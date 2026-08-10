@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ILO Radiograph Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --primary-accent: #10b981; /* Emerald */
+            --secondary-accent: #3b82f6; /* Blue */
+            --glass-bg: rgba(17, 25, 40, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.125);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(16, 185, 129, 0.1), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.1), transparent 25%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero Section */
+        header {
+            text-align: center;
+            padding: 4rem 0;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--primary-accent), var(--secondary-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            margin-bottom: 4rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Infographic */
+        .infographic-wrapper {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .infographic {
+            max-width: 100%;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s ease;
+        }
+        
+        .infographic:hover {
+            transform: scale(1.02);
+        }
+
+        /* Distribution Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-5px);
+            border-color: var(--primary-accent);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            color: white;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1rem;
+        }
+        
+        .card p {
+            color: var(--text-muted);
+            flex-grow: 1;
+        }
+
+        .btn {
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            color: white;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            margin-top: 1.5rem;
+        }
+
+        .btn-viewer {
+            background: linear-gradient(135deg, #059669, #10b981);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .btn-viewer:hover { filter: brightness(1.1); transform: scale(1.05); }
+
+        .btn-pusher {
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .btn-pusher:hover { filter: brightness(1.1); transform: scale(1.05); }
+
+        .btn-unified {
+            background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+        .btn-unified:hover { filter: brightness(1.1); transform: scale(1.05); }
+
+        /* Documentation Section */
+        .docs-section {
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 3rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .docs-section h2 {
+            color: var(--primary-accent);
+            border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .docs-section h3 {
+            color: var(--secondary-accent);
+        }
+
+        .docs-section ul, .docs-section ol {
+            color: var(--text-muted);
+            padding-left: 1.5rem;
+        }
+
+        .docs-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        code {
+            background: rgba(255,255,255,0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #a78bfa;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            border-top: 1px solid var(--glass-border);
+            margin-top: 4rem;
+            color: var(--text-muted);
+        }
+        
+        .footer-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>ILO Radiograph Suite</h1>
+        <p class="subtitle">A comprehensive, fully local web application suite for ILO pneumoconiosis classification, designed for seamless collaboration between technicians and doctors.</p>
+    </header>
+
+    <div class="glass-panel">
+        <div class="infographic-wrapper">
+            <img src="infographic.jpg" alt="Distribution Infographic" class="infographic">
+        </div>
+
+        <h2 style="text-align: center; margin-bottom: 2rem; color: white;">Download Your Distribution</h2>
+        
+        <div class="grid">
+            <!-- Viewer -->
+            <div class="card">
+                <h3>Viewer Distribution</h3>
+                <p><strong>For the Doctor / Medical Interpreter.</strong> Includes the full ILO classification suite, reporting wizard, and DICOM viewer. Ready to receive images instantly.</p>
+                <a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/arka1985/ILO_RAD/tree/main/Viewer_Distribution" target="_blank" class="btn btn-viewer">Download Viewer (.zip)</a>
+            </div>
+
+            <!-- Pusher -->
+            <div class="card">
+                <h3>Pusher Distribution</h3>
+                <p><strong>For the X-Ray Technician.</strong> A lightweight, drag-and-drop tool to push DICOM patient files directly to the doctor's screen over the local network.</p>
+                <a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/arka1985/ILO_RAD/tree/main/Pusher_Distribution" target="_blank" class="btn btn-pusher">Download Pusher (.zip)</a>
+            </div>
+
+            <!-- Unified -->
+            <div class="card">
+                <h3>Unified Distribution</h3>
+                <p><strong>For All-in-One setups.</strong> Contains both applications. Running the startup script presents an interactive menu to choose your role.</p>
+                <a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/arka1985/ILO_RAD/tree/main/Unified_Distribution" target="_blank" class="btn btn-unified">Download Unified (.zip)</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="docs-section">
+        <h2>What is ILO Radiography?</h2>
+        <p class="subtitle" style="margin-left: 0;">The International Labour Organization (ILO) International Classification of Radiographs of Pneumoconioses is a standard system for classifying chest radiographs (X-rays) for pneumoconiosis (dust-induced lung diseases like silicosis, coal worker's pneumoconiosis, and asbestosis).</p>
+        <p class="subtitle" style="margin-left: 0; margin-top: 1rem;">Its purpose is to provide a standardized, reproducible way to record the presence and severity of lung abnormalities, which is crucial for epidemiological research, screening, and medical surveillance of workers exposed to hazardous dusts. This software suite provides a digital side-by-side viewer of standard ILO reference images alongside patient DICOM files to assist physicians in grading these conditions.</p>
+
+        <h2>How to Run (Windows, Mac, Linux)</h2>
+        <p style="color: var(--text-muted)"><em>Prerequisite: You must have <a href="https://nodejs.org/" target="_blank" style="color: var(--secondary-accent)">Node.js</a> installed on your computer.</em></p>
+        
+        <h3>Windows:</h3>
+        <ol>
+            <li>Extract the downloaded ZIP folder completely.</li>
+            <li>Double-click the <code>.bat</code> file (e.g., <code>start_viewer_windows.bat</code>).</li>
+            <li>The script will automatically install dependencies on its first run, boot the server, and open your web browser.</li>
+        </ol>
+
+        <h3>Mac / Linux:</h3>
+        <ol>
+            <li>Open a terminal and navigate to the extracted folder.</li>
+            <li>Make the script executable: <code>chmod +x start_mac_linux.sh</code> (or the equivalent script name).</li>
+            <li>Run the script: <code>./start_mac_linux.sh</code></li>
+        </ol>
+
+        <h2>How to Use the Viewer App</h2>
+        <ol>
+            <li>Launch the Viewer using the instructions above. (Opens at <code>http://localhost:3000</code>).</li>
+            <li>Fill out the <strong>Reporting Wizard</strong> on the left side of the screen.</li>
+            <li>Click <strong>"POP OUT DUAL VIEWER PANEL"</strong> to open the side-by-side image viewer in a new window.</li>
+            <li>Load a patient DICOM file (via Upload button, PACS, or pushed from the Technician).</li>
+            <li>Compare the patient's X-ray against the ILO Standard Reference Images.</li>
+            <li>Generate and save your final PDF report.</li>
+        </ol>
+
+        <h2>How to Use the Pusher App</h2>
+        <ol>
+            <li>Launch the Pusher using the instructions above. (Opens at <code>http://localhost:3002</code>).</li>
+            <li>Find the IP Address of the doctor's computer (e.g. <code>192.168.1.100</code>).</li>
+            <li>In the Pusher App, enter the target address: <code>http://192.168.1.100:3000/api/dicom-receiver</code></li>
+            <li>Drag and drop a patient's <code>.dcm</code> file into the designated area.</li>
+            <li>The image will instantly appear on the doctor's screen!</li>
+        </ol>
+
+        <h2>How to Use PACS</h2>
+        <p style="color: var(--text-muted)">If your facility uses a PACS server (like Orthanc) with a DICOMweb endpoint enabled:</p>
+        <ol>
+            <li>Open the Viewer App and click the <strong>"Connect to PACS"</strong> button.</li>
+            <li>In the <strong>"Network Setup"</strong> tab, enter your PACS DICOMweb URL (e.g., <code>http://192.168.1.50:8042/dicom-web</code>).</li>
+            <li>Provide a Username and Password if required.</li>
+            <li>Go to the <strong>"Query / Retrieve"</strong> tab.</li>
+            <li>Enter the Patient Name or ID and click <strong>Search</strong>.</li>
+            <li>Click on any study to instantly fetch and render the DICOM files!</li>
+        </ol>
+    </div>
+
+    <footer>
+        <div class="footer-name">Developed by Dr. Arkaprabha Sau</div>
+        <div>MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM</div>
+        <div>Ph.D. (Computer Science and Engineering: AI & ML in Healthcare)</div>
+    </footer>
+</div>
+
+</body>
+</html>
