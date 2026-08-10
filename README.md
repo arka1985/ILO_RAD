@@ -31,7 +31,7 @@ This software is provided in three distinct "Distributions" to fit different wor
 2. **Pusher Distribution (`Pusher_Distribution`)**
    - **For:** The X-Ray Technician / Image Sender.
    - **Contains:** Only the Pusher App.
-   - **Use case:** Send this to the person acquiring the X-rays. It provides a simple drag-and-drop web interface to instantly push DICOM images over the local network to the doctor's screen.
+   - **Use case:** Send this to the person acquiring the X-rays. It provides a simple drag-and-drop web interface to instantly push DICOM images over the local network (or remotely via Tailscale) to the doctor's screen.
 
 3. **Unified Distribution (`Unified_Distribution` or the Root Folder)**
    - **For:** General distribution, or when both the sender and receiver are the same person/machine.
