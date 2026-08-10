@@ -1,0 +1,156 @@
+21   7. Appendices
+Chest Radiograph Classification Form
+Patientʼs Name:   Patient ID:  
+Birth Date:   Radiogr aph Date:  
+Note: Record your interpretation of a single radiograph by placing an “x” in the appropriate boxes on this form. 
+Classify all appearances described in the ILO International Classification of Radiographs of Pneumoconioses 
+or illustrated by the ILO standard radiographs. Use symbols and record comments as appropriate.
+1. IMA GE QUALITY
+2B. SMALL OP ACITIES2A. ANY CLASSIFIABLE P ARENCHYMAL ABNORMALITIES?
+3A. ANY CLASSIFIABLE PLEURAL ABNORMALITIES?
+3C. C OSTOPHRENIC ANGLE OBLITERATION 
+4A. ANY O THER ABNORMALITIES?
+5. Radiology Facility Reading Type
+Classifying Physician's Name and Signature  Or dering Physician
+ Reading Date
+ Classification Purpose4B. O THER SYMBOLS (OBLIGATORY)
+4C. Should worker see personal physician because of findings in section 4?Date Physician or Worker  
+notified?3B. PLEURAL PLA QUES  (mark site, calcification, extent, and width)
+3D. DIFFUSE PLEURAL PLA QUES THICKENING  (mark site, calcification, extent, and width)2C. LARGE OP ACITIES
+a. SHAPE/SIZE(If not grade 1, mark  
+all boxes that apply1Overexposed (dark) Improper position Underinflation Scapula Overlay
+Underexposed (light) Poor contrast Mottle
+Artifacts Poor processingExcessive Edge  
+EnhancementOther  
+(please specify)
+Complete Sections  
+2B and 2C
+Complete Sections  
+3B and 3C
+Complete Sections  
+4B, 4CYes
+Yes
+Yes NoYesNo
+No
+No
+NoProceed to  
+Section 3A
+Proceed to  
+Section 4A
+Proceed to  
+Section 4AProceed to  
+Section 3D
+Proceed to  
+Section 52 3 4
+PRIMARY
+p
+q
+rs
+t
+uSECONDARY
+pq
+rs
+t
+ub. ZONES
+UPPER
+MIDDLE
+LOWER L
+Proceed to Section 3A SIZE O B A Cc. PROFUSION
+0/–
+1/0
+2/13/20/00/1
+1/11/2
+2/22/3
+3/33/+
+DiaphragmIn profileChest wall
+Other site(s)Face onSite
+O
+O
+O
+ORL
+RL
+RL
+RL
+In profileChest wall
+Face onSite
+OORL
+RL
+If other diseases or significant abnormalities, findings must be recovered on reverse.aa cn ho px bu es cv kl tb
+ODat co id ra ca fr pb di me ax em cp ih rp cg hi pi ef paCalcification
+OO
+O
+ORL
+RL
+RL
+RL
+Calcification
+OORL
+RLExtent (chest wall; combined  
+for in profile and face on)
+Up to 1/4 of lateral chest wall = 1  
+1/4 to 1/2 of lateral chest wall = 2  
+> 1/2 of lateral chest wall = 3
+O O
+1 1R L
+2 2 3 3
+RL
+Extent (chest wall; combined  
+for in profile and face on)
+Up to 1/4 of lateral chest wall = 1  
+1/4 to 1/2 of lateral chest wall = 2  
+> 1/2 of lateral chest wall = 3
+O O
+1 1R L
+2 2 3 3Width (in profile only)  
+(3mm minimum width required)
+3 to 5 mm = a  
+5 to 10 mm = b  
+> 10 mm = c
+O O
+a aR L
+b b c c
+Width (in profile only)  
+(3mm minimum width required)
+3 to 5 mm = a  
+5 to 10 mm = b  
+> 10 mm = c
+O O
+a aR L
+b b c c
+ Guidelines for the use of the ILO International Classification of Radiographs of Pneumoconioses  
+Revised edition 202222
+Reading Sheet for the Abbreviated ILO Classification
+Reader Code  Radiogr aph Identi fi er
+Date of Reading  Date of Radiogr aph
+Technical Quality
+Grade 1, 2, 3, or 4  Mark appr opriate box
+Comment on technical quality:  If the gr ade is not 1 – comments required here:
+Parenchymal Abnormalities 
+Small opacities
+Predominant shape and size  p, q, r , s, t, or u  
+(Consult standard radiographs)  Mark only one bo x
+Profusion (4-point scale)
+(Consult standard radiographs)  Mark pr ofusion category
+Large opacities  Mark 0 for none or mark A, B , or C
+Pleural Abnormalities
+ If “ No ” go to *Symbols
+0=None R=Right L=Left)  Pleur al thickening - PT 
+ Pleur al calcification - PC
+* Symbols
+Comments– – – –
+1 2 3 4
+0 1 2 3
+0 A B Cp
+q
+rs
+t
+u
+Yes
+Yes
+YesNo
+No
+NoORL
+ORL
+(Circle as appropriate; if od is circled,  
+comments must be made below)aa at  ax  bu  ca  cg  cn  co  cp  cv  di  ef  em  es  
+fr hi  ho  id  ih  kl  me  pa  pb  pi  p x  r a  rp  tb  od

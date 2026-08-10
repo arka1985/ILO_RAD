@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  viewer-app:
+    build:
+      context: ./viewer-app
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    restart: unless-stopped
+
+  bviewer-app:
+    build:
+      context: ./bviewer-app
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+    restart: unless-stopped
+
+  pusher-app:
+    build:
+      context: ./pusher-app
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+    restart: unless-stopped
