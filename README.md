@@ -1,65 +1,100 @@
 # ILO Radiograph Suite
 
-A comprehensive, cross-platform DICOM Radiograph viewer and classification suite designed for ILO standard classification of pneumoconioses.
+A comprehensive, fully local web application suite for ILO pneumoconiosis classification. 
 
-## Features
-- **Pusher App**: Push DICOMs or image files to the viewers and enter patient metadata.
-- **Full Viewer**: A detailed, step-by-step wizard for Full ILO Classification.
-- **Abbreviated Viewer**: A streamlined wizard for Abbreviated ILO Classification.
+## Table of Contents
+1. [What is ILO Radiography?](#what-is-ilo-radiography)
+2. [Distributions (Which one to use?)](#distributions-which-one-to-use)
+3. [How to Download from GitHub](#how-to-download-from-github)
+4. [How to Run (Windows, Mac, Linux)](#how-to-run-windows-mac-linux)
+5. [How to Use the Viewer App](#how-to-use-the-viewer-app)
+6. [How to Use the Pusher App](#how-to-use-the-pusher-app)
+7. [How to Use PACS](#how-to-use-pacs)
 
 ---
 
-## 🚀 Quick Start (No Docker Required)
+## What is ILO Radiography?
+The International Labour Organization (ILO) International Classification of Radiographs of Pneumoconioses is a standard system for classifying chest radiographs (X-rays) for pneumoconiosis (dust-induced lung diseases like silicosis, coal worker's pneumoconiosis, and asbestosis). 
 
-If you just want to run the suite quickly on your computer:
+Its purpose is to provide a standardized, reproducible way to record the presence and severity of lung abnormalities, which is crucial for epidemiological research, screening, and medical surveillance of workers exposed to hazardous dusts. This software suite provides a digital side-by-side viewer of standard ILO reference images alongside patient DICOM files to assist physicians ("B Readers") in grading these conditions.
 
-### Prerequisites
-- Install **[Node.js](https://nodejs.org/)** (Version 18 or higher)
+---
 
-### Windows
-1. Double-click the `start_windows.bat` file in this folder.
-2. It will automatically install everything and launch the servers.
-3. Keep the terminal window open to keep the servers running.
+## Distributions (Which one to use?)
+This software is provided in three distinct "Distributions" to fit different workflows. Choose the one that matches your role:
 
-### Mac / Linux
-1. Open your terminal and navigate to this folder.
-2. Make the script executable: `chmod +x start_mac_linux.sh`
+1. **Viewer Distribution (`Viewer_Distribution`)**
+   - **For:** The Medical Interpreter / Doctor / B-Reader.
+   - **Contains:** Only the Viewer App.
+   - **Use case:** Send this folder to the doctor. It has a single one-click startup script that opens the full classification suite.
+
+2. **Pusher Distribution (`Pusher_Distribution`)**
+   - **For:** The X-Ray Technician / Image Sender.
+   - **Contains:** Only the Pusher App.
+   - **Use case:** Send this to the person acquiring the X-rays. It provides a simple drag-and-drop web interface to instantly push DICOM images over the local network to the doctor's screen.
+
+3. **Unified Distribution (`Unified_Distribution` or the Root Folder)**
+   - **For:** General distribution, or when both the sender and receiver are the same person/machine.
+   - **Contains:** Both the Viewer and Pusher apps, linked by an interactive menu script.
+   - **Use case:** Distribute this single ZIP file if you want the user to be able to choose their role when they run the startup script.
+
+---
+
+## How to Download from GitHub
+1. Go to the main GitHub repository page.
+2. Click the green **"Code"** button.
+3. Select **"Download ZIP"**.
+4. Once downloaded, **Extract/Unzip** the folder completely. (Do not try to run the scripts from inside the ZIP archive).
+
+---
+
+## How to Run (Windows, Mac, Linux)
+*Prerequisite: You must have [Node.js](https://nodejs.org/) installed on your computer.*
+
+**Windows:**
+1. Open the folder of your chosen distribution.
+2. Double-click the `.bat` file (e.g., `start_windows.bat`, `start_viewer_windows.bat`, or `start_pusher_windows.bat`).
+3. The script will automatically install dependencies on its first run, boot the server, and open your default web browser.
+
+**Mac / Linux:**
+1. Open a terminal and navigate to the folder of your chosen distribution.
+2. Make the script executable: `chmod +x start_mac_linux.sh` (or the equivalent script name).
 3. Run the script: `./start_mac_linux.sh`
+4. The script will install dependencies, boot the server, and open your default web browser.
 
-### Accessing the Apps
-Once the servers are running, open your web browser to:
-- **Full Viewer**: [http://localhost:3000](http://localhost:3000)
-- **Abbreviated Viewer**: [http://localhost:3001](http://localhost:3001)
-- **Pusher App**: [http://localhost:3002](http://localhost:3002)
+*Note for Unified Distribution:* If you run the unified startup script, you will be prompted with a terminal menu to press `1` for the Viewer or `2` for the Pusher.
 
 ---
 
-## 🐳 Docker Deployment (For IT / Production)
-
-If you prefer to deploy the suite using Docker containers (ideal for hospital IT environments), a full `docker-compose` setup is provided.
-
-### Prerequisites
-- **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** (or Docker Engine + Docker Compose)
-
-### Running with Docker
-1. Open a terminal in this directory.
-2. Run the following command:
-   ```bash
-   docker-compose up -d --build
-   ```
-3. The apps will build and launch in detached mode on the same ports (3000, 3001, 3002).
-4. To stop the containers, run:
-   ```bash
-   docker-compose down
-   ```
+## How to Use the Viewer App
+1. Launch the Viewer using the instructions above.
+2. The browser will open to `http://localhost:3000`.
+3. Fill out the **Reporting Wizard** on the left side of the screen.
+4. You can click **"POP OUT DUAL VIEWER PANEL"** to open the side-by-side image viewer in a new window (great for dual-monitor setups).
+5. Load a patient DICOM file either by using the "Upload" button, connecting to a PACS, or waiting for an image to be pushed from the Pusher App.
+6. Compare the patient's X-ray against the ILO Standard Reference Images provided in the app.
+7. Generate and save your final PDF report.
 
 ---
 
-## Architecture Overview
+## How to Use the Pusher App
+1. Launch the Pusher using the instructions above.
+2. The browser will open to `http://localhost:3002`.
+3. Find the IP Address of the doctor's computer (the one running the Viewer App). 
+   - *Example: `192.168.1.100`*
+4. In the Pusher App, enter the target address: `http://192.168.1.100:3000/api/dicom-receiver`
+5. Drag and drop a patient's `.dcm` file into the designated area.
+6. The image will instantly appear on the doctor's screen without them needing to refresh!
 
-The suite consists of three Next.js applications that operate independently but can communicate:
-- The **Pusher App** makes HTTP requests directly to the Viewer applications to transfer images and metadata instantly across the network.
-- No central database is required. State is handled entirely on the client and via local temporary storage within each app.
+---
 
-## Support
-For issues or questions regarding the setup, please consult the IT department or the project maintainers.
+## How to Use PACS
+If your facility uses a PACS server (like Orthanc) with a DICOMweb endpoint enabled:
+
+1. Open the Viewer App (`http://localhost:3000`).
+2. Click the **"Connect to PACS"** button in the patient viewer panel.
+3. In the popup, go to the **"Network Setup"** tab and enter your PACS DICOMweb URL (e.g., `http://192.168.1.50:8042/dicom-web`).
+4. Provide a Username and Password if your PACS requires authentication.
+5. Go to the **"Query / Retrieve"** tab.
+6. Enter the Patient Name or ID and click **Search**.
+7. Click on any of the resulting studies/series to instantly fetch and render the DICOM files directly from the PACS server!

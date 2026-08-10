@@ -4,10 +4,10 @@
   "private": true,
   "description": "A comprehensive DICOM Radiograph viewer suite for ILO standard classification.",
   "scripts": {
-    "install:all": "npm install --prefix viewer-app && npm install --prefix bviewer-app && npm install --prefix pusher-app",
-    "build:all": "npm run build --prefix viewer-app && npm run build --prefix bviewer-app && npm run build --prefix pusher-app",
-    "start": "concurrently \"npm start --prefix viewer-app\" \"npm start --prefix bviewer-app\" \"npm start --prefix pusher-app\"",
-    "dev": "concurrently \"npm run dev --prefix viewer-app\" \"npm run dev --prefix bviewer-app\" \"npm run dev --prefix pusher-app\""
+    "install:all": "npm install --prefix viewer-app && npm install --prefix pusher-app",
+    "build:all": "npm run build --prefix viewer-app && npm run build --prefix pusher-app",
+    "start": "concurrently \"npm start --prefix viewer-app\" \"npm start --prefix pusher-app\"",
+    "dev": "concurrently \"npm run dev --prefix viewer-app\" \"npm run dev --prefix pusher-app\""
   },
   "dependencies": {
     "concurrently": "^8.2.2"

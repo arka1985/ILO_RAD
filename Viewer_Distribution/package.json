@@ -1,0 +1,13 @@
+{
+  "name": "ilo-rad-viewer-suite",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ILO Radiograph Viewer Distribution",
+  "scripts": {
+    "install:all": "npm install --prefix viewer-app",
+    "dev": "npm run dev --prefix viewer-app"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

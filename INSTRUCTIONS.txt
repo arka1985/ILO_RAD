@@ -3,80 +3,59 @@ ILO PNEUMOCONIOSIS CLASSIFIER SUITE
 Distribution Package & Installation Guide
 =======================================================
 
-This package contains two completely independent applications:
+This software can be distributed in three different ways, depending on who needs to use it:
 
-1. VIEWER APP (viewer-app)
-   The main software used by the Interpreter/Physician. It includes the 
-   ILO standard image library, the reporting wizard, the patient history, 
-   and the PDF generator. It also listens silently for any X-Rays pushed 
-   by the X-Ray technician.
+1. VIEWER DISTRIBUTION (Viewer_Distribution folder)
+   Send this folder to the Interpreter/Physician. It only contains the Viewer App.
+   - Windows: Double-click `start_viewer_windows.bat`
+   - Mac/Linux: Run `./start_viewer_mac_linux.sh`
+   It automatically installs dependencies and opens the Viewer in the browser at http://localhost:3000.
 
-2. PUSHER APP (pusher-app)
-   The lightweight upload utility designed to be installed on the X-Ray 
-   Source Computer. The technician simply drags and drops a patient's 
-   DICOM image here, and it is instantly pushed to the Interpreter's screen.
+2. PUSHER DISTRIBUTION (Pusher_Distribution folder)
+   Send this folder to the X-Ray Technician. It only contains the Pusher App.
+   - Windows: Double-click `start_pusher_windows.bat`
+   - Mac/Linux: Run `./start_pusher_mac_linux.sh`
+   It automatically installs dependencies and opens the Pusher in the browser at http://localhost:3002.
 
--------------------------------------------------------
-INSTALLATION INSTRUCTIONS (WINDOWS)
--------------------------------------------------------
-For both the Viewer App and the Pusher App:
-
-1. Open the app folder (`viewer-app` or `pusher-app`).
-2. Double-click the file named "install.bat".
-3. A terminal window will open and automatically install the application. 
-   *(Note: If you do not have Node.js installed, the installer will alert 
-   you and give you a download link. Install Node.js, making sure to check 
-   "Add to PATH", then run install.bat again).*
-4. Once installation finishes, a shortcut will automatically appear on 
-   your Desktop!
-
--------------------------------------------------------
-INSTALLATION INSTRUCTIONS (MAC / LINUX)
--------------------------------------------------------
-For both the Viewer App and the Pusher App:
-
-1. Open the app folder (`viewer-app` or `pusher-app`).
-2. Double-click the file named "install.command".
-3. The terminal will open and automatically install the application.
-4. Once installation finishes, you can start the application by 
-   double-clicking "start.command".
+3. UNIFIED DISTRIBUTION (Unified_Distribution folder or the root ILO_RAD folder)
+   Use this if you want both apps on the same computer, or if you want to distribute a single ZIP file where the user can choose their role.
+   - Windows: Double-click `start_windows.bat`
+   - Mac/Linux: Run `./start_mac_linux.sh`
+   When run, an interactive menu will appear in the terminal prompting you to select your role (Viewer or Pusher). It will then automatically start the correct application and open the browser.
 
 -------------------------------------------------------
 HOW TO USE
 -------------------------------------------------------
-- To start the application, simply double-click the newly created Desktop 
-  Shortcut (or "start.command" on Mac).
-- The application will boot invisibly in the background and immediately 
-  open your default web browser to the correct page.
-- Note: Both apps can be safely installed on the same computer. The 
-  Viewer runs on port 3000, and the Pusher runs on port 3001.
+- Ensure you have Node.js installed before running any of the `.bat` or `.sh` files. If you don't have it, download it from https://nodejs.org/.
+- Keep the black terminal window open while you are using the app. When you're done, simply close the terminal window to stop the servers.
+- The applications run completely locally and securely on your own network.
 
 -------------------------------------------------------
-NETWORK SETUP GUIDE (No Orthanc/PACS required)
+NETWORK SETUP GUIDE (PACS & Push Connections)
 -------------------------------------------------------
-This suite uses a direct, modern web-based transfer system. You do NOT 
-need to configure a complex third-party PACS server (like Orthanc) or 
-mess with traditional DICOM C-STORE routing.
+This suite allows you to connect directly to an existing PACS server (like Orthanc) using the DICOMweb standard, OR you can use the included Pusher App for a direct push workflow.
 
+OPTION A: CONNECTING TO A PACS SERVER (Orthanc / DICOMweb)
+1. Ensure your PACS (e.g., Orthanc) has the DICOMweb plugin installed and enabled.
+2. The PACS server must have CORS (Cross-Origin Resource Sharing) configured to allow the Viewer App to make requests.
+   - For Orthanc, set `"CorsAllowedOrigins": ["*"]` in the configuration file.
+3. Open the Viewer App and click on the "Connect to PACS" button.
+4. Go to the "Network Setup & Instructions" tab.
+5. Enter your PACS DICOMweb URL (e.g., `http://192.168.1.100:8042/dicom-web`).
+6. Enter the Username and Password if your PACS server requires authentication.
+7. Go to the "Query / Retrieve" tab, enter the patient details, and click "Search" to query and load images using QIDO-RS and WADO-RS.
+
+OPTION B: DIRECT PUSH WORKFLOW (Pusher App)
 1. THE RECEIVER (Viewer App)
-   - Role: The Interpreter/Physician's computer. It receives DICOM files.
-   - IP Address: The Local Network IP of the Interpreter's PC (e.g., 192.168.1.100)
+   - Role: The Interpreter/Physician's computer.
+   - IP Address: Find the Local IP (e.g., 192.168.1.100) using 'ipconfig'.
    - Port Number: 3000
-   - AE Title: N/A (Uses direct HTTP REST API instead of traditional DICOM protocol)
-
 2. THE PUSHER (Pusher App)
-   - Role: The X-Ray Source/Technician's computer. It sends DICOM files.
-   - IP Address: The Local Network IP of the Technician's PC
-   - Port Number: 3001
-   - AE Title: N/A (Uses direct HTTP REST API)
-
-HOW TO CONNECT THEM OVER YOUR NETWORK:
-1. Find the IP Address of the RECEIVER computer (e.g., 192.168.1.100).
-   (On Windows, open Command Prompt and type 'ipconfig' to find your IPv4 Address).
-2. Open the PUSHER APP on the technician's computer.
-3. In the "Target Interpreter URL" box, enter the receiver's address like this:
-   http://192.168.1.100:3000/api/dicom-receiver
-4. Drag and drop your DICOM file. It will push directly to the Viewer!
+   - Role: The X-Ray Technician's computer.
+   - Open the PUSHER APP on the technician's computer.
+   - In the "Target Interpreter URL" box, enter the receiver's address:
+     http://192.168.1.100:3000/api/dicom-receiver
+   - Drag and drop your DICOM file. It will push directly to the Viewer!
 
 Developed by Dr. Arkaprabha Sau
 MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM
