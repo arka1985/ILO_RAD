@@ -16,7 +16,7 @@ A comprehensive, fully local web application suite for ILO pneumoconiosis classi
 ## What is ILO Radiography?
 The International Labour Organization (ILO) International Classification of Radiographs of Pneumoconioses is a standard system for classifying chest radiographs (X-rays) for pneumoconiosis (dust-induced lung diseases like silicosis, coal worker's pneumoconiosis, and asbestosis). 
 
-Its purpose is to provide a standardized, reproducible way to record the presence and severity of lung abnormalities, which is crucial for epidemiological research, screening, and medical surveillance of workers exposed to hazardous dusts. This software suite provides a digital side-by-side viewer of standard ILO reference images alongside patient DICOM files to assist physicians ("B Readers") in grading these conditions.
+Its purpose is to provide a standardized, reproducible way to record the presence and severity of lung abnormalities, which is crucial for epidemiological research, screening, and medical surveillance of workers exposed to hazardous dusts. This software suite provides a digital side-by-side viewer of standard ILO reference images alongside patient DICOM files to assist physicians in grading these conditions.
 
 ---
 
@@ -24,7 +24,7 @@ Its purpose is to provide a standardized, reproducible way to record the presenc
 This software is provided in three distinct "Distributions" to fit different workflows. Choose the one that matches your role:
 
 1. **Viewer Distribution (`Viewer_Distribution`)**
-   - **For:** The Medical Interpreter / Doctor / B-Reader.
+   - **For:** The Medical Interpreter / Doctor.
    - **Contains:** Only the Viewer App.
    - **Use case:** Send this folder to the doctor. It has a single one-click startup script that opens the full classification suite.
 
