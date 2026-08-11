@@ -1410,6 +1410,10 @@ export default function Home() {
                 <ExternalLink size={12} />
                 <span>ILO_2020 (28-29)</span>
               </a>
+              <a href="https://arka1985.github.io/ILO_RAD/" target="_blank" rel="noreferrer" className="bg-[#0f172a] hover:bg-gray-700 border border-[#334155] hover:border-gray-500 text-gray-300 hover:text-white px-3 py-1.5 rounded text-xs font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md flex-1 md:flex-none" title="Check GitHub for Updates">
+                <Github size={12} />
+                <span>Updates</span>
+              </a>
             </div>
           </div>
         </div>
