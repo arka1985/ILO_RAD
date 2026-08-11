@@ -83,6 +83,7 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
         <div>
           <p><span className="font-bold">Patient ID:</span> {data.patientId || 'N/A'}</p>
           <p><span className="font-bold">Patient Name:</span> {data.patientName || 'N/A'}</p>
+          <p><span className="font-bold">Address/PIN:</span> {data.patientAddress || 'N/A'}</p>
           <p><span className="font-bold">Radiograph Date:</span> {data.radiographDate || 'N/A'} &nbsp; | &nbsp; <span className="font-bold">Reading Date:</span> {data.readingDate || 'N/A'}</p>
         </div>
         <div>
@@ -558,23 +559,40 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
           ADVICE: The radiograph is Unacceptable for classification purposes (Grade 4). A re-Xray is required.
         </div>
       )}
-      {/* SIGNATURE BLOCK */}
-      <div className="mt-2 pt-2 border-t border-gray-400 flex justify-between items-end">
-        <div>
-          <p className="mb-1 text-base text-black">_______________________________________</p>
-          <p className="font-bold text-black text-[10px]">Signature of Reader</p>
-          <p className="text-[11px] font-bold text-black">{data.classifyingPhysician || 'Reader Name'}</p>
-          {data.physicianQualification && (
-            <p className="text-[9px] text-gray-600 max-w-[200px] leading-tight mt-0.5">
-              {Array.isArray(data.physicianQualification) 
-                ? [...data.physicianQualification.filter((q: string) => q !== 'Others'), ...(data.physicianQualification.includes('Others') && data.physicianQualificationOtherText ? [data.physicianQualificationOtherText] : [])].join(', ') 
-                : data.physicianQualification}
-            </p>
-          )}
+      {/* SIGNATURE BLOCK (SECTION 5) */}
+      <div className="mt-4 border border-[#1e1b4b]">
+        <div className="bg-gray-50/50 p-1.5 border-b border-[#1e1b4b]">
+          <h3 className="text-[13px] text-black font-bold">5. CLASSIFYING PHYSICIAN DETAILS</h3>
         </div>
-        <div>
-          <p className="mb-2 text-lg text-black">_______________________</p>
-          <p className="font-bold text-center text-black text-[10px]">Date</p>
+        <div className="p-2 grid grid-cols-2 gap-4">
+          <div>
+            <p className="mb-3 text-base text-black">_______________________________________</p>
+            <p className="font-bold text-black text-[10px]">Signature of Classifying Physician</p>
+            <p className="text-[11px] font-bold text-black mt-1">{data.classifyingPhysician || 'Reader Name'}</p>
+            {data.physicianQualification && (
+              <p className="text-[9px] text-gray-600 max-w-[250px] leading-tight mt-0.5">
+                {Array.isArray(data.physicianQualification) 
+                  ? [...data.physicianQualification.filter((q: string) => q !== 'Others'), ...(data.physicianQualification.includes('Others') && data.physicianQualificationOtherText ? [data.physicianQualificationOtherText] : [])].join(', ') 
+                  : data.physicianQualification}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col justify-between">
+            <div className="grid grid-cols-2 gap-2 text-[10px]">
+              <div>
+                <p className="font-bold text-black mb-0.5">Radiology Facility:</p>
+                <p className="text-gray-800">{data.facility || '_______________________'}</p>
+              </div>
+              <div>
+                <p className="font-bold text-black mb-0.5">Ordering Physician:</p>
+                <p className="text-gray-800">{data.orderingPhysician || '_______________________'}</p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <p className="mb-1 text-base text-black">_______________________</p>
+              <p className="font-bold text-black text-[10px]">Date</p>
+            </div>
+          </div>
         </div>
       </div>
 

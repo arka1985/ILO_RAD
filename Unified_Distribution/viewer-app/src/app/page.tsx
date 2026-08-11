@@ -44,6 +44,7 @@ export default function Home() {
     // PATIENT
     patientName: '',
     patientId: '',
+    patientAddress: '',
     dob: '',
     radiographDate: '',
     workingPlace: '',
@@ -208,6 +209,7 @@ export default function Home() {
     updateData({
       patientName: report.patientName || '',
       patientId: report.patientId || '',
+      patientAddress: report.patientAddress || '',
       dob: report.dob || '',
       radiographDate: report.radiographDate || '',
       workingPlace: report.workingPlace || '',
@@ -644,6 +646,10 @@ export default function Home() {
                 <div>
                   <label className="block text-gray-400 text-xs uppercase mb-1">Patient/Worker/Employee ID *</label>
                   <input type="text" value={wizardData.patientId} onChange={e => updateData({ patientId: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-gray-400 text-xs uppercase mb-1">Patient Address (including PIN)</label>
+                  <textarea value={wizardData.patientAddress} onChange={e => updateData({ patientAddress: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[60px]" placeholder="Address details"></textarea>
                 </div>
                 <div>
                   <label className="block text-gray-400 text-xs uppercase mb-1">Birth Date</label>
@@ -1451,12 +1457,21 @@ export default function Home() {
                       <p className="text-white font-bold text-lg">{report.patientName} <span className="text-gray-400 text-sm font-normal">({report.patientId})</span></p>
                       <p className="text-gray-400 text-sm mt-1">Report Date: {report.historyDate || 'Unknown'} | Mode: {report.classificationMode}</p>
                     </div>
-                    <button 
-                      onClick={() => loadHistoricalPatient(report)}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded font-bold transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
-                    >
-                      Load Demographics
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); deleteHistoricalPatient(report.historyId); }}
+                        className="bg-red-900/50 hover:bg-red-600 text-red-200 px-3 py-2 rounded transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                        title="Delete this record"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                      <button 
+                        onClick={() => loadHistoricalPatient(report)}
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded font-bold transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                      >
+                        Load Demographics
+                      </button>
+                    </div>
                   </div>
                 ))}
                 {historyData.length === 0 && (

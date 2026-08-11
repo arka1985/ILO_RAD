@@ -44,6 +44,7 @@ export default function Home() {
     // PATIENT
     patientName: '',
     patientId: '',
+    patientAddress: '',
     dob: '',
     radiographDate: '',
     workingPlace: '',
@@ -208,6 +209,7 @@ export default function Home() {
     updateData({
       patientName: report.patientName || '',
       patientId: report.patientId || '',
+      patientAddress: report.patientAddress || '',
       dob: report.dob || '',
       radiographDate: report.radiographDate || '',
       workingPlace: report.workingPlace || '',
@@ -644,6 +646,10 @@ export default function Home() {
                 <div>
                   <label className="block text-gray-400 text-xs uppercase mb-1">Patient/Worker/Employee ID *</label>
                   <input type="text" value={wizardData.patientId} onChange={e => updateData({ patientId: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-gray-400 text-xs uppercase mb-1">Patient Address (including PIN)</label>
+                  <textarea value={wizardData.patientAddress} onChange={e => updateData({ patientAddress: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[60px]" placeholder="Address details"></textarea>
                 </div>
                 <div>
                   <label className="block text-gray-400 text-xs uppercase mb-1">Birth Date</label>
