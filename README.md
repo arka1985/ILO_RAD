@@ -80,7 +80,10 @@ This software is provided in three distinct "Distributions" to fit different wor
 ## How to Use the Pusher App
 1. Launch the Pusher using the instructions above.
 2. The browser will open to `http://localhost:3002`.
-3. Find the IP Address of the doctor's computer (the one running the Viewer App). 
+3. Find the IP Address of the doctor's computer (the one running the Viewer App).
+   - **Windows**: Open Command Prompt, type `ipconfig` (look for IPv4 Address).
+   - **Mac**: Open Terminal, type `ifconfig | grep inet` (or check System Settings > Network).
+   - **Linux**: Open Terminal, type `ip a` or `hostname -I`.
    - *Example: `192.168.1.100`*
 4. In the Pusher App, enter the target address: `http://192.168.1.100:3000/api/dicom-receiver`
 5. Drag and drop a patient's `.dcm` file into the designated area.

@@ -48,7 +48,11 @@ OPTION A: CONNECTING TO A PACS SERVER (Orthanc / DICOMweb)
 OPTION B: DIRECT PUSH WORKFLOW (Pusher App)
 1. THE RECEIVER (Viewer App)
    - Role: The Interpreter/Physician's computer.
-   - IP Address: Find the Local IP (e.g., 192.168.1.100) using 'ipconfig'.
+   - IP Address: Find the Local IP of this computer.
+     * Windows: Use 'ipconfig' in Command Prompt (look for IPv4 Address).
+     * Mac: Use 'ifconfig | grep inet' in Terminal or check System Settings.
+     * Linux: Use 'ip a' or 'hostname -I' in Terminal.
+     Example: 192.168.1.100
    - Port Number: 3000
 2. THE PUSHER (Pusher App)
    - Role: The X-Ray Technician's computer.

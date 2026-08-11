@@ -19,7 +19,11 @@ This suite uses a direct, modern web-based transfer system. You do NOT need to c
 * **AE Title**: N/A (Uses direct HTTP REST API)
 
 ### How to Connect Them Over Your Network:
-1. Find the IP Address of the RECEIVER computer (e.g., `192.168.1.100`).
+1. Find the IP Address of the RECEIVER computer.
+   - **Windows**: Open Command Prompt, type `ipconfig` (look for IPv4 Address).
+   - **Mac**: Open Terminal, type `ifconfig | grep inet` (or check System Settings > Network).
+   - **Linux**: Open Terminal, type `ip a` or `hostname -I`.
+   - *Example: `192.168.1.100`*
 2. Open the PUSHER APP on the technician's computer.
 3. In the "Target Interpreter URL" box, enter the receiver's address like this:
    `http://192.168.1.100:3000/api/dicom-receiver`

@@ -287,7 +287,13 @@
         <h2>How to Use the Pusher App</h2>
         <ol>
             <li>Launch the Pusher using the instructions above. (Opens at <code>http://localhost:3002</code>).</li>
-            <li>Find the IP Address of the doctor's computer (e.g. <code>192.168.1.100</code>).</li>
+            <li>Find the IP Address of the doctor's computer (where the Viewer App is running).
+                <ul>
+                    <li><strong>Windows</strong>: Open Command Prompt and type <code>ipconfig</code> (look for IPv4 Address).</li>
+                    <li><strong>Mac</strong>: Open Terminal and type <code>ifconfig | grep inet</code>, or check System Settings > Network.</li>
+                    <li><strong>Linux</strong>: Open Terminal and type <code>ip a</code> or <code>hostname -I</code>.</li>
+                </ul>
+            </li>
             <li>In the Pusher App, enter the target address: <code>http://192.168.1.100:3000/api/dicom-receiver</code></li>
             <li>Drag and drop a patient's <code>.dcm</code> file into the designated area.</li>
             <li>The image will instantly appear on the doctor's screen!</li>

@@ -441,7 +441,7 @@ export default function PatientViewerPage() {
                       <div className="p-4 bg-[#020617] space-y-3 text-gray-300">
                         <p>Instead of querying a PACS, you can push a DICOM file directly to this screen using the included <strong>Pusher App</strong>.</p>
                         <ol className="list-decimal pl-5 space-y-2">
-                          <li>Open Command Prompt and type <code className="bg-[#1e293b] px-1 py-0.5 rounded text-orange-300">ipconfig</code> on this computer to find its local IP Address.</li>
+                          <li>Find the local IP Address of this computer (<strong>Windows</strong>: <code className="bg-[#1e293b] px-1 py-0.5 rounded text-orange-300">ipconfig</code>, <strong>Mac</strong>: <code className="bg-[#1e293b] px-1 py-0.5 rounded text-orange-300">ifconfig | grep inet</code>, <strong>Linux</strong>: <code className="bg-[#1e293b] px-1 py-0.5 rounded text-orange-300">ip a</code>).</li>
                           <li>Open the Pusher App on the source computer and enter this IP address (e.g., <code className="bg-[#1e293b] px-1 py-0.5 rounded text-orange-300">http://192.168.1.50:3000/api/dicom-receiver</code>).</li>
                           <li>Drag and drop the DICOM file into the Pusher App to instantly load it here.</li>
                         </ol>
