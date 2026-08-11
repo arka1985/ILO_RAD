@@ -28,3 +28,15 @@ This suite uses a direct, modern web-based transfer system. You do NOT need to c
 3. In the "Target Interpreter URL" box, enter the receiver's address like this:
    `http://192.168.1.100:3000/api/dicom-receiver`
 4. Drag and drop your DICOM file. It will push directly to the Viewer!
+
+
+## Privacy & Data Confidentiality
+* **100% Local & Offline**: This software suite is designed to run entirely locally on your own hardware or local area network.
+* **No Telemetry & No Cloud Storage**: We do not collect usage data, analytics, or store your patient data in any external cloud server. 
+* **Data Security**: DICOM files transferred via the Pusher App or loaded directly do not leave your network. It is the user's responsibility to ensure the host machine complies with local medical data regulations (e.g., HIPAA, GDPR).
+
+## Why This Suite is Novel
+* **Zero Server Configuration**: Unlike traditional PACS solutions, you can immediately push DICOM files directly from the acquisition PC to the doctor's screen via a simple drag-and-drop interface over the local network (or VPNs like Tailscale).
+* **Modern Side-by-Side Viewing**: Combines an integrated medical DICOM viewer seamlessly with the standard ILO 2022 Reference Radiographs (digitized in high-resolution DICOM and JPEG formats) directly in your browser.
+* **Instant Digital Reporting**: Replaces paper ILO forms with an interactive, validating digital wizard that generates standardized PDFs locally.
+

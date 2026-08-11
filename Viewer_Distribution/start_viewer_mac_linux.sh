@@ -1,4 +1,21 @@
 #!/bin/bash
+echo "==============================================================================="
+echo "PRIVACY AND CONFIDENTIALITY DISCLAIMER & TERMS OF USE"
+echo "==============================================================================="
+echo "1. This software suite operates completely LOCALLY on your network."
+echo "2. NO patient data, DICOM files, or reports are sent to any external server or cloud."
+echo "3. We do NOT collect telemetry or usage data."
+echo "4. You are responsible for ensuring HIPAA/GDPR or local compliance regarding"
+echo "   the security of the machine you are running this software on."
+echo "==============================================================================="
+read -p "Type Y to accept these terms and continue: " accept
+if [[ "$accept" != "Y" && "$accept" != "y" ]]; then
+    echo "You must accept the terms to use this software. Exiting..."
+    sleep 3
+    exit 1
+fi
+echo "Terms accepted. Launching..."
+
 
 echo "==================================================="
 echo "    Viewer Apps - Startup Script"

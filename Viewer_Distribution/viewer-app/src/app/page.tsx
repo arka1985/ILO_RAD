@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { ExternalLink, LayoutGrid, ClipboardList, ChevronRight, ChevronLeft, Save, Search, X, Info, AlertTriangle } from 'lucide-react';
+import { ExternalLink, LayoutGrid, ClipboardList, ChevronRight, ChevronLeft, Save, Search, X, Info, AlertTriangle , Trash2} from 'lucide-react';
 import { ILOReportTemplate } from './components/ILOReportTemplate';
 
 type InterpretationStep = '1_quality' | '2_parenchymal' | '3_pleural' | '4_other';
@@ -191,6 +191,17 @@ export default function Home() {
     }
     setHistorySearch('');
     setShowHistoryModal(true);
+  };
+
+  const deleteHistoricalPatient = (historyId: number) => {
+    if (!window.confirm("Are you sure you want to permanently delete this patient's history?")) return;
+    const existingHistoryStr = localStorage.getItem('ilo_reports_history');
+    if (existingHistoryStr) {
+      let history = JSON.parse(existingHistoryStr);
+      history = history.filter((r: any) => r.historyId !== historyId);
+      localStorage.setItem('ilo_reports_history', JSON.stringify(history));
+      setHistoryData(history);
+    }
   };
 
   const loadHistoricalPatient = (report: any) => {
@@ -1433,12 +1444,21 @@ export default function Home() {
                       <p className="text-white font-bold text-lg">{report.patientName} <span className="text-gray-400 text-sm font-normal">({report.patientId})</span></p>
                       <p className="text-gray-400 text-sm mt-1">Report Date: {report.historyDate || 'Unknown'} | Mode: {report.classificationMode}</p>
                     </div>
-                    <button 
-                      onClick={() => loadHistoricalPatient(report)}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded font-bold transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
-                    >
-                      Load Demographics
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); deleteHistoricalPatient(report.historyId); }}
+                        className="bg-red-900/50 hover:bg-red-600 text-red-200 px-3 py-2 rounded transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                        title="Delete this record"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                      <button 
+                        onClick={() => loadHistoricalPatient(report)}
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded font-bold transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                      >
+                        Load Demographics
+                      </button>
+                    </div>
                   </div>
                 ))}
                 {historyData.length === 0 && (

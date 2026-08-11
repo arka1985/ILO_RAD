@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { ExternalLink, LayoutGrid, ClipboardList, ChevronRight, ChevronLeft, Save, Search, X, Info, AlertTriangle } from 'lucide-react';
+import { ExternalLink, LayoutGrid, ClipboardList, ChevronRight, ChevronLeft, Save, Search, X, Info, AlertTriangle , Trash2} from 'lucide-react';
 import { ILOReportTemplate } from './components/ILOReportTemplate';
 
 type InterpretationStep = '1_quality' | '2_parenchymal' | '3_pleural' | '4_other';
@@ -191,6 +191,17 @@ export default function Home() {
     }
     setHistorySearch('');
     setShowHistoryModal(true);
+  };
+
+  const deleteHistoricalPatient = (historyId: number) => {
+    if (!window.confirm("Are you sure you want to permanently delete this patient's history?")) return;
+    const existingHistoryStr = localStorage.getItem('ilo_reports_history');
+    if (existingHistoryStr) {
+      let history = JSON.parse(existingHistoryStr);
+      history = history.filter((r: any) => r.historyId !== historyId);
+      localStorage.setItem('ilo_reports_history', JSON.stringify(history));
+      setHistoryData(history);
+    }
   };
 
   const loadHistoricalPatient = (report: any) => {
