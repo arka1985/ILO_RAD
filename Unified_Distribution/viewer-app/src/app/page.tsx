@@ -814,7 +814,7 @@ export default function Home() {
                   {wizardData.qualityGrade && wizardData.qualityGrade !== '4' && (
                     <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg mt-6 animate-in fade-in duration-300">
                       <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">OVERALL ASSESSMENT</p>
-                      <p className="mb-4 text-sm text-gray-300">Based on history, signs, and symptoms, is this essentially a normal X-ray? (No parenchymal, pleural, or other abnormalities)</p>
+                      <p className="mb-4 text-sm text-gray-300">Based on history, signs, symptoms, and your best clinical judgment, is this essentially a normal X-ray? (No parenchymal, pleural, or other abnormalities)</p>
                       <div className="flex space-x-4">
                         <label className="flex-1 cursor-pointer">
                           <div className={`border rounded-lg p-4 flex items-center space-x-3 transition-colors ${wizardData.isEssentiallyNormal === 'Yes' ? 'border-emerald-500 bg-emerald-900/20' : 'border-[#475569] bg-[#0f172a] hover:border-gray-400'}`}>
