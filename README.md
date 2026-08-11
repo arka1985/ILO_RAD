@@ -46,6 +46,8 @@ This software is provided in three distinct "Distributions" to fit different wor
 3. Select **"Download ZIP"**.
 4. Once downloaded, **Extract/Unzip** the folder completely. (Do not try to run the scripts from inside the ZIP archive).
 
+> **Note on Download Size:** The repository contains the standard ILO reference images in both JPEG and DICOM formats to allow for seamless offline classification. Because of this, the total size of the distribution is approximately **1.4 GB**. It may take some time to download depending on your internet connection.
+
 ---
 
 ## How to Run (Windows, Mac, Linux)
