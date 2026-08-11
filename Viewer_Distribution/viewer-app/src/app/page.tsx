@@ -1397,6 +1397,7 @@ export default function Home() {
               <p className="font-bold text-blue-300 text-sm mb-0.5">Developed by Dr. Arkaprabha Sau</p>
               <p className="font-medium text-gray-200">MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM</p>
               <p className="font-medium text-gray-200 mt-0.5 text-[10px] md:text-xs">Ph.D. (Computer Science and Engineering: AI & ML in Healthcare)</p>
+              <p className="font-medium text-blue-200 mt-1 text-[10px] md:text-xs">If any bug or any issue please email to: arka.doctor@gmail.com</p>
             </div>
             
             <div className="flex flex-row space-x-2 w-full md:w-auto">

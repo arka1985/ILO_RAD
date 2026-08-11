@@ -64,6 +64,7 @@ OPTION B: DIRECT PUSH WORKFLOW (Pusher App)
 Developed by Dr. Arkaprabha Sau
 MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM
 Ph.D. (Computer Science and Engineering: AI & ML in Healthcare)
+If any bug or any issue please email to arka.doctor@gmail.com
 
 
 ## Privacy & Data Confidentiality
