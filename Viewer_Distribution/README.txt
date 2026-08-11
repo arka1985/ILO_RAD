@@ -55,3 +55,11 @@ To check if a newer version of the software is available, visit the [Official Up
 3. If you want to keep your patient history, your browser's `localStorage` will automatically carry over as long as you open the new version in the same browser on the same computer (e.g., `localhost:3000`).
 4. Once you have verified the new version works and your history is intact, you can safely delete the old folder.
 
+
+
+## Creating a Desktop Shortcut (Windows Only)
+To make launching the software easier, we have included a script to automatically create a shortcut on your Desktop with a custom medical icon.
+1. Open the folder containing the software.
+2. Double-click the file named `Create_Desktop_Shortcut.vbs`.
+3. A shortcut named **"ILO RAD Suite"** will appear on your Desktop. You can now use this to start the application directly!
+
