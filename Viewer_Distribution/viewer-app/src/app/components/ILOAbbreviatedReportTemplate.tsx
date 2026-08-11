@@ -48,7 +48,7 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
     <div id="ilo-abbrev-report-template" className="bg-white text-[#1e1b4b] p-4 font-sans text-xs mx-auto" style={{ width: '210mm', boxSizing: 'border-box' }}>
       
       <div className="text-center font-bold text-lg mb-4 text-black border-b-2 border-black pb-2">
-        ABBREVIATED RECORD OF CLASSIFICATION OF RADIOGRAPHS FOR PNEUMOCONIOSES
+        ABBREVIATED RECORD OF ILO TERMINOLOGY CLASSIFICATION OF RADIOGRAPHS FOR PNEUMOCONIOSES
       </div>
 
       {/* Header Info Block */}
@@ -134,21 +134,22 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
 
         {/* 3. PLEURAL ABNORMALITIES */}
         <div className="mb-6 border-b border-gray-300 pb-4">
-          <h3 className="font-bold mb-2">3. Pleural Abnormalities</h3>
+          <h3 className="font-bold mb-4">3. Pleural Abnormalities <span className="italic font-normal text-xs ml-4">(0 = None, R = Right, L = Left)</span></h3>
           <div className={`grid grid-cols-2 gap-4 ${isEssentiallyNormal || isUnreadable ? 'opacity-30' : ''}`}>
             <div>
-              <p className="font-bold mb-2">Pleural Thickening</p>
-              <div className="space-y-2">
-                <span className="flex items-center"><Checkbox checked={thickening.includes('Pleural plaques')} boxClass="w-5 h-5 mr-2" /> Pleural plaques</span>
-                <span className="flex items-center"><Checkbox checked={thickening.includes('Costophrenic angle obliteration')} boxClass="w-5 h-5 mr-2" /> Costophrenic angle obliteration</span>
-                <span className="flex items-center"><Checkbox checked={thickening.includes('Diffuse pleural thickening')} boxClass="w-5 h-5 mr-2" /> Diffuse pleural thickening</span>
+              <p className="font-bold mb-2">PLEURAL THICKENING - PT</p>
+              <div className="flex space-x-4">
+                <span className="flex items-center"><Checkbox checked={thickening.includes('0')} boxClass="w-5 h-5 mr-1" /> 0</span>
+                <span className="flex items-center"><Checkbox checked={thickening.includes('R')} boxClass="w-5 h-5 mr-1" /> R</span>
+                <span className="flex items-center"><Checkbox checked={thickening.includes('L')} boxClass="w-5 h-5 mr-1" /> L</span>
               </div>
             </div>
             <div>
-              <p className="font-bold mb-2">Pleural Calcification</p>
-              <div className="space-y-2">
-                <span className="flex items-center"><Checkbox checked={calcification.includes('Pleural plaques')} boxClass="w-5 h-5 mr-2" /> Pleural plaques</span>
-                <span className="flex items-center"><Checkbox checked={calcification.includes('Diffuse pleural thickening')} boxClass="w-5 h-5 mr-2" /> Diffuse pleural thickening</span>
+              <p className="font-bold mb-2">PLEURAL CALCIFICATION - PC</p>
+              <div className="flex space-x-4">
+                <span className="flex items-center"><Checkbox checked={calcification.includes('0')} boxClass="w-5 h-5 mr-1" /> 0</span>
+                <span className="flex items-center"><Checkbox checked={calcification.includes('R')} boxClass="w-5 h-5 mr-1" /> R</span>
+                <span className="flex items-center"><Checkbox checked={calcification.includes('L')} boxClass="w-5 h-5 mr-1" /> L</span>
               </div>
             </div>
           </div>
