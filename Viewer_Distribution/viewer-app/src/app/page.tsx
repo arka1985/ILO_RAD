@@ -375,6 +375,8 @@ export default function Home() {
   const prevStep = () => {
     if (wizardData.currentInterpStep > 0) {
       updateData({ currentInterpStep: wizardData.currentInterpStep - 1 });
+    } else if (wizardData.currentInterpStep === 0) {
+      updateData({ stage: 1 });
     }
   };
 
@@ -1356,8 +1358,7 @@ export default function Home() {
             <div className="p-8 border-t border-[#334155] flex justify-between bg-[#0f172a]">
               <button 
                 onClick={prevStep}
-                disabled={wizardData.currentInterpStep === 0}
-                className={`flex items-center space-x-2 px-6 py-2 rounded font-bold transition-colors ${wizardData.currentInterpStep === 0 ? 'bg-gray-800 text-gray-600 cursor-not-allowed' : 'bg-[#334155] hover:bg-[#475569] text-white'}`}
+                className="flex items-center space-x-2 px-6 py-2 rounded font-bold transition-colors bg-[#334155] hover:bg-[#475569] text-white"
               >
                 <ChevronLeft size={16} />
                 <span>Previous</span>
