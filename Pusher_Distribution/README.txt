@@ -38,3 +38,16 @@ Keep the black terminal window open while you are using the app. When you're don
 * **Modern Side-by-Side Viewing**: Combines an integrated medical DICOM viewer seamlessly with the standard ILO 2022 Reference Radiographs (digitized in high-resolution DICOM and JPEG formats) directly in your browser.
 * **Instant Digital Reporting**: Replaces paper ILO forms with an interactive, validating digital wizard that generates standardized PDFs locally.
 
+
+
+## Updates and Versioning
+**Current Version:** 1.0.0
+
+To check if a newer version of the software is available, visit the [GitHub Repository](https://github.com/arka1985/ILO_RAD) (you can also click the "Updates" button in the Viewer App footer).
+
+**How to Install an Update:**
+1. Download the new `.zip` package from GitHub and extract it to a **new folder**.
+2. **Do not overwrite** the old folder immediately. The software runs locally and your browser saves your settings based on the local address. 
+3. If you want to keep your patient history, your browser's `localStorage` will automatically carry over as long as you open the new version in the same browser on the same computer (e.g., `localhost:3000`).
+4. Once you have verified the new version works and your history is intact, you can safely delete the old folder.
+
