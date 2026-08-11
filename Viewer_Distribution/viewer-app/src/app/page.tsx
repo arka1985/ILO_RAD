@@ -467,7 +467,7 @@ export default function Home() {
         <div className="bg-[#020617] text-white p-3 border-b border-[#1e293b] flex justify-between items-center shadow-md">
           <div className="flex items-center space-x-2">
             <ClipboardList size={18} className="text-emerald-400" />
-            <div className="font-bold tracking-widest text-xs">ILO RAD Suite: ILO Radiography System for Pneumoconiosis Classification</div>
+            <div className="font-bold tracking-widest text-xs text-orange-400">ILO RAD Suite: ILO Radiography System for Pneumoconiosis Classification</div>
           </div>
           <div className="flex items-center space-x-4">
             {pendingPush && (
