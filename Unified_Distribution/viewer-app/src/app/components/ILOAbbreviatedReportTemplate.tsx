@@ -86,17 +86,20 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
           </div>
         </div>
 
-        {/* 2. PARENCHYMAL ABNORMALITIES */}
-        <div className="mb-6 border-b border-gray-300 pb-4">
-          <h3 className="font-bold mb-2">2. Parenchymal Abnormalities</h3>
-          <div className="flex items-center space-x-6 mb-4">
-            <span className="font-semibold">Essentially Normal?</span>
-            <div className="flex space-x-2">
-              <span className="flex items-center"><Checkbox checked={data.isEssentiallyNormal === 'Yes'} boxClass="w-5 h-5 mr-1" /> Yes</span>
-              <span className="flex items-center"><Checkbox checked={data.isEssentiallyNormal === 'No'} boxClass="w-5 h-5 mr-1" /> No</span>
+        {/* ESSENTIALLY NORMAL OVERALL ASSESSMENT */}
+        <div className="mb-6 border-b border-gray-300 pb-4 bg-gray-50/50 p-2 rounded">
+          <div className="flex items-center space-x-6">
+            <span className="font-bold text-[13px] text-black uppercase">Based on history, signs, and symptoms, and best of your clinical judgement is this essentially a normal X-ray?</span>
+            <div className="flex space-x-4">
+              <span className="flex items-center font-bold text-black text-sm"><Checkbox checked={data.isEssentiallyNormal === 'Yes'} boxClass="w-5 h-5 mr-1" /> Yes</span>
+              <span className="flex items-center font-bold text-black text-sm"><Checkbox checked={data.isEssentiallyNormal === 'No'} boxClass="w-5 h-5 mr-1" /> No</span>
             </div>
           </div>
-          
+        </div>
+
+        {/* 2. PARENCHYMAL ABNORMALITIES */}
+        <div className="mb-6 border-b border-gray-300 pb-4">
+          <h3 className="font-bold mb-4">2. Parenchymal Abnormalities</h3>
           <div className={`grid grid-cols-2 gap-6 ${isEssentiallyNormal || isUnreadable ? 'opacity-30' : ''}`}>
             <div>
               <p className="font-bold mb-1 text-xs uppercase">Small Opacities</p>
