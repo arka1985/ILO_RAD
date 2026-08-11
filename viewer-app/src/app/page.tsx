@@ -30,7 +30,7 @@ export default function Home() {
     // DOCTOR
     classifyingPhysician: '',
     readingDate: '',
-    physicianQualification: ['MBBS (MD-Physician : Equivalent to MBBS)'],
+    physicianQualification: ['MBBS'],
     physicianQualificationOtherText: '',
     facility: '',
     orderingPhysician: '',
@@ -230,6 +230,37 @@ export default function Home() {
   };
 
   const toggleArrayItem = (key: 'physicianQualification' | 'qualityDefects' | 'symbols' | 'abbrevThickening' | 'abbrevCalcification' | 'zones' | 'plaqueSiteProfile' | 'plaqueSiteFaceOn' | 'plaqueSiteDiaphragm' | 'plaqueSiteOther' | 'plaqueCalcProfile' | 'plaqueCalcFaceOn' | 'plaqueCalcDiaphragm' | 'plaqueCalcOther' | 'diffuseSiteProfile' | 'diffuseSiteFaceOn' | 'diffuseCalcProfile' | 'diffuseCalcFaceOn', item: string) => {
+    if (key === 'physicianQualification') {
+      const arr = wizardData.physicianQualification;
+      const isChecking = !arr.includes(item);
+      const isBase = item === 'MBBS' || item === 'MD-Physician : Equivalent to MBBS';
+      
+      if (isChecking && !isBase) {
+        if (!arr.includes('MBBS') && !arr.includes('MD-Physician : Equivalent to MBBS')) {
+          alert('Selecting at least MBBS or MD-Physician : Equivalent to MBBS is mandatory before selecting other qualifications.');
+          return;
+        }
+      }
+      
+      if (!isChecking && isBase) {
+        const otherBase = item === 'MBBS' ? 'MD-Physician : Equivalent to MBBS' : 'MBBS';
+        if (!arr.includes(otherBase)) {
+          alert('Selecting at least MBBS or MD-Physician : Equivalent to MBBS is mandatory.');
+          return;
+        }
+      }
+
+      if (isChecking && isBase) {
+        const otherBase = item === 'MBBS' ? 'MD-Physician : Equivalent to MBBS' : 'MBBS';
+        if (arr.includes(otherBase)) {
+          setWizardData(prev => ({
+            ...prev,
+            [key]: [...prev[key].filter(i => i !== otherBase), item]
+          }));
+          return;
+        }
+      }
+    }
     setWizardData(prev => {
       const arr = prev[key];
       if (arr.includes(item)) return { ...prev, [key]: arr.filter(i => i !== item) };
@@ -273,6 +304,10 @@ export default function Home() {
       if (!wizardData.qualityGrade) return false;
       if (wizardData.classificationMode === 'Abbreviated' && wizardData.qualityGrade !== '1') {
         return !!wizardData.abbrevQualityComment;
+      }
+      if (wizardData.classificationMode !== 'Abbreviated' && wizardData.qualityGrade !== '1') {
+        if (!wizardData.qualityDefects || wizardData.qualityDefects.length === 0) return false;
+        if (wizardData.qualityDefects.includes('Other') && !wizardData.qualityDefectsOtherText) return false;
       }
       return true;
     }
@@ -481,11 +516,13 @@ export default function Home() {
                 <div className="col-span-2">
                   <label className="block text-gray-400 text-xs uppercase mb-2">Physician Qualification *</label>
                   <div className="flex flex-wrap gap-4 bg-[#0f172a] border border-[#475569] p-3 rounded">
-                    <label className="flex items-center space-x-2 text-emerald-400 text-sm cursor-not-allowed">
-                      <input type="checkbox" checked={true} readOnly className="accent-emerald-500 w-4 h-4 cursor-not-allowed" />
-                      <span className="font-bold">MBBS (MD-Physician : Equivalent to MBBS)</span>
-                    </label>
-                    {['DIH', 'DPH', 'AFIH', 'Diploma', 'MD', 'MS', 'DNB', 'FNB', 'DM', 'MCH', 'PhD'].map(opt => (
+                    {['MBBS', 'MD-Physician : Equivalent to MBBS'].map(opt => (
+                      <label key={opt} className="flex items-center space-x-2 text-emerald-400 text-sm cursor-pointer hover:text-emerald-300 transition-colors">
+                        <input type="checkbox" checked={wizardData.physicianQualification.includes(opt)} onChange={() => toggleArrayItem('physicianQualification', opt)} className="accent-emerald-500 w-4 h-4" />
+                        <span className="font-bold">{opt}</span>
+                      </label>
+                    ))}
+                    {['DIH', 'DPH', 'AFIH', 'Diploma', 'MPH', 'MD', 'MS', 'DNB', 'FNB', 'DM', 'MCH', 'PhD'].map(opt => (
                       <label key={opt} className="flex items-center space-x-2 text-white text-sm cursor-pointer hover:text-emerald-400 transition-colors">
                         <input type="checkbox" checked={wizardData.physicianQualification.includes(opt)} onChange={() => toggleArrayItem('physicianQualification', opt)} className="accent-emerald-500 w-4 h-4" />
                         <span>{opt}</span>
@@ -512,9 +549,10 @@ export default function Home() {
                 </div>
                 
                 <div className="col-span-2">
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Designation of Examining and Ordering Doctor</label>
+                  <label className="block text-gray-400 text-xs uppercase mb-1">Designation of Examining Physician</label>
                   <select value={wizardData.designation} onChange={e => updateData({ designation: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500">
                     <option value="">- Select Designation -</option>
+                    <option value="Registered Medical Practitioners or Medical Specialist">Registered Medical Practitioners or Medical Specialist</option>
                     <option value="Medical Officer under OSHWC Code 2020">Medical Officer under OSHWC Code 2020</option>
                     <option value="Qualified Medical Practitioner under OHSWC Code 2020">Qualified Medical Practitioner under OHSWC Code 2020</option>
                     <option value="Examining Authority in Mines">Examining Authority in Mines</option>

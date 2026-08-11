@@ -26,11 +26,13 @@ const Checkbox = ({ checked, label, className = "", boxClass = "w-4 h-4", style 
 
 export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
   const isEssentiallyNormal = data.isEssentiallyNormal === 'Yes';
+  const isUnreadable = data.qualityGrade === '4';
+  const pData = isUnreadable ? {} : data;
   
   // Abnormalities override
-  const anyParenchymal = isEssentiallyNormal ? 'No' : data.anyParenchymal;
-  const anyPleural = isEssentiallyNormal ? 'No' : data.anyPleural;
-  const anyOther = isEssentiallyNormal ? 'No' : data.anyOther;
+  const anyParenchymal = isUnreadable ? '' : (isEssentiallyNormal ? 'No' : data.anyParenchymal);
+  const anyPleural = isUnreadable ? '' : (isEssentiallyNormal ? 'No' : data.anyPleural);
+  const anyOther = isUnreadable ? '' : (isEssentiallyNormal ? 'No' : data.anyOther);
   
   const OBLIGATORY_SYMBOLS = ['aa', 'at', 'ax', 'bu', 'ca', 'cg', 'cn', 'co', 'cp', 'cv', 'di', 'ef', 'em', 'es', 'fr', 'hi', 'ho', 'id', 'ih', 'kl', 'me', 'pa', 'pb', 'pi', 'px', 'ra', 'rp', 'tb'];
 
@@ -68,16 +70,16 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
             </div>
             <p className="text-[9px] mt-1 leading-tight text-black ml-1">(If not grade 1, mark<br/>all boxes that apply)</p>
           </div>
-          <div className="w-[70%] grid grid-cols-3 gap-y-1 gap-x-2 content-start">
+          <div className="w-[70%] grid grid-cols-4 gap-y-1 gap-x-2 content-start">
             <Checkbox checked={data.qualityDefects?.includes('Overexposed (dark)')} label="Overexposed (dark)" />
             <Checkbox checked={data.qualityDefects?.includes('Improper position')} label="Improper position" />
             <Checkbox checked={data.qualityDefects?.includes('Underinflation')} label="Underinflation" />
-            <Checkbox checked={data.qualityDefects?.includes('Scapula Overlay')} label="Scapula Overlay" className="col-start-4" style={{ gridColumn: '4' }} />
+            <Checkbox checked={data.qualityDefects?.includes('Scapula Overlay')} label="Scapula Overlay"  />
             
             <Checkbox checked={data.qualityDefects?.includes('Underexposed (light)')} label="Underexposed (light)" />
             <Checkbox checked={data.qualityDefects?.includes('Poor contrast')} label="Poor contrast" />
             <Checkbox checked={data.qualityDefects?.includes('Mottle')} label="Mottle" />
-            <div className="flex items-start" style={{ gridColumn: '4' }}>
+            <div className="flex items-start" >
               <Checkbox checked={data.qualityDefects?.includes('Other')} label="Other" />
               <div className="flex flex-col ml-1">
                 <span className="text-[9px] leading-tight">(please specify)</span>
@@ -87,7 +89,7 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
 
             <Checkbox checked={data.qualityDefects?.includes('Artifacts')} label="Artifacts" />
             <Checkbox checked={data.qualityDefects?.includes('Poor processing')} label="Poor processing" />
-            <Checkbox checked={data.qualityDefects?.includes('Excessive Edge Enhancement')} label="Excessive Edge Enhancement" />
+            <Checkbox checked={data.qualityDefects?.includes('Excessive edge enhancement')} label="Excessive edge enhancement" />
           </div>
         </div>
 
@@ -123,7 +125,7 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
                     <p className="text-[9px] mb-1 text-black uppercase">PRIMARY</p>
                     <div className="grid grid-cols-2 gap-[2px]">
                       {['p','s','q','t','r','u'].map(s => (
-                        <LetterBox key={`pri-${s}`} checked={data.primaryShape === s} label={s} />
+                        <LetterBox key={`pri-${s}`} checked={pData.primaryShape === s} label={s} />
                       ))}
                     </div>
                   </div>
@@ -131,7 +133,7 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
                     <p className="text-[9px] mb-1 text-black uppercase">SECONDARY</p>
                     <div className="grid grid-cols-2 gap-[2px]">
                       {['p','s','q','t','r','u'].map(s => (
-                        <LetterBox key={`sec-${s}`} checked={data.secondaryShape === s} label={s} />
+                        <LetterBox key={`sec-${s}`} checked={pData.secondaryShape === s} label={s} />
                       ))}
                     </div>
                   </div>
@@ -146,16 +148,16 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
                   <div className="col-start-3 text-center text-[10px] font-bold text-black">L</div>
                   
                   <div className="text-right text-[9px] pr-1 text-black uppercase">UPPER</div>
-                  <Checkbox checked={data.zones?.includes('RU')} boxClass="w-[22px] h-[22px]" />
-                  <Checkbox checked={data.zones?.includes('LU')} boxClass="w-[22px] h-[22px]" />
+                  <Checkbox checked={pData.zones?.includes('RU')} boxClass="w-[22px] h-[22px]" />
+                  <Checkbox checked={pData.zones?.includes('LU')} boxClass="w-[22px] h-[22px]" />
                   
                   <div className="text-right text-[9px] pr-1 text-black uppercase">MIDDLE</div>
-                  <Checkbox checked={data.zones?.includes('RM')} boxClass="w-[22px] h-[22px]" />
-                  <Checkbox checked={data.zones?.includes('LM')} boxClass="w-[22px] h-[22px]" />
+                  <Checkbox checked={pData.zones?.includes('RM')} boxClass="w-[22px] h-[22px]" />
+                  <Checkbox checked={pData.zones?.includes('LM')} boxClass="w-[22px] h-[22px]" />
 
                   <div className="text-right text-[9px] pr-1 text-black uppercase">LOWER</div>
-                  <Checkbox checked={data.zones?.includes('RL')} boxClass="w-[22px] h-[22px]" />
-                  <Checkbox checked={data.zones?.includes('LL')} boxClass="w-[22px] h-[22px]" />
+                  <Checkbox checked={pData.zones?.includes('RL')} boxClass="w-[22px] h-[22px]" />
+                  <Checkbox checked={pData.zones?.includes('LL')} boxClass="w-[22px] h-[22px]" />
                 </div>
               </div>
 
@@ -164,7 +166,7 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
                 <p className="text-[10px] mb-1 text-black uppercase">c. PROFUSION</p>
                 <div className="grid grid-cols-3 gap-[2px]">
                   {['0/-', '0/0', '0/1', '1/0', '1/1', '1/2', '2/1', '2/2', '2/3', '3/2', '3/3', '3/+'].map(p => (
-                    <LetterBox key={p} className="w-7 h-6" checked={data.profusion === p} label={p} />
+                    <LetterBox key={p} className="w-7 h-6" checked={pData.profusion === p} label={p} />
                   ))}
                 </div>
               </div>
@@ -178,7 +180,7 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
             <div className="flex items-center space-x-2 pl-4">
               <span className="text-[10px] text-black">SIZE</span>
               {['O', 'A', 'B', 'C'].map(o => (
-                <LetterBox key={o} checked={data.largeOpacity === o} label={o} />
+                <LetterBox key={o} checked={pData.largeOpacity === o && (!isUnreadable || o !== 'O')} label={o} />
               ))}
               <span className="text-[9px] ml-2 text-black leading-tight">Proceed to<br/>Section 3A</span>
             </div>
@@ -215,25 +217,25 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
                 <div className="flex justify-between items-center text-[10px] text-black">
                   <span>In profile</span>
                   <div className="flex space-x-[2px]">
-                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueSiteProfile?.length) || data.plaqueSiteProfile?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !isUnreadable && !pData.plaqueSiteProfile?.length) || pData.plaqueSiteProfile?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
                 <div className="flex justify-between items-center text-[10px] text-black">
                   <span>Face on</span>
                   <div className="flex space-x-[2px]">
-                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueSiteFaceOn?.length) || data.plaqueSiteFaceOn?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !isUnreadable && !pData.plaqueSiteFaceOn?.length) || pData.plaqueSiteFaceOn?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
                 <div className="flex justify-between items-center text-[10px] text-black">
                   <span>Diaphragm</span>
                   <div className="flex space-x-[2px]">
-                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueSiteDiaphragm?.length) || data.plaqueSiteDiaphragm?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !isUnreadable && !pData.plaqueSiteDiaphragm?.length) || pData.plaqueSiteDiaphragm?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
                 <div className="flex justify-between items-center text-[10px] text-black">
                   <span>Other site(s)</span>
                   <div className="flex space-x-[2px]">
-                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueSiteOther?.length) || data.plaqueSiteOther?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !isUnreadable && !pData.plaqueSiteOther?.length) || pData.plaqueSiteOther?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
               </div>
@@ -246,16 +248,16 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
               </div>
               <div className="space-y-[2px] flex flex-col items-center">
                 <div className="flex space-x-[2px]">
-                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueCalcProfile?.length) || data.plaqueCalcProfile?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !isUnreadable && !pData.plaqueCalcProfile?.length) || pData.plaqueCalcProfile?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
                 </div>
                 <div className="flex space-x-[2px]">
-                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueCalcFaceOn?.length) || data.plaqueCalcFaceOn?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !isUnreadable && !pData.plaqueCalcFaceOn?.length) || pData.plaqueCalcFaceOn?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
                 </div>
                 <div className="flex space-x-[2px]">
-                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueCalcDiaphragm?.length) || data.plaqueCalcDiaphragm?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !isUnreadable && !pData.plaqueCalcDiaphragm?.length) || pData.plaqueCalcDiaphragm?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
                 </div>
                 <div className="flex space-x-[2px]">
-                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueCalcOther?.length) || data.plaqueCalcOther?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !isUnreadable && !pData.plaqueCalcOther?.length) || pData.plaqueCalcOther?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
                 </div>
               </div>
             </div>
@@ -273,20 +275,20 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
               <div className="flex justify-center space-x-6 mt-1">
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={!data.plaqueExtentRight} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!data.plaqueExtentRight} label="R" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!isUnreadable && !pData.plaqueExtentRight} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!pData.plaqueExtentRight} label="R" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
-                    {['1','2','3'].map(v => <LetterBox key={v} checked={data.plaqueExtentRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['1','2','3'].map(v => <LetterBox key={v} checked={pData.plaqueExtentRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={!data.plaqueExtentLeft} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!data.plaqueExtentLeft} label="L" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!isUnreadable && !pData.plaqueExtentLeft} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!pData.plaqueExtentLeft} label="L" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
-                    {['1','2','3'].map(v => <LetterBox key={v} checked={data.plaqueExtentLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['1','2','3'].map(v => <LetterBox key={v} checked={pData.plaqueExtentLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
               </div>
@@ -305,20 +307,20 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
               <div className="flex justify-center space-x-4 mt-1">
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={!data.plaqueWidthRight} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!data.plaqueWidthRight} label="R" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!isUnreadable && !pData.plaqueWidthRight} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!pData.plaqueWidthRight} label="R" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
-                    {['a','b','c'].map(v => <LetterBox key={v} checked={data.plaqueWidthRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['a','b','c'].map(v => <LetterBox key={v} checked={pData.plaqueWidthRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={!data.plaqueWidthLeft} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!data.plaqueWidthLeft} label="L" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!isUnreadable && !pData.plaqueWidthLeft} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!pData.plaqueWidthLeft} label="L" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
-                    {['a','b','c'].map(v => <LetterBox key={v} checked={data.plaqueWidthLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['a','b','c'].map(v => <LetterBox key={v} checked={pData.plaqueWidthLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
               </div>
@@ -333,14 +335,14 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
           <div className="flex items-center space-x-6 mr-4">
             <div className="flex items-center space-x-2">
               <div className="flex space-x-1">
-                <LetterBox checked={!!data.costophrenicRight} label="R" className="w-5 h-5 text-[10px]" />
-                <LetterBox checked={!!data.costophrenicLeft} label="L" className="w-5 h-5 text-[10px]" />
+                <LetterBox checked={!!pData.costophrenicRight} label="R" className="w-5 h-5 text-[10px]" />
+                <LetterBox checked={!!pData.costophrenicLeft} label="L" className="w-5 h-5 text-[10px]" />
               </div>
               <span className="text-[9px] leading-tight w-16 text-black">Proceed to<br/>Section 3D</span>
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-black">No</span>
-              <Checkbox checked={!data.costophrenicRight && !data.costophrenicLeft} boxClass="w-5 h-5" />
+              <Checkbox checked={!isUnreadable && !pData.costophrenicRight && !pData.costophrenicLeft} boxClass="w-5 h-5" />
               <span className="text-[9px] leading-tight w-20 text-black">Proceed to<br/>Section 4A</span>
             </div>
           </div>
@@ -359,13 +361,13 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
                 <div className="flex justify-between items-center text-[10px] text-black">
                   <span>In profile</span>
                   <div className="flex space-x-[2px]">
-                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.diffuseSiteProfile?.length) || data.diffuseSiteProfile?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !isUnreadable && !pData.diffuseSiteProfile?.length) || pData.diffuseSiteProfile?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
                 <div className="flex justify-between items-center text-[10px] text-black">
                   <span>Face on</span>
                   <div className="flex space-x-[2px]">
-                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.diffuseSiteFaceOn?.length) || data.diffuseSiteFaceOn?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !isUnreadable && !pData.diffuseSiteFaceOn?.length) || pData.diffuseSiteFaceOn?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
               </div>
@@ -378,10 +380,10 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
               </div>
               <div className="space-y-[2px] flex flex-col items-center mt-6">
                 <div className="flex space-x-[2px]">
-                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.diffuseCalcProfile?.length) || data.diffuseCalcProfile?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !isUnreadable && !pData.diffuseCalcProfile?.length) || pData.diffuseCalcProfile?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
                 </div>
                 <div className="flex space-x-[2px]">
-                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.diffuseCalcFaceOn?.length) || data.diffuseCalcFaceOn?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !isUnreadable && !pData.diffuseCalcFaceOn?.length) || pData.diffuseCalcFaceOn?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
                 </div>
               </div>
             </div>
@@ -399,20 +401,20 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
               <div className="flex justify-center space-x-6 mt-1">
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={!data.diffuseExtentRight} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!data.diffuseExtentRight} label="R" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!isUnreadable && !pData.diffuseExtentRight} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!pData.diffuseExtentRight} label="R" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
-                    {['1','2','3'].map(v => <LetterBox key={v} checked={data.diffuseExtentRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['1','2','3'].map(v => <LetterBox key={v} checked={pData.diffuseExtentRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={!data.diffuseExtentLeft} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!data.diffuseExtentLeft} label="L" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!isUnreadable && !pData.diffuseExtentLeft} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!pData.diffuseExtentLeft} label="L" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
-                    {['1','2','3'].map(v => <LetterBox key={v} checked={data.diffuseExtentLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['1','2','3'].map(v => <LetterBox key={v} checked={pData.diffuseExtentLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
               </div>
@@ -431,20 +433,20 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
               <div className="flex justify-center space-x-4 mt-1">
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={!data.diffuseWidthRight} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!data.diffuseWidthRight} label="R" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!isUnreadable && !pData.diffuseWidthRight} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!pData.diffuseWidthRight} label="R" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
-                    {['a','b','c'].map(v => <LetterBox key={v} checked={data.diffuseWidthRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['a','b','c'].map(v => <LetterBox key={v} checked={pData.diffuseWidthRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={!data.diffuseWidthLeft} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!data.diffuseWidthLeft} label="L" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!isUnreadable && !pData.diffuseWidthLeft} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!pData.diffuseWidthLeft} label="L" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
-                    {['a','b','c'].map(v => <LetterBox key={v} checked={data.diffuseWidthLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                    {['a','b','c'].map(v => <LetterBox key={v} checked={pData.diffuseWidthLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
                   </div>
                 </div>
               </div>
@@ -475,9 +477,9 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
           <h3 className="text-[13px] text-black mb-1 font-bold">4B. OTHER SYMBOLS (OBLIGATORY)</h3>
           <div className="flex flex-wrap gap-[2px] mb-1">
             {OBLIGATORY_SYMBOLS.map(sym => (
-              <LetterBox key={sym} checked={data.symbols?.includes(sym)} label={sym} className="w-auto px-[3px] h-4 text-[9px]" />
+              <LetterBox key={sym} checked={pData.symbols?.includes(sym)} label={sym} className="w-auto px-[3px] h-4 text-[9px]" />
             ))}
-            <LetterBox checked={data.symbols?.includes('OD')} label="OD" className="w-auto px-[3px] h-4 text-[9px]" />
+            <LetterBox checked={pData.symbols?.includes('OD')} label="OD" className="w-auto px-[3px] h-4 text-[9px]" />
           </div>
           
           <div className="flex justify-between items-center mt-2 border-t border-gray-300 pt-1">
@@ -492,9 +494,9 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
           <div className="mt-2 flex items-center space-x-4">
             <h3 className="text-[12px] text-black font-bold">4C. Should worker see personal physician because of findings in section 4?</h3>
             <span className="text-black ml-4">Yes</span>
-            <Checkbox checked={data.seePhysician === 'Yes'} boxClass="w-4 h-4" />
+            <Checkbox checked={pData.seePhysician === 'Yes'} boxClass="w-4 h-4" />
             <span className="text-black">No</span>
-            <Checkbox checked={data.seePhysician === 'No'} boxClass="w-4 h-4" />
+            <Checkbox checked={pData.seePhysician === 'No'} boxClass="w-4 h-4" />
             <div className="border border-[#1e1b4b] w-24 h-5 ml-4 bg-gray-50"></div>
           </div>
         </div>
@@ -511,6 +513,12 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
         </div>
       )}
 
+      
+      {isUnreadable && (
+        <div className="mt-4 mb-2 p-2 border-2 border-red-500 bg-red-50 text-red-900 font-bold text-[14px] text-center rounded">
+          ADVICE: The radiograph is Unacceptable for classification purposes (Grade 4). A re-Xray is required.
+        </div>
+      )}
       {/* SIGNATURE BLOCK */}
       <div className="mt-2 pt-2 border-t border-gray-400 flex justify-between items-end">
         <div>
