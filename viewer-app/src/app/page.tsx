@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { ExternalLink, LayoutGrid, ClipboardList, ChevronRight, ChevronLeft, Save, Search, X, Info, AlertTriangle , Trash2, Github} from 'lucide-react';
+import { ExternalLink, LayoutGrid, ClipboardList, ChevronRight, ChevronLeft, Save, Search, X, Info, AlertTriangle , Trash2, RefreshCw} from 'lucide-react';
 import { ILOReportTemplate } from './components/ILOReportTemplate';
 
 type InterpretationStep = '1_quality' | '2_parenchymal' | '3_pleural' | '4_other';
@@ -1411,7 +1411,7 @@ export default function Home() {
                 <span>ILO_2020 (28-29)</span>
               </a>
               <a href="https://arka1985.github.io/ILO_RAD/" target="_blank" rel="noreferrer" className="bg-[#0f172a] hover:bg-gray-700 border border-[#334155] hover:border-gray-500 text-gray-300 hover:text-white px-3 py-1.5 rounded text-xs font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md flex-1 md:flex-none" title="Check GitHub for Updates">
-                <Github size={12} />
+                <RefreshCw size={12} />
                 <span>Updates</span>
               </a>
             </div>
