@@ -1,187 +1,533 @@
 import React from 'react';
 
-// Interface matching the relevant wizardData structure
 export interface ILOReportProps {
   data: any;
 }
 
+const LetterBox = ({ checked, label, className = "" }: { checked: boolean, label: string, className?: string }) => (
+  <span className={`relative inline-block w-[22px] h-[22px] border ${checked ? 'border-black text-black' : 'border-[#ef4444] text-[#ef4444]'} bg-white text-center text-[12px] align-middle overflow-hidden ${className}`} style={{ lineHeight: '20px' }}>
+    <span className="relative z-10">{label}</span>
+    {checked && (
+      <span className="absolute text-black font-normal" style={{ fontSize: '22px', left: 0, top: 0, width: '100%', height: '100%', lineHeight: '20px', textAlign: 'center', zIndex: 20 }}>
+        X
+      </span>
+    )}
+  </span>
+);
+
+const Checkbox = ({ checked, label, className = "", boxClass = "w-4 h-4", style }: { checked: boolean, label?: string, className?: string, boxClass?: string, style?: React.CSSProperties }) => (
+  <span className={`inline-block whitespace-nowrap align-middle ${className}`} style={{ lineHeight: '1', ...style }}>
+    <span className={`inline-block ${boxClass} border ${checked ? 'border-black text-black font-extrabold' : 'border-[#ef4444] text-transparent'} text-center text-[12px] align-middle bg-white overflow-hidden`} style={{ lineHeight: boxClass.includes('22px') ? '20px' : '14px' }}>
+      {checked ? 'X' : '\u00A0'}
+    </span>
+    {label && <span className="align-middle ml-1.5 text-black text-[11px] whitespace-normal">{label}</span>}
+  </span>
+);
+
 export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
+  const isEssentiallyNormal = data.isEssentiallyNormal === 'Yes';
+  
+  // Abnormalities override
+  const anyParenchymal = isEssentiallyNormal ? 'No' : data.anyParenchymal;
+  const anyPleural = isEssentiallyNormal ? 'No' : data.anyPleural;
+  const anyOther = isEssentiallyNormal ? 'No' : data.anyOther;
+  
+  const OBLIGATORY_SYMBOLS = ['aa', 'at', 'ax', 'bu', 'ca', 'cg', 'cn', 'co', 'cp', 'cv', 'di', 'ef', 'em', 'es', 'fr', 'hi', 'ho', 'id', 'ih', 'kl', 'me', 'pa', 'pb', 'pi', 'px', 'ra', 'rp', 'tb'];
+
   return (
-    <div id="ilo-report-template" className="bg-white text-black p-6 font-sans text-xs" style={{ width: '210mm', minHeight: '297mm', boxSizing: 'border-box' }}>
+    <div id="ilo-report-template" className="bg-white text-[#1e1b4b] p-3 font-sans text-xs mx-auto" style={{ width: '210mm', boxSizing: 'border-box' }}>
       
-      {/* HEADER */}
-      <div className="text-center border-b-2 border-black pb-2 mb-4">
-        <h1 className="text-lg font-bold uppercase tracking-wider">ILO International Classification of Radiographs of Pneumoconioses</h1>
-        <h2 className="text-sm font-bold mt-1">Radiograph Reading Report</h2>
-      </div>
-
-      {data.isNonDicom && (
-        <div className="mb-4 text-center font-black border-2 border-black p-2 uppercase text-sm">
-          WARNING: A NON-DICOM IMAGE FORMAT WAS USED FOR INTERPRETATION. THIS REPORT IS FOR TRAINING PURPOSES ONLY.
-        </div>
-      )}
-
-      {/* METADATA */}
-      <div className="grid grid-cols-2 gap-4 mb-4 border-b border-gray-300 pb-3">
+      {/* Header Info Block (Not in standard image but needed for reporting) */}
+      <div className="mb-2 text-[10px] grid grid-cols-2 gap-4 border-b-2 border-[#1e1b4b] pb-2">
         <div>
-          <p><span className="font-bold">Patient/Worker/Employee Name:</span> {data.patientName || 'N/A'}</p>
-          <p><span className="font-bold">Patient/Worker/Employee ID:</span> {data.patientId || 'N/A'}</p>
-          <p><span className="font-bold">Date of Radiograph:</span> {data.radiographDate || 'N/A'}</p>
-          <p><span className="font-bold">Reading Date:</span> {data.readingDate || 'N/A'}</p>
+          <p><span className="font-bold">Patient ID:</span> {data.patientId || 'N/A'}</p>
+          <p><span className="font-bold">Patient Name:</span> {data.patientName || 'N/A'}</p>
+          <p><span className="font-bold">Radiograph Date:</span> {data.radiographDate || 'N/A'} &nbsp; | &nbsp; <span className="font-bold">Reading Date:</span> {data.readingDate || 'N/A'}</p>
         </div>
         <div>
           <p><span className="font-bold">Reader Name:</span> {data.classifyingPhysician || 'N/A'}</p>
-          <p><span className="font-bold">Reader Qualification:</span> {data.physicianQualification || 'N/A'}</p>
-          <p><span className="font-bold">Classification Mode:</span> {data.classificationMode}</p>
-          <p><span className="font-bold">Classification Purpose:</span> {data.classificationPurpose === 'Other' ? data.classificationPurposeOtherText : data.classificationPurpose}</p>
-          <p><span className="font-bold">Working Place:</span> {data.workingPlace === 'Other' ? data.workingPlaceOtherText : data.workingPlace}</p>
-          <p><span className="font-bold">Establishment:</span> {data.establishmentName || 'N/A'}</p>
-          <p><span className="font-bold">Examination Type:</span> {data.examinationType === 'Other' ? data.examinationTypeOtherText : data.examinationType}</p>
+          <p><span className="font-bold">Classification Mode:</span> {data.classificationMode} &nbsp; | &nbsp; <span className="font-bold">Purpose:</span> {data.classificationPurpose === 'Other' ? data.classificationPurposeOtherText : data.classificationPurpose}</p>
         </div>
       </div>
 
-      {/* 1. QUALITY */}
-      <div className="mb-4">
-        <h3 className="font-bold bg-gray-200 p-1 mb-1 text-sm">1. Image Quality</h3>
-        <p className="ml-2"><span className="font-bold">Grade:</span> {data.qualityGrade || 'N/A'}</p>
-        {data.classificationMode === 'Abbreviated' ? (
-          data.qualityGrade && data.qualityGrade !== '1' && (
-            <p className="ml-2 italic text-xs">Comment: {data.abbrevQualityComment}</p>
-          )
-        ) : (
-          <>
-            {data.qualityGrade !== '1' && data.qualityDefects.length > 0 && (
-              <p className="ml-2">Defects: {data.qualityDefects.join(', ')}</p>
-            )}
-            {data.qualityDefects.includes('Other') && data.qualityDefectsOtherText && (
-              <p className="ml-2 italic text-xs">Other defect: {data.qualityDefectsOtherText}</p>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* 2. PARENCHYMAL */}
-      <div className="mb-4">
-        <h3 className="font-bold bg-gray-200 p-1 mb-1 text-sm">2. Parenchymal Abnormalities</h3>
-        <p className="ml-2 mb-2"><span className="font-bold">Any Small Opacities?</span> {data.anyParenchymal}</p>
+      <div className="border border-[#1e1b4b]">
         
-        {data.anyParenchymal === 'Yes' && (
-          <div className="ml-4 border-l-2 border-gray-300 pl-4">
-            {data.classificationMode === 'Abbreviated' ? (
-              <>
-                <p><span className="font-bold">Profusion (4-point):</span> {data.abbrevProfusion}</p>
-                <p><span className="font-bold">Primary Shape/Size:</span> {data.abbrevShape}</p>
-              </>
-            ) : (
-              <>
-                <p><span className="font-bold">Shape/Size (Primary/Secondary):</span> {data.primaryShape} / {data.secondaryShape}</p>
-                <p><span className="font-bold">Zones Involved:</span> {data.zones.length > 0 ? data.zones.join(', ') : 'None'}</p>
-                <p><span className="font-bold">Profusion (12-point scale):</span> {data.profusion}</p>
-              </>
-            )}
-            <p className="mt-2"><span className="font-bold">Large Opacities (Size):</span> {data.largeOpacity}</p>
-          </div>
-        )}
-      </div>
-
-      {/* 3. PLEURAL */}
-      <div className="mb-4">
-        <h3 className="font-bold bg-gray-200 p-1 mb-1 text-sm">3. Pleural Abnormalities</h3>
-        <p className="ml-2 mb-2"><span className="font-bold">Any Classifiable Pleural Abnormalities?</span> {data.anyPleural}</p>
-
-        {data.anyPleural === 'Yes' && data.classificationMode === 'Abbreviated' && (
-          <div className="ml-4 border-l-2 border-gray-300 pl-4">
-            <p><span className="font-bold">Pleural Thickening (PT):</span> {data.abbrevThickening.length > 0 ? data.abbrevThickening.join(', ') : '0'}</p>
-            <p><span className="font-bold">Pleural Calcification (PC):</span> {data.abbrevCalcification.length > 0 ? data.abbrevCalcification.join(', ') : '0'}</p>
-          </div>
-        )}
-
-        {data.anyPleural === 'Yes' && data.classificationMode === 'Full' && (
-          <div className="ml-4 text-xs">
-            {/* PLAQUES SUMMARY */}
-            <div className="mb-2">
-              <p className="font-bold underline mb-1">3B. Pleural Plaques</p>
-              <div className="grid grid-cols-2 gap-2 ml-2">
-                <div>
-                  <span className="font-bold">Site:</span> Profile ({data.plaqueSiteProfile.join(',') || 'O'}), Face on ({data.plaqueSiteFaceOn.join(',') || 'O'}), Diaphragm ({data.plaqueSiteDiaphragm.join(',') || 'O'}), Other ({data.plaqueSiteOther.join(',') || 'O'})
+        {/* 1. IMAGE QUALITY */}
+        <div className="flex border-b border-[#1e1b4b] p-1.5">
+          <div className="w-[30%]">
+            <h3 className="text-[13px] mb-1 text-black font-bold">1. IMAGE QUALITY</h3>
+            <div className="flex space-x-2 mb-1 ml-4">
+              {['1', '2', '3', '4'].map(g => (
+                <div key={g} className="flex flex-col items-center">
+                  <span className={`inline-flex w-5 h-5 border ${data.qualityGrade === g ? 'border-black text-black font-extrabold' : 'border-[#ef4444] text-transparent'} text-center text-sm items-center justify-center bg-white`}>
+                    {data.qualityGrade === g ? 'X' : '\u00A0'}
+                  </span>
+                  <span className="text-[10px] mt-1 text-black font-bold">{g}</span>
                 </div>
-                <div>
-                  <span className="font-bold">Calcification:</span> Profile ({data.plaqueCalcProfile.join(',') || 'O'}), Face on ({data.plaqueCalcFaceOn.join(',') || 'O'}), Diaphragm ({data.plaqueCalcDiaphragm.join(',') || 'O'}), Other ({data.plaqueCalcOther.join(',') || 'O'})
-                </div>
-                <div><span className="font-bold">Extent (R/L):</span> {data.plaqueExtentRight}/{data.plaqueExtentLeft}</div>
-                <div><span className="font-bold">Width (R/L):</span> {data.plaqueWidthRight}/{data.plaqueWidthLeft}</div>
+              ))}
+            </div>
+            <p className="text-[9px] mt-1 leading-tight text-black ml-1">(If not grade 1, mark<br/>all boxes that apply)</p>
+          </div>
+          <div className="w-[70%] grid grid-cols-3 gap-y-1 gap-x-2 content-start">
+            <Checkbox checked={data.qualityDefects?.includes('Overexposed (dark)')} label="Overexposed (dark)" />
+            <Checkbox checked={data.qualityDefects?.includes('Improper position')} label="Improper position" />
+            <Checkbox checked={data.qualityDefects?.includes('Underinflation')} label="Underinflation" />
+            <Checkbox checked={data.qualityDefects?.includes('Scapula Overlay')} label="Scapula Overlay" className="col-start-4" style={{ gridColumn: '4' }} />
+            
+            <Checkbox checked={data.qualityDefects?.includes('Underexposed (light)')} label="Underexposed (light)" />
+            <Checkbox checked={data.qualityDefects?.includes('Poor contrast')} label="Poor contrast" />
+            <Checkbox checked={data.qualityDefects?.includes('Mottle')} label="Mottle" />
+            <div className="flex items-start" style={{ gridColumn: '4' }}>
+              <Checkbox checked={data.qualityDefects?.includes('Other')} label="Other" />
+              <div className="flex flex-col ml-1">
+                <span className="text-[9px] leading-tight">(please specify)</span>
+                <span className="border-b border-black text-[9px] mt-1 h-3">{data.qualityDefectsOtherText || '\u00A0'}</span>
               </div>
             </div>
 
-            {/* COSTO */}
-            <div className="mb-2">
-              <p className="font-bold underline mb-1">3C. Costophrenic Angle Obliteration</p>
-              <p className="ml-2">Right: {data.costophrenicRight ? 'Yes' : 'No'}, Left: {data.costophrenicLeft ? 'Yes' : 'No'}</p>
-            </div>
-
-            {/* DIFFUSE */}
-            <div>
-              <p className="font-bold underline mb-1">3D. Diffuse Pleural Thickening</p>
-              <div className="grid grid-cols-2 gap-2 ml-2">
-                <div>
-                  <span className="font-bold">Site:</span> Profile ({data.diffuseSiteProfile.join(',') || 'O'}), Face on ({data.diffuseSiteFaceOn.join(',') || 'O'})
-                </div>
-                <div>
-                  <span className="font-bold">Calcification:</span> Profile ({data.diffuseCalcProfile.join(',') || 'O'}), Face on ({data.diffuseCalcFaceOn.join(',') || 'O'})
-                </div>
-                <div><span className="font-bold">Extent (R/L):</span> {data.diffuseExtentRight}/{data.diffuseExtentLeft}</div>
-                <div><span className="font-bold">Width (R/L):</span> {data.diffuseWidthRight}/{data.diffuseWidthLeft}</div>
-              </div>
-            </div>
+            <Checkbox checked={data.qualityDefects?.includes('Artifacts')} label="Artifacts" />
+            <Checkbox checked={data.qualityDefects?.includes('Poor processing')} label="Poor processing" />
+            <Checkbox checked={data.qualityDefects?.includes('Excessive Edge Enhancement')} label="Excessive Edge Enhancement" />
           </div>
-        )}
-      </div>
-
-      {/* 4. OTHER */}
-      <div className="mb-6">
-        <h3 className="font-bold bg-gray-200 p-1 mb-1 text-sm">4. Symbols & Comments</h3>
-        <div className="ml-2">
-          {data.classificationMode === 'Abbreviated' ? (
-            <>
-              <p className="mb-2"><span className="font-bold">Symbols Present?</span> {data.abbrevSymbolsPresent}</p>
-              {data.abbrevSymbolsPresent === 'Yes' && (
-                <p className="mb-2"><span className="font-bold">Symbols:</span> {data.symbols.length > 0 ? data.symbols.join(', ') : 'None'}</p>
-              )}
-            </>
-          ) : (
-            <>
-              <p className="mb-2"><span className="font-bold">Any Other Abnormalities?</span> {data.anyOther}</p>
-              {data.anyOther === 'Yes' && (
-                <>
-                  <p className="mb-2"><span className="font-bold">Obligatory Symbols:</span> {data.symbols.length > 0 ? data.symbols.join(', ') : 'None'}</p>
-                  <p className="mb-2"><span className="font-bold">Refer to Physician?</span> {data.seePhysician}</p>
-                </>
-              )}
-            </>
-          )}
-          
-          <p className="mt-4"><span className="font-bold">Comments Present?</span> {data.hasComments}</p>
-          {data.hasComments === 'Yes' && (
-            <div className="mt-2 p-3 border border-gray-300 rounded bg-gray-50 text-gray-800 whitespace-pre-wrap">
-              {data.commentsText || 'No comment text provided.'}
-            </div>
-          )}
         </div>
+
+        {/* 2A. ANY CLASSIFIABLE PARENCHYMAL ABNORMALITIES? */}
+        <div className="flex justify-between items-center border-b border-[#1e1b4b] p-1.5 bg-gray-50/50">
+          <h3 className="text-[13px] text-black font-bold">2A. ANY CLASSIFIABLE PARENCHYMAL ABNORMALITIES?</h3>
+          <div className="flex items-center space-x-6 mr-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-black">Yes</span>
+              <Checkbox checked={anyParenchymal === 'Yes'} boxClass="w-5 h-5" />
+              <span className="text-[9px] leading-tight w-24 text-black">Complete Sections<br/>2B and 2C</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-black">No</span>
+              <Checkbox checked={anyParenchymal === 'No'} boxClass="w-5 h-5" />
+              <span className="text-[9px] leading-tight w-20 text-black">Proceed to<br/>Section 3A</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 2B. SMALL OPACITIES & 2C. LARGE OPACITIES */}
+        <div className="flex border-b border-[#1e1b4b]">
+          {/* 2B */}
+          <div className="w-[65%] border-r border-[#1e1b4b] p-1.5">
+            <h3 className="text-[13px] mb-2 text-black font-bold">2B. SMALL OPACITIES</h3>
+            <div className="flex justify-around items-start">
+              
+              {/* SHAPE/SIZE */}
+              <div className="flex flex-col items-center">
+                <p className="text-[10px] mb-1 text-black uppercase">a. SHAPE/SIZE</p>
+                <div className="flex space-x-4">
+                  <div className="flex flex-col items-center">
+                    <p className="text-[9px] mb-1 text-black uppercase">PRIMARY</p>
+                    <div className="grid grid-cols-2 gap-[2px]">
+                      {['p','s','q','t','r','u'].map(s => (
+                        <LetterBox key={`pri-${s}`} checked={data.primaryShape === s} label={s} />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <p className="text-[9px] mb-1 text-black uppercase">SECONDARY</p>
+                    <div className="grid grid-cols-2 gap-[2px]">
+                      {['p','s','q','t','r','u'].map(s => (
+                        <LetterBox key={`sec-${s}`} checked={data.secondaryShape === s} label={s} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ZONES */}
+              <div className="flex flex-col items-center">
+                <p className="text-[10px] mb-1 text-black uppercase">b. ZONES</p>
+                <div className="grid grid-cols-3 gap-x-1 gap-y-1 items-center">
+                  <div className="col-start-2 text-center text-[10px] font-bold text-black">R</div>
+                  <div className="col-start-3 text-center text-[10px] font-bold text-black">L</div>
+                  
+                  <div className="text-right text-[9px] pr-1 text-black uppercase">UPPER</div>
+                  <Checkbox checked={data.zones?.includes('RU')} boxClass="w-[22px] h-[22px]" />
+                  <Checkbox checked={data.zones?.includes('LU')} boxClass="w-[22px] h-[22px]" />
+                  
+                  <div className="text-right text-[9px] pr-1 text-black uppercase">MIDDLE</div>
+                  <Checkbox checked={data.zones?.includes('RM')} boxClass="w-[22px] h-[22px]" />
+                  <Checkbox checked={data.zones?.includes('LM')} boxClass="w-[22px] h-[22px]" />
+
+                  <div className="text-right text-[9px] pr-1 text-black uppercase">LOWER</div>
+                  <Checkbox checked={data.zones?.includes('RL')} boxClass="w-[22px] h-[22px]" />
+                  <Checkbox checked={data.zones?.includes('LL')} boxClass="w-[22px] h-[22px]" />
+                </div>
+              </div>
+
+              {/* PROFUSION */}
+              <div className="flex flex-col items-center">
+                <p className="text-[10px] mb-1 text-black uppercase">c. PROFUSION</p>
+                <div className="grid grid-cols-3 gap-[2px]">
+                  {['0/-', '0/0', '0/1', '1/0', '1/1', '1/2', '2/1', '2/2', '2/3', '3/2', '3/3', '3/+'].map(p => (
+                    <LetterBox key={p} className="w-7 h-6" checked={data.profusion === p} label={p} />
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+          
+          {/* 2C */}
+          <div className="w-[35%] p-1.5">
+            <h3 className="text-[13px] mb-6 text-black font-bold">2C. LARGE OPACITIES</h3>
+            <div className="flex items-center space-x-2 pl-4">
+              <span className="text-[10px] text-black">SIZE</span>
+              {['O', 'A', 'B', 'C'].map(o => (
+                <LetterBox key={o} checked={data.largeOpacity === o} label={o} />
+              ))}
+              <span className="text-[9px] ml-2 text-black leading-tight">Proceed to<br/>Section 3A</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3A. ANY CLASSIFIABLE PLEURAL ABNORMALITIES? */}
+        <div className="flex justify-between items-center border-b border-[#1e1b4b] p-1.5 bg-gray-50/50">
+          <h3 className="text-[13px] text-black font-bold">3A. ANY CLASSIFIABLE PLEURAL ABNORMALITIES?</h3>
+          <div className="flex items-center space-x-6 mr-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-black">Yes</span>
+              <Checkbox checked={anyPleural === 'Yes'} boxClass="w-5 h-5" />
+              <span className="text-[9px] leading-tight w-24 text-black">Complete Sections<br/>3B and 3C</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-black">No</span>
+              <Checkbox checked={anyPleural === 'No'} boxClass="w-5 h-5" />
+              <span className="text-[9px] leading-tight w-20 text-black">Proceed to<br/>Section 4A</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3B. PLEURAL PLAQUES */}
+        <div className="border-b border-[#1e1b4b] p-1.5">
+          <h3 className="text-[13px] text-black mb-1 font-bold">3B. PLEURAL PLAQUES <span className="italic text-[11px] font-normal">(mark site, calcification, extent, and width)</span></h3>
+          <div className="flex mt-1 ml-2">
+            {/* Chest Wall / Site */}
+            <div className="w-[20%] border-r border-[#1e1b4b] pr-2">
+              <div className="flex justify-between text-[10px] italic text-black mb-1">
+                <span>Chest wall</span><span>Site</span>
+              </div>
+              <div className="space-y-[2px]">
+                <div className="flex justify-between items-center text-[10px] text-black">
+                  <span>In profile</span>
+                  <div className="flex space-x-[2px]">
+                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueSiteProfile?.length) || data.plaqueSiteProfile?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-[10px] text-black">
+                  <span>Face on</span>
+                  <div className="flex space-x-[2px]">
+                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueSiteFaceOn?.length) || data.plaqueSiteFaceOn?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-[10px] text-black">
+                  <span>Diaphragm</span>
+                  <div className="flex space-x-[2px]">
+                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueSiteDiaphragm?.length) || data.plaqueSiteDiaphragm?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-[10px] text-black">
+                  <span>Other site(s)</span>
+                  <div className="flex space-x-[2px]">
+                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueSiteOther?.length) || data.plaqueSiteOther?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Calcification */}
+            <div className="w-[18%] border-r border-[#1e1b4b] px-4">
+              <div className="text-center text-[10px] italic text-black mb-1">
+                <span>Calcification</span>
+              </div>
+              <div className="space-y-[2px] flex flex-col items-center">
+                <div className="flex space-x-[2px]">
+                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueCalcProfile?.length) || data.plaqueCalcProfile?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                </div>
+                <div className="flex space-x-[2px]">
+                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueCalcFaceOn?.length) || data.plaqueCalcFaceOn?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                </div>
+                <div className="flex space-x-[2px]">
+                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueCalcDiaphragm?.length) || data.plaqueCalcDiaphragm?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                </div>
+                <div className="flex space-x-[2px]">
+                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.plaqueCalcOther?.length) || data.plaqueCalcOther?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                </div>
+              </div>
+            </div>
+
+            {/* Extent */}
+            <div className="w-[30%] border-r border-[#1e1b4b] px-2">
+              <div className="text-center text-[9px] italic text-black mb-1 leading-tight">
+                <span>Extent (chest wall; combined<br/>for in profile and face on)</span>
+              </div>
+              <div className="text-[9px] text-black flex flex-col items-center leading-tight mb-1">
+                <p>Up to 1/4 of lateral chest wall = 1</p>
+                <p>1/4 to 1/2 of lateral chest wall = 2</p>
+                <p>&gt; 1/2 of lateral chest wall = 3</p>
+              </div>
+              <div className="flex justify-center space-x-6 mt-1">
+                <div className="flex flex-col items-center space-y-1">
+                  <div className="flex space-x-[2px]">
+                    <LetterBox checked={!data.plaqueExtentRight} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!data.plaqueExtentRight} label="R" className="w-5 h-5 text-[9px]" />
+                  </div>
+                  <div className="flex space-x-[2px]">
+                    {['1','2','3'].map(v => <LetterBox key={v} checked={data.plaqueExtentRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+                <div className="flex flex-col items-center space-y-1">
+                  <div className="flex space-x-[2px]">
+                    <LetterBox checked={!data.plaqueExtentLeft} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!data.plaqueExtentLeft} label="L" className="w-5 h-5 text-[9px]" />
+                  </div>
+                  <div className="flex space-x-[2px]">
+                    {['1','2','3'].map(v => <LetterBox key={v} checked={data.plaqueExtentLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Width */}
+            <div className="w-[32%] px-2">
+              <div className="text-center text-[9px] italic text-black mb-1 leading-tight">
+                <span>Width (in profile only)<br/>(3mm minimum width required)</span>
+              </div>
+              <div className="text-[9px] text-black flex flex-col items-center leading-tight mb-1">
+                <p>3 to 5 mm = a</p>
+                <p>5 to 10 mm = b</p>
+                <p>&gt; 10 mm = c</p>
+              </div>
+              <div className="flex justify-center space-x-4 mt-1">
+                <div className="flex flex-col items-center space-y-1">
+                  <div className="flex space-x-[2px]">
+                    <LetterBox checked={!data.plaqueWidthRight} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!data.plaqueWidthRight} label="R" className="w-5 h-5 text-[9px]" />
+                  </div>
+                  <div className="flex space-x-[2px]">
+                    {['a','b','c'].map(v => <LetterBox key={v} checked={data.plaqueWidthRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+                <div className="flex flex-col items-center space-y-1">
+                  <div className="flex space-x-[2px]">
+                    <LetterBox checked={!data.plaqueWidthLeft} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!data.plaqueWidthLeft} label="L" className="w-5 h-5 text-[9px]" />
+                  </div>
+                  <div className="flex space-x-[2px]">
+                    {['a','b','c'].map(v => <LetterBox key={v} checked={data.plaqueWidthLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+
+        {/* 3C. COSTOPHRENIC ANGLE OBLITERATION */}
+        <div className="flex justify-between items-center border-b border-[#1e1b4b] p-1.5 bg-gray-50/50">
+          <h3 className="text-[13px] text-black font-bold">3C. COSTOPHRENIC ANGLE OBLITERATION</h3>
+          <div className="flex items-center space-x-6 mr-4">
+            <div className="flex items-center space-x-2">
+              <div className="flex space-x-1">
+                <LetterBox checked={!!data.costophrenicRight} label="R" className="w-5 h-5 text-[10px]" />
+                <LetterBox checked={!!data.costophrenicLeft} label="L" className="w-5 h-5 text-[10px]" />
+              </div>
+              <span className="text-[9px] leading-tight w-16 text-black">Proceed to<br/>Section 3D</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-black">No</span>
+              <Checkbox checked={!data.costophrenicRight && !data.costophrenicLeft} boxClass="w-5 h-5" />
+              <span className="text-[9px] leading-tight w-20 text-black">Proceed to<br/>Section 4A</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3D. DIFFUSE PLEURAL THICKENING */}
+        <div className="border-b border-[#1e1b4b] p-1.5">
+          <h3 className="text-[13px] text-black mb-1 font-bold">3D. DIFFUSE PLEURAL THICKENING <span className="italic text-[11px] font-normal">(mark site, calcification, extent, and width)</span></h3>
+          <div className="flex mt-1 ml-2">
+            {/* Chest Wall / Site */}
+            <div className="w-[20%] border-r border-[#1e1b4b] pr-2">
+              <div className="flex justify-between text-[10px] italic text-black mb-1">
+                <span>Chest wall</span><span>Site</span>
+              </div>
+              <div className="space-y-[2px] mt-6">
+                <div className="flex justify-between items-center text-[10px] text-black">
+                  <span>In profile</span>
+                  <div className="flex space-x-[2px]">
+                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.diffuseSiteProfile?.length) || data.diffuseSiteProfile?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-[10px] text-black">
+                  <span>Face on</span>
+                  <div className="flex space-x-[2px]">
+                    {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.diffuseSiteFaceOn?.length) || data.diffuseSiteFaceOn?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Calcification */}
+            <div className="w-[18%] border-r border-[#1e1b4b] px-4">
+              <div className="text-center text-[10px] italic text-black mb-1">
+                <span>Calcification</span>
+              </div>
+              <div className="space-y-[2px] flex flex-col items-center mt-6">
+                <div className="flex space-x-[2px]">
+                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.diffuseCalcProfile?.length) || data.diffuseCalcProfile?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                </div>
+                <div className="flex space-x-[2px]">
+                  {['O','R','L'].map(v => <LetterBox key={v} checked={(v === 'O' && !data.diffuseCalcFaceOn?.length) || data.diffuseCalcFaceOn?.includes(v)} label={v} className="w-5 h-5 text-[9px]" />)}
+                </div>
+              </div>
+            </div>
+
+            {/* Extent */}
+            <div className="w-[30%] border-r border-[#1e1b4b] px-2">
+              <div className="text-center text-[9px] italic text-black mb-1 leading-tight">
+                <span>Extent (chest wall; combined<br/>for in profile and face on)</span>
+              </div>
+              <div className="text-[9px] text-black flex flex-col items-center leading-tight mb-1">
+                <p>Up to 1/4 of lateral chest wall = 1</p>
+                <p>1/4 to 1/2 of lateral chest wall = 2</p>
+                <p>&gt; 1/2 of lateral chest wall = 3</p>
+              </div>
+              <div className="flex justify-center space-x-6 mt-1">
+                <div className="flex flex-col items-center space-y-1">
+                  <div className="flex space-x-[2px]">
+                    <LetterBox checked={!data.diffuseExtentRight} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!data.diffuseExtentRight} label="R" className="w-5 h-5 text-[9px]" />
+                  </div>
+                  <div className="flex space-x-[2px]">
+                    {['1','2','3'].map(v => <LetterBox key={v} checked={data.diffuseExtentRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+                <div className="flex flex-col items-center space-y-1">
+                  <div className="flex space-x-[2px]">
+                    <LetterBox checked={!data.diffuseExtentLeft} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!data.diffuseExtentLeft} label="L" className="w-5 h-5 text-[9px]" />
+                  </div>
+                  <div className="flex space-x-[2px]">
+                    {['1','2','3'].map(v => <LetterBox key={v} checked={data.diffuseExtentLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Width */}
+            <div className="w-[32%] px-2">
+              <div className="text-center text-[9px] italic text-black mb-1 leading-tight">
+                <span>Width (in profile only)<br/>(3mm minimum width required)</span>
+              </div>
+              <div className="text-[9px] text-black flex flex-col items-center leading-tight mb-1">
+                <p>3 to 5 mm = a</p>
+                <p>5 to 10 mm = b</p>
+                <p>&gt; 10 mm = c</p>
+              </div>
+              <div className="flex justify-center space-x-4 mt-1">
+                <div className="flex flex-col items-center space-y-1">
+                  <div className="flex space-x-[2px]">
+                    <LetterBox checked={!data.diffuseWidthRight} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!data.diffuseWidthRight} label="R" className="w-5 h-5 text-[9px]" />
+                  </div>
+                  <div className="flex space-x-[2px]">
+                    {['a','b','c'].map(v => <LetterBox key={v} checked={data.diffuseWidthRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+                <div className="flex flex-col items-center space-y-1">
+                  <div className="flex space-x-[2px]">
+                    <LetterBox checked={!data.diffuseWidthLeft} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={!!data.diffuseWidthLeft} label="L" className="w-5 h-5 text-[9px]" />
+                  </div>
+                  <div className="flex space-x-[2px]">
+                    {['a','b','c'].map(v => <LetterBox key={v} checked={data.diffuseWidthLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+
+        {/* 4A. ANY OTHER ABNORMALITIES? */}
+        <div className="flex justify-between items-center border-b border-[#1e1b4b] p-1.5 bg-gray-50/50">
+          <h3 className="text-[13px] text-black font-bold">4A. ANY OTHER ABNORMALITIES?</h3>
+          <div className="flex items-center space-x-6 mr-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-black">Yes</span>
+              <Checkbox checked={anyOther === 'Yes'} boxClass="w-5 h-5" />
+              <span className="text-[9px] leading-tight w-24 text-black">Complete Sections<br/>4B, 4C</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-black">No</span>
+              <Checkbox checked={anyOther === 'No'} boxClass="w-5 h-5" />
+              <span className="text-[9px] leading-tight w-20 text-black">Proceed to<br/>Section 5</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 4B & 4C */}
+        <div className="p-1.5">
+          <h3 className="text-[13px] text-black mb-1 font-bold">4B. OTHER SYMBOLS (OBLIGATORY)</h3>
+          <div className="flex flex-wrap gap-[2px] mb-1">
+            {OBLIGATORY_SYMBOLS.map(sym => (
+              <LetterBox key={sym} checked={data.symbols?.includes(sym)} label={sym} className="w-auto px-[3px] h-4 text-[9px]" />
+            ))}
+            <LetterBox checked={data.symbols?.includes('OD')} label="OD" className="w-auto px-[3px] h-4 text-[9px]" />
+          </div>
+          
+          <div className="flex justify-between items-center mt-2 border-t border-gray-300 pt-1">
+            <div className="text-[10px] text-black">
+              If other diseases or significant abnormalities, <span className="font-bold">findings must be recorded on reverse.</span>
+            </div>
+            <div className="text-[9px] text-black text-right leading-tight">
+              Date Physician or Worker<br/>notified? ______________
+            </div>
+          </div>
+
+          <div className="mt-2 flex items-center space-x-4">
+            <h3 className="text-[12px] text-black font-bold">4C. Should worker see personal physician because of findings in section 4?</h3>
+            <span className="text-black ml-4">Yes</span>
+            <Checkbox checked={data.seePhysician === 'Yes'} boxClass="w-4 h-4" />
+            <span className="text-black">No</span>
+            <Checkbox checked={data.seePhysician === 'No'} boxClass="w-4 h-4" />
+            <div className="border border-[#1e1b4b] w-24 h-5 ml-4 bg-gray-50"></div>
+          </div>
+        </div>
+
       </div>
+
+      {/* COMMENTS */}
+      {data.hasComments === 'Yes' && data.commentsText && (
+        <div className="mt-2">
+          <h3 className="text-[12px] text-black font-bold mb-0.5">COMMENTS:</h3>
+          <div className="p-1.5 border border-gray-300 rounded min-h-[30px] text-[10px] text-gray-800 whitespace-pre-wrap">
+            {data.commentsText}
+          </div>
+        </div>
+      )}
 
       {/* SIGNATURE BLOCK */}
-      <div className="mt-8 pt-4 border-t border-gray-300 flex justify-between items-end">
+      <div className="mt-2 pt-2 border-t border-gray-400 flex justify-between items-end">
         <div>
-          <p className="mb-2 text-lg">_______________________________________</p>
-          <p className="font-bold">Signature of Reader</p>
-          <p className="text-sm font-bold mt-1">{data.classifyingPhysician || 'Reader Name'}</p>
+          <p className="mb-1 text-base text-black">_______________________________________</p>
+          <p className="font-bold text-black text-[10px]">Signature of Reader</p>
+          <p className="text-[11px] font-bold text-black">{data.classifyingPhysician || 'Reader Name'}</p>
           {data.physicianQualification && (
-            <p className="text-xs italic text-gray-600">{data.physicianQualification}</p>
+            <p className="text-[9px] text-gray-600 max-w-[200px] leading-tight mt-0.5">
+              {Array.isArray(data.physicianQualification) 
+                ? [...data.physicianQualification.filter((q: string) => q !== 'Others'), ...(data.physicianQualification.includes('Others') && data.physicianQualificationOtherText ? [data.physicianQualificationOtherText] : [])].join(', ') 
+                : data.physicianQualification}
+            </p>
           )}
         </div>
         <div>
-          <p className="mb-4 text-xl">_______________________</p>
-          <p className="font-bold text-center">Date</p>
+          <p className="mb-2 text-lg text-black">_______________________</p>
+          <p className="font-bold text-center text-black text-[10px]">Date</p>
         </div>
       </div>
 

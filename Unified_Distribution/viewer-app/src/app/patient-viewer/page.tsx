@@ -38,6 +38,14 @@ export default function PatientViewerPage() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
   useEffect(() => {
+    // Track viewer open state
+    localStorage.setItem('isDualViewerOpen', 'true');
+    const handleUnload = () => {
+      localStorage.setItem('isDualViewerOpen', 'false');
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    window.addEventListener('unload', handleUnload);
+
     // Listen for messages from the Main Control Panel
     const channel = new BroadcastChannel('bviewer-sync');
     
@@ -49,6 +57,9 @@ export default function PatientViewerPage() {
     };
 
     return () => {
+      localStorage.setItem('isDualViewerOpen', 'false');
+      window.removeEventListener('beforeunload', handleUnload);
+      window.removeEventListener('unload', handleUnload);
       channel.close();
     };
   }, []);

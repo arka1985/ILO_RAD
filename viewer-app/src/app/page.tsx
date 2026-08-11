@@ -30,7 +30,8 @@ export default function Home() {
     // DOCTOR
     classifyingPhysician: '',
     readingDate: '',
-    physicianQualification: 'MBBS/MD (Physician)',
+    physicianQualification: ['MBBS (MD-Physician : Equivalent to MBBS)'],
+    physicianQualificationOtherText: '',
     facility: '',
     orderingPhysician: '',
     isTrained: '', // 'Yes' or 'No'
@@ -56,6 +57,7 @@ export default function Home() {
     qualityGrade: '',
     qualityDefects: [] as string[],
     qualityDefectsOtherText: '',
+    isEssentiallyNormal: 'No', // 'Yes' or 'No'
     
     // 2. PARENCHYMAL
     anyParenchymal: '', // 'Yes' or 'No'
@@ -115,6 +117,7 @@ export default function Home() {
 
   const QUALITY_DEFECTS = ['Overexposed (dark)', 'Underexposed (light)', 'Artifacts', 'Improper position', 'Poor contrast', 'Poor processing', 'Underinflation', 'Mottle', 'Excessive Edge Enhancement', 'Scapula Overlay', 'Other'];
   const OBLIGATORY_SYMBOLS = ['aa', 'at', 'ax', 'bu', 'ca', 'cg', 'cn', 'co', 'cp', 'cv', 'di', 'ef', 'em', 'es', 'fr', 'hi', 'ho', 'id', 'ih', 'kl', 'me', 'pa', 'pb', 'pi', 'px', 'ra', 'rp', 'tb', 'od'];
+  const OBLIGATORY_SYMBOLS_FULL: Record<string, string> = { 'aa': 'Atherosclerotic aorta', 'at': 'Significant apical pleural thickening', 'ax': 'Coalescence of small pneumoconiotic opacities', 'bu': 'Bulla(e)', 'ca': 'Cancer of lung or pleura', 'cg': 'Calcified non-pneumoconiotic nodules', 'cn': 'Calcification in small pneumoconiotic opacities', 'co': 'Abnormality of cardiac shape or size', 'cp': 'Cor pulmonale', 'cv': 'Cavity', 'di': 'Marked distortion of the intrathoracic organs', 'ef': 'Effusion', 'em': 'Emphysema', 'es': 'Eggshell calcification of hilar or mediastinal lymph nodes', 'fr': 'Fractured rib(s)', 'hi': 'Enlargement of hilar or mediastinal lymph nodes', 'ho': 'Honeycomb lung', 'id': 'Ill-defined diaphragm', 'ih': 'Ill-defined heart border', 'kl': 'Septal (Kerley) lines', 'me': 'Mesothelioma', 'pa': 'Plate atelectasis', 'pb': 'Parenchymal bands', 'pi': 'Pleural thickening of an interlobar fissure', 'px': 'Pneumothorax', 'ra': 'Rounded atelectasis', 'rp': 'Rheumatoid pneumoconiosis', 'tb': 'Tuberculosis', 'od': 'Other significant abnormality' };
 
   useEffect(() => {
     const saved = localStorage.getItem('ilo_doctor_profile');
@@ -211,6 +214,11 @@ export default function Home() {
   };
 
   const loadStandard = (url: string, label: string) => {
+    const isViewerOpen = localStorage.getItem('isDualViewerOpen') === 'true';
+    if (!isViewerOpen) {
+      alert("Please open the 'POP OUT DUAL VIEWER PANEL' first before selecting a standard.");
+      return;
+    }
     setActiveStandard(label);
     if (channel) {
       channel.postMessage({ type: 'LOAD_STANDARD', url, label });
@@ -221,7 +229,7 @@ export default function Home() {
     setWizardData(prev => ({ ...prev, ...updates }));
   };
 
-  const toggleArrayItem = (key: 'qualityDefects' | 'symbols' | 'abbrevThickening' | 'abbrevCalcification' | 'zones' | 'plaqueSiteProfile' | 'plaqueSiteFaceOn' | 'plaqueSiteDiaphragm' | 'plaqueSiteOther' | 'plaqueCalcProfile' | 'plaqueCalcFaceOn' | 'plaqueCalcDiaphragm' | 'plaqueCalcOther' | 'diffuseSiteProfile' | 'diffuseSiteFaceOn' | 'diffuseCalcProfile' | 'diffuseCalcFaceOn', item: string) => {
+  const toggleArrayItem = (key: 'physicianQualification' | 'qualityDefects' | 'symbols' | 'abbrevThickening' | 'abbrevCalcification' | 'zones' | 'plaqueSiteProfile' | 'plaqueSiteFaceOn' | 'plaqueSiteDiaphragm' | 'plaqueSiteOther' | 'plaqueCalcProfile' | 'plaqueCalcFaceOn' | 'plaqueCalcDiaphragm' | 'plaqueCalcOther' | 'diffuseSiteProfile' | 'diffuseSiteFaceOn' | 'diffuseCalcProfile' | 'diffuseCalcFaceOn', item: string) => {
     setWizardData(prev => {
       const arr = prev[key];
       if (arr.includes(item)) return { ...prev, [key]: arr.filter(i => i !== item) };
@@ -254,7 +262,9 @@ export default function Home() {
   };
 
   // Derive visible steps based on mode
-  const visibleSteps = INTERPRETATION_STEPS; // Both modes use all 4 steps
+  const visibleSteps = wizardData.isEssentiallyNormal === 'Yes' 
+    ? INTERPRETATION_STEPS.filter(s => s.id === '1_quality') 
+    : INTERPRETATION_STEPS;
 
   // Stage 2 Validation
   const canProceedInterp = (stepIndex: number) => {
@@ -343,28 +353,47 @@ export default function Home() {
           </div>
           
           <div>
-            <h3 className="font-bold text-gray-400 mb-2 border-b border-[#334155] pb-1">Small Opacities</h3>
-            <div className="grid grid-cols-3 gap-2">
-              <button onClick={() => loadStandard('/standards/11_pp.dcm', '1/1 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 p/p</button>
-              <button onClick={() => loadStandard('/standards/11_qq.dcm', '1/1 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 q/q</button>
-              <button onClick={() => loadStandard('/standards/11_rr.dcm', '1/1 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 r/r</button>
-              
-              <button onClick={() => loadStandard('/standards/22_pp.dcm', '2/2 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">2/2 p/p</button>
-              <button onClick={() => loadStandard('/standards/22_qq.dcm', '2/2 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">2/2 q/q</button>
-              <button onClick={() => loadStandard('/standards/22_rr.dcm', '2/2 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">2/2 r/r</button>
-              
-              <button onClick={() => loadStandard('/standards/33_pp.dcm', '3/3 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">3/3 p/p</button>
-              <button onClick={() => loadStandard('/standards/33_qq.dcm', '3/3 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">3/3 q/q</button>
-              <button onClick={() => loadStandard('/standards/33_rr.dcm', '3/3 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">3/3 r/r</button>
+            <h3 className="font-bold text-gray-400 mb-1 border-b border-[#334155] pb-1 flex flex-col">
+              <span>Small Opacities</span>
+              <span className="text-[10px] font-normal text-gray-500 mt-0.5">(opacity having the longest dimension not exceeding 10mm)</span>
+            </h3>
+            
+            <div className="mt-2 mb-3">
+              <h4 className="text-xs font-semibold text-gray-400 mb-2">Regular</h4>
+              <div className="grid grid-cols-3 gap-2">
+                <button onClick={() => loadStandard('/standards/11_pp.dcm', '1/1 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 p/p</button>
+                <button onClick={() => loadStandard('/standards/11_qq.dcm', '1/1 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 q/q</button>
+                <button onClick={() => loadStandard('/standards/11_rr.dcm', '1/1 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 r/r</button>
+                
+                <button onClick={() => loadStandard('/standards/22_pp.dcm', '2/2 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">2/2 p/p</button>
+                <button onClick={() => loadStandard('/standards/22_qq.dcm', '2/2 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">2/2 q/q</button>
+                <button onClick={() => loadStandard('/standards/22_rr.dcm', '2/2 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">2/2 r/r</button>
+                
+                <button onClick={() => loadStandard('/standards/33_pp.dcm', '3/3 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">3/3 p/p</button>
+                <button onClick={() => loadStandard('/standards/33_qq.dcm', '3/3 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">3/3 q/q</button>
+                <button onClick={() => loadStandard('/standards/33_rr.dcm', '3/3 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">3/3 r/r</button>
+              </div>
+            </div>
 
-              <button onClick={() => loadStandard('/standards/11_ss.dcm', '1/1 s/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 s/s</button>
-              <button onClick={() => loadStandard('/standards/11_tt.dcm', '1/1 t/t')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 t/t</button>
-              <button onClick={() => loadStandard('/standards/123u.dcm', '123 u')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">123 u</button>
+            <div className="mb-2">
+              <h4 className="text-xs font-semibold text-gray-400 mb-2">Irregular</h4>
+              <div className="grid grid-cols-3 gap-2">
+                <button onClick={() => loadStandard('/standards/11_ss.dcm', '1/1 s/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 s/s</button>
+                <button onClick={() => loadStandard('/standards/11_tt.dcm', '1/1 t/t')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 t/t</button>
+                <button onClick={() => loadStandard('/standards/22_ss.dcm', '2/2 s/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">2/2 s/s</button>
+                <button onClick={() => loadStandard('/standards/22_tt.dcm', '2/2 t/t')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">2/2 t/t</button>
+                <button onClick={() => loadStandard('/standards/33_ss.dcm', '3/3 s/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">3/3 s/s</button>
+                <button onClick={() => loadStandard('/standards/33_ts.dcm', '3/3 t/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">3/3 t/s</button>
+                <button onClick={() => loadStandard('/standards/123u.dcm', '123 u')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">123 u</button>
+              </div>
             </div>
           </div>
 
           <div>
-            <h3 className="font-bold text-gray-400 mb-2 border-b border-[#334155] pb-1">Large Opacities</h3>
+            <h3 className="font-bold text-gray-400 mb-2 border-b border-[#334155] pb-1 flex flex-col">
+              <span>Large Opacities</span>
+              <span className="text-[10px] font-normal text-gray-500 mt-0.5">(opacity having the longest dimension exceeding 10mm)</span>
+            </h3>
             <div className="grid grid-cols-1 gap-2">
               <button onClick={() => loadStandard('/standards/A_22_qq.dcm', 'Size A (2/2 q/q)')} className="p-2 bg-[#334155] hover:bg-emerald-600 border border-[#475569] hover:border-emerald-400 rounded text-xs font-bold">Size A (2/2 q/q)</button>
               <button onClick={() => loadStandard('/standards/B_23_qr.dcm', 'Size B (2/3 q/r)')} className="p-2 bg-[#334155] hover:bg-emerald-600 border border-[#475569] hover:border-emerald-400 rounded text-xs font-bold">Size B (2/3 q/r)</button>
@@ -449,9 +478,33 @@ export default function Home() {
                   <label className="block text-gray-400 text-xs uppercase mb-1">Classifying Physician's Name *</label>
                   <input type="text" value={wizardData.classifyingPhysician} onChange={e => updateData({ classifyingPhysician: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
                 </div>
-                <div className="col-span-2 md:col-span-1">
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Physician Qualification *</label>
-                  <input type="text" value={wizardData.physicianQualification} onChange={e => updateData({ physicianQualification: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
+                <div className="col-span-2">
+                  <label className="block text-gray-400 text-xs uppercase mb-2">Physician Qualification *</label>
+                  <div className="flex flex-wrap gap-4 bg-[#0f172a] border border-[#475569] p-3 rounded">
+                    <label className="flex items-center space-x-2 text-emerald-400 text-sm cursor-not-allowed">
+                      <input type="checkbox" checked={true} readOnly className="accent-emerald-500 w-4 h-4 cursor-not-allowed" />
+                      <span className="font-bold">MBBS (MD-Physician : Equivalent to MBBS)</span>
+                    </label>
+                    {['DIH', 'DPH', 'AFIH', 'Diploma', 'MD', 'MS', 'DNB', 'FNB', 'DM', 'MCH', 'PhD'].map(opt => (
+                      <label key={opt} className="flex items-center space-x-2 text-white text-sm cursor-pointer hover:text-emerald-400 transition-colors">
+                        <input type="checkbox" checked={wizardData.physicianQualification.includes(opt)} onChange={() => toggleArrayItem('physicianQualification', opt)} className="accent-emerald-500 w-4 h-4" />
+                        <span>{opt}</span>
+                      </label>
+                    ))}
+                    <label className="flex items-center space-x-2 text-white text-sm cursor-pointer hover:text-emerald-400 transition-colors">
+                      <input type="checkbox" checked={wizardData.physicianQualification.includes('Others')} onChange={() => toggleArrayItem('physicianQualification', 'Others')} className="accent-emerald-500 w-4 h-4" />
+                      <span>Others</span>
+                    </label>
+                  </div>
+                  {wizardData.physicianQualification.includes('Others') && (
+                    <input 
+                      type="text" 
+                      value={wizardData.physicianQualificationOtherText || ""} 
+                      onChange={e => updateData({ physicianQualificationOtherText: e.target.value })} 
+                      className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500 mt-2" 
+                      placeholder="Please specify other qualification" 
+                    />
+                  )}
                 </div>
                 <div>
                   <label className="block text-gray-400 text-xs uppercase mb-1">Reading Date *</label>
@@ -705,6 +758,29 @@ export default function Home() {
                       )}
                     </div>
                   </div>
+
+                  {/* ESSENTIALLY NORMAL OVERRIDE */}
+                  {wizardData.qualityGrade && wizardData.qualityGrade !== '4' && (
+                    <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg mt-6 animate-in fade-in duration-300">
+                      <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">OVERALL ASSESSMENT</p>
+                      <p className="mb-4 text-sm text-gray-300">Based on history, signs, and symptoms, is this essentially a normal X-ray? (No parenchymal, pleural, or other abnormalities)</p>
+                      <div className="flex space-x-4">
+                        <label className="flex-1 cursor-pointer">
+                          <div className={`border rounded-lg p-4 flex items-center space-x-3 transition-colors ${wizardData.isEssentiallyNormal === 'Yes' ? 'border-emerald-500 bg-emerald-900/20' : 'border-[#475569] bg-[#0f172a] hover:border-gray-400'}`}>
+                            <input type="radio" name="isEssentiallyNormal" checked={wizardData.isEssentiallyNormal === 'Yes'} onChange={() => updateData({ isEssentiallyNormal: 'Yes', anyParenchymal: 'No', anyPleural: 'No', anyOther: 'No' })} className="accent-emerald-500 w-5 h-5" />
+                            <span className={`font-bold ${wizardData.isEssentiallyNormal === 'Yes' ? 'text-emerald-400' : 'text-gray-300'}`}>Yes</span>
+                          </div>
+                        </label>
+                        <label className="flex-1 cursor-pointer">
+                          <div className={`border rounded-lg p-4 flex items-center space-x-3 transition-colors ${wizardData.isEssentiallyNormal === 'No' ? 'border-emerald-500 bg-emerald-900/20' : 'border-[#475569] bg-[#0f172a] hover:border-gray-400'}`}>
+                            <input type="radio" name="isEssentiallyNormal" checked={wizardData.isEssentiallyNormal === 'No'} onChange={() => updateData({ isEssentiallyNormal: 'No' })} className="accent-emerald-500 w-5 h-5" />
+                            <span className={`font-bold ${wizardData.isEssentiallyNormal === 'No' ? 'text-emerald-400' : 'text-gray-300'}`}>No</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
                 </div>
               )}
 
@@ -914,9 +990,9 @@ export default function Home() {
                                     <div key={`site-${row.k}`} className="flex items-center justify-between bg-[#1e293b] p-1.5 rounded">
                                       <span className="text-[10px] text-gray-400 w-16">{row.l}</span>
                                       <div className="flex space-x-1">
-                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${wizardData[row.k as keyof typeof wizardData].length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${wizardData[row.k as keyof typeof wizardData].includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${wizardData[row.k as keyof typeof wizardData].includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
                                       </div>
                                     </div>
                                   ))}
@@ -931,9 +1007,9 @@ export default function Home() {
                                     <div key={`calc-${row.k}`} className="flex items-center justify-between bg-[#1e293b] p-1.5 rounded">
                                       <span className="text-[10px] text-gray-400 w-16">{row.l}</span>
                                       <div className="flex space-x-1">
-                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${wizardData[row.k as keyof typeof wizardData].length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${wizardData[row.k as keyof typeof wizardData].includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${wizardData[row.k as keyof typeof wizardData].includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
                                       </div>
                                     </div>
                                   ))}
@@ -1016,7 +1092,8 @@ export default function Home() {
                           </div>
 
                           {/* 3D. DIFFUSE */}
-                          <div className="bg-[#0f172a] p-4 rounded border border-[#475569]">
+                          {(wizardData.costophrenicRight || wizardData.costophrenicLeft) && (
+                            <div className="bg-[#0f172a] p-4 rounded border border-[#475569]">
                             <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-[#334155] pb-2">3D. DIFFUSE PLEURAL THICKENING</p>
                             
                             <div className="grid grid-cols-4 gap-6">
@@ -1028,9 +1105,9 @@ export default function Home() {
                                     <div key={`dsite-${row.k}`} className="flex items-center justify-between bg-[#1e293b] p-1.5 rounded">
                                       <span className="text-[10px] text-gray-400 w-16">{row.l}</span>
                                       <div className="flex space-x-1">
-                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${wizardData[row.k as keyof typeof wizardData].length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${wizardData[row.k as keyof typeof wizardData].includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${wizardData[row.k as keyof typeof wizardData].includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
                                       </div>
                                     </div>
                                   ))}
@@ -1045,9 +1122,9 @@ export default function Home() {
                                     <div key={`dcalc-${row.k}`} className="flex items-center justify-between bg-[#1e293b] p-1.5 rounded">
                                       <span className="text-[10px] text-gray-400 w-16">{row.l}</span>
                                       <div className="flex space-x-1">
-                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${wizardData[row.k as keyof typeof wizardData].length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${wizardData[row.k as keyof typeof wizardData].includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${wizardData[row.k as keyof typeof wizardData].includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
                                       </div>
                                     </div>
                                   ))}
@@ -1113,6 +1190,7 @@ export default function Home() {
                               </div>
                             </div>
                           </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -1175,7 +1253,7 @@ export default function Home() {
                         <p className="mb-4 text-blue-400 font-bold uppercase tracking-widest text-xs border-b border-[#334155] pb-2">4B. OTHER SYMBOLS (OBLIGATORY)</p>
                         <div className="grid grid-cols-8 gap-2">
                           {OBLIGATORY_SYMBOLS.map(sym => (
-                            <label key={sym} className="flex items-center justify-center border border-[#475569] p-2 rounded hover:bg-[#334155] cursor-pointer transition-colors">
+                            <label key={sym} title={OBLIGATORY_SYMBOLS_FULL[sym]} className="flex items-center justify-center border border-[#475569] p-2 rounded hover:bg-[#334155] cursor-pointer transition-colors">
                               <input type="checkbox" checked={wizardData.symbols.includes(sym)} onChange={() => toggleArrayItem('symbols', sym)} className="hidden peer" />
                               <span className="font-mono font-bold uppercase text-gray-400 peer-checked:text-emerald-400">{sym}</span>
                             </label>
@@ -1186,7 +1264,7 @@ export default function Home() {
                       {/* 4C */}
                       {wizardData.classificationMode === 'Full' && (
                         <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
-                          <p className="mb-4 text-gray-400 font-bold uppercase tracking-widest text-xs">4C. Should worker see personal physician because of findings in section 4? *</p>
+                          <p className="mb-4 text-gray-400 font-bold uppercase tracking-widest text-xs">4C. Should Patient/Worker/Employee see personal physician because of findings in section 4? *</p>
                           <div className="flex space-x-4">
                             <label className="flex items-center space-x-2 cursor-pointer">
                               <input type="radio" name="seePhys" checked={wizardData.seePhysician === 'Yes'} onChange={() => updateData({ seePhysician: 'Yes' })} className="accent-emerald-500 w-5 h-5" />
@@ -1236,7 +1314,7 @@ export default function Home() {
                 <span>Previous</span>
               </button>
               
-              {wizardData.currentInterpStep < visibleSteps.length - 1 ? (
+              {wizardData.currentInterpStep < visibleSteps.length - 1 && wizardData.qualityGrade !== '4' ? (
                 <button 
                   onClick={nextStep}
                   disabled={!canProceedInterp(wizardData.currentInterpStep)}

@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 interface DicomViewerProps {
   initialUrl?: string;
   hideToolbar?: boolean;
+  patientFile?: File | null;
 }
 
 const DicomViewerBase = dynamic(() => import('./DwvComponent'), {
