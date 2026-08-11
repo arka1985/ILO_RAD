@@ -43,7 +43,11 @@ Keep the black terminal window open while you are using the app. When you're don
 ## Updates and Versioning
 **Current Version:** 1.0.0
 
-To check if a newer version of the software is available, visit the [Official Updates Page](https://arka1985.github.io/ILO_RAD/) (you can also click the "Updates" button in the Viewer App footer). You can download the latest `.zip` packages directly from that page without needing to navigate the GitHub repository.
+To check if a newer version of the software is available, visit the [Official Updates Page](https://arka1985.github.io/ILO_RAD/) (you can also click the "Updates" button in the Viewer App footer). 
+
+**How to check for updates:**
+1. Compare the **Current Version** listed on the Updates Page with the version number shown in your Viewer App's footer.
+2. If the Updates Page shows a newer version, download the latest `.zip` package for your distribution directly from that page without needing to navigate the GitHub repository.
 
 **How to Install an Update:**
 1. Download the new `.zip` package from GitHub and extract it to a **new folder**.
