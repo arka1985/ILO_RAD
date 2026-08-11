@@ -79,10 +79,10 @@ export default function Home() {
     plaqueCalcFaceOn: [] as string[],
     plaqueCalcDiaphragm: [] as string[],
     plaqueCalcOther: [] as string[],
-    plaqueExtentRight: '0',
-    plaqueExtentLeft: '0',
-    plaqueWidthRight: '0',
-    plaqueWidthLeft: '0',
+    plaqueExtentRight: '',
+    plaqueExtentLeft: '',
+    plaqueWidthRight: '',
+    plaqueWidthLeft: '',
     
     // 3C. COSTOPHRENIC
     costophrenicRight: false,
@@ -93,10 +93,10 @@ export default function Home() {
     diffuseSiteFaceOn: [] as string[],
     diffuseCalcProfile: [] as string[],
     diffuseCalcFaceOn: [] as string[],
-    diffuseExtentRight: '0',
-    diffuseExtentLeft: '0',
-    diffuseWidthRight: '0',
-    diffuseWidthLeft: '0',
+    diffuseExtentRight: '',
+    diffuseExtentLeft: '',
+    diffuseWidthRight: '',
+    diffuseWidthLeft: '',
 
     // 4. OTHER
     anyOther: '', // 'Yes' or 'No'

@@ -27,7 +27,6 @@ const Checkbox = ({ checked, label, className = "", boxClass = "w-4 h-4", style 
 export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
   const isEssentiallyNormal = data.isEssentiallyNormal === 'Yes';
   const isUnreadable = data.qualityGrade === '4';
-  const pData = isUnreadable ? {} : data;
   
   // Abnormalities override
   const anyParenchymal = isUnreadable ? '' : (isEssentiallyNormal ? 'No' : data.anyParenchymal);
@@ -36,6 +35,43 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
   
   const showPleuralDetails = !isUnreadable && anyPleural === 'Yes';
   const showParenchymalDetails = !isUnreadable && anyParenchymal === 'Yes';
+  
+  const pData = { ...data };
+  if (isUnreadable || anyParenchymal === 'No') {
+      pData.primaryShape = null;
+      pData.secondaryShape = null;
+      pData.zones = [];
+      pData.profusion = null;
+      pData.largeOpacity = null;
+  }
+  if (isUnreadable || anyPleural === 'No') {
+      pData.plaqueSiteProfile = [];
+      pData.plaqueSiteFaceOn = [];
+      pData.plaqueSiteDiaphragm = [];
+      pData.plaqueSiteOther = [];
+      pData.plaqueCalcProfile = [];
+      pData.plaqueCalcFaceOn = [];
+      pData.plaqueCalcDiaphragm = [];
+      pData.plaqueCalcOther = [];
+      pData.plaqueExtentRight = null;
+      pData.plaqueExtentLeft = null;
+      pData.plaqueWidthRight = null;
+      pData.plaqueWidthLeft = null;
+      pData.costophrenicRight = false;
+      pData.costophrenicLeft = false;
+      pData.diffuseSiteProfile = [];
+      pData.diffuseSiteFaceOn = [];
+      pData.diffuseCalcProfile = [];
+      pData.diffuseCalcFaceOn = [];
+      pData.diffuseExtentRight = null;
+      pData.diffuseExtentLeft = null;
+      pData.diffuseWidthRight = null;
+      pData.diffuseWidthLeft = null;
+  }
+  if (isUnreadable || anyOther === 'No') {
+      pData.obligatorySymbols = [];
+      pData.otherComments = '';
+  }
   
   const OBLIGATORY_SYMBOLS = ['aa', 'at', 'ax', 'bu', 'ca', 'cg', 'cn', 'co', 'cp', 'cv', 'di', 'ef', 'em', 'es', 'fr', 'hi', 'ho', 'id', 'ih', 'kl', 'me', 'pa', 'pb', 'pi', 'px', 'ra', 'rp', 'tb'];
 
@@ -278,8 +314,8 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
               <div className="flex justify-center space-x-6 mt-1">
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={showPleuralDetails && !pData.plaqueExtentRight} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!pData.plaqueExtentRight} label="R" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={showPleuralDetails && (!pData.plaqueExtentRight || pData.plaqueExtentRight === '0')} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={(!!pData.plaqueExtentRight && pData.plaqueExtentRight !== '0')} label="R" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
                     {['1','2','3'].map(v => <LetterBox key={v} checked={pData.plaqueExtentRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
@@ -287,8 +323,8 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
                 </div>
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={showPleuralDetails && !pData.plaqueExtentLeft} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!pData.plaqueExtentLeft} label="L" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={showPleuralDetails && (!pData.plaqueExtentLeft || pData.plaqueExtentLeft === '0')} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={(!!pData.plaqueExtentLeft && pData.plaqueExtentLeft !== '0')} label="L" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
                     {['1','2','3'].map(v => <LetterBox key={v} checked={pData.plaqueExtentLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
@@ -310,8 +346,8 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
               <div className="flex justify-center space-x-4 mt-1">
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={showPleuralDetails && !pData.plaqueWidthRight} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!pData.plaqueWidthRight} label="R" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={showPleuralDetails && (!pData.plaqueWidthRight || pData.plaqueWidthRight === '0')} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={(!!pData.plaqueWidthRight && pData.plaqueWidthRight !== '0')} label="R" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
                     {['a','b','c'].map(v => <LetterBox key={v} checked={pData.plaqueWidthRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
@@ -319,8 +355,8 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
                 </div>
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={showPleuralDetails && !pData.plaqueWidthLeft} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!pData.plaqueWidthLeft} label="L" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={showPleuralDetails && (!pData.plaqueWidthLeft || pData.plaqueWidthLeft === '0')} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={(!!pData.plaqueWidthLeft && pData.plaqueWidthLeft !== '0')} label="L" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
                     {['a','b','c'].map(v => <LetterBox key={v} checked={pData.plaqueWidthLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
@@ -404,8 +440,8 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
               <div className="flex justify-center space-x-6 mt-1">
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={showPleuralDetails && !pData.diffuseExtentRight} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!pData.diffuseExtentRight} label="R" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={showPleuralDetails && (!pData.diffuseExtentRight || pData.diffuseExtentRight === '0')} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={(!!pData.diffuseExtentRight && pData.diffuseExtentRight !== '0')} label="R" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
                     {['1','2','3'].map(v => <LetterBox key={v} checked={pData.diffuseExtentRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
@@ -413,8 +449,8 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
                 </div>
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={showPleuralDetails && !pData.diffuseExtentLeft} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!pData.diffuseExtentLeft} label="L" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={showPleuralDetails && (!pData.diffuseExtentLeft || pData.diffuseExtentLeft === '0')} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={(!!pData.diffuseExtentLeft && pData.diffuseExtentLeft !== '0')} label="L" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
                     {['1','2','3'].map(v => <LetterBox key={v} checked={pData.diffuseExtentLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
@@ -436,8 +472,8 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
               <div className="flex justify-center space-x-4 mt-1">
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={showPleuralDetails && !pData.diffuseWidthRight} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!pData.diffuseWidthRight} label="R" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={showPleuralDetails && (!pData.diffuseWidthRight || pData.diffuseWidthRight === '0')} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={(!!pData.diffuseWidthRight && pData.diffuseWidthRight !== '0')} label="R" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
                     {['a','b','c'].map(v => <LetterBox key={v} checked={pData.diffuseWidthRight === v} label={v} className="w-5 h-5 text-[9px]" />)}
@@ -445,8 +481,8 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
                 </div>
                 <div className="flex flex-col items-center space-y-1">
                   <div className="flex space-x-[2px]">
-                    <LetterBox checked={showPleuralDetails && !pData.diffuseWidthLeft} label="O" className="w-5 h-5 text-[9px]" />
-                    <LetterBox checked={!!pData.diffuseWidthLeft} label="L" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={showPleuralDetails && (!pData.diffuseWidthLeft || pData.diffuseWidthLeft === '0')} label="O" className="w-5 h-5 text-[9px]" />
+                    <LetterBox checked={(!!pData.diffuseWidthLeft && pData.diffuseWidthLeft !== '0')} label="L" className="w-5 h-5 text-[9px]" />
                   </div>
                   <div className="flex space-x-[2px]">
                     {['a','b','c'].map(v => <LetterBox key={v} checked={pData.diffuseWidthLeft === v} label={v} className="w-5 h-5 text-[9px]" />)}
