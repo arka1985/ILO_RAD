@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ExternalLink, LayoutGrid, ClipboardList, ChevronRight, ChevronLeft, Save, Search, X, Info, AlertTriangle , Trash2, RefreshCw} from 'lucide-react';
 import { ILOReportTemplate } from './components/ILOReportTemplate';
+import { ILOAbbreviatedReportTemplate } from './components/ILOAbbreviatedReportTemplate';
 
 type InterpretationStep = '1_quality' | '2_parenchymal' | '3_pleural' | '4_other';
 
@@ -1488,7 +1489,10 @@ export default function Home() {
 
     {/* HIDDEN REPORT TEMPLATE FOR PDF */}
     <div id="pdf-report-container" className="hidden print:block print:w-[210mm] print:mx-auto print:bg-white print:text-black">
-      <ILOReportTemplate data={wizardData} />
+      {wizardData.classificationMode === 'Abbreviated' 
+        ? <ILOAbbreviatedReportTemplate data={wizardData} />
+        : <ILOReportTemplate data={wizardData} />
+      }
     </div>
   </>
 );
