@@ -1,5 +1,6 @@
 ===================================================
-      ILO RADIOGRAPH SUITE - UNIFIED DISTRIBUTION
+      ILO RAD SUITE - UNIFIED DISTRIBUTION
+      ILO Radiography System for Pneumoconiosis Classification
 ===================================================
 
 This package contains both the Viewer Application and the Pusher Application in one unified bundle.

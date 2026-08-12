@@ -1,5 +1,6 @@
 ===================================================
-      ILO RADIOGRAPH SUITE - VIEWER APPS
+      ILO RAD SUITE - VIEWER APPS
+      ILO Radiography System for Pneumoconiosis Classification
 ===================================================
 
 This package contains the standalone Viewer Applications (Full Viewer and Abbreviated Viewer) designed for the medical interpreter. 

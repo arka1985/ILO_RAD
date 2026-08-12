@@ -1,4 +1,4 @@
-# ILO Radiograph Suite
+# ILO RAD Suite: ILO Radiography System for Pneumoconiosis Classification
 
 A comprehensive, fully local web application suite for ILO pneumoconiosis classification. 
 
