@@ -37,12 +37,12 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
   const OBLIGATORY_SYMBOLS = ['aa', 'at', 'ax', 'bu', 'ca', 'cg', 'cn', 'co', 'cp', 'cv', 'di', 'ef', 'em', 'es', 'fr', 'hi', 'ho', 'id', 'ih', 'kl', 'me', 'pa', 'pb', 'pi', 'px', 'ra', 'rp', 'tb'];
 
   // Handle abbreviated specific mappings
-  const profusion = isUnreadable || anyParenchymal === 'No' ? null : data.abbrevProfusion;
-  const shape = isUnreadable || anyParenchymal === 'No' ? null : data.abbrevShape;
-  const largeOpacity = isUnreadable || anyParenchymal === 'No' ? null : data.largeOpacity;
-  const thickening = isUnreadable || anyPleural === 'No' ? [] : (data.abbrevThickening || []);
-  const calcification = isUnreadable || anyPleural === 'No' ? [] : (data.abbrevCalcification || []);
-  const symbols = isUnreadable || anyOther === 'No' ? [] : (data.symbols || []);
+  const profusion = isUnreadable || isEssentiallyNormal ? null : data.abbrevProfusion;
+  const shape = isUnreadable || isEssentiallyNormal ? null : data.abbrevShape;
+  const largeOpacity = isUnreadable || isEssentiallyNormal ? null : data.largeOpacity;
+  const thickening = isUnreadable || isEssentiallyNormal ? [] : (data.abbrevThickening || []);
+  const calcification = isUnreadable || isEssentiallyNormal ? [] : (data.abbrevCalcification || []);
+  const symbols = isUnreadable || isEssentiallyNormal ? [] : (data.symbols || []);
 
   return (
     <div id="ilo-abbrev-report-template" className="bg-white text-[#1e1b4b] p-4 font-sans text-xs mx-auto" style={{ width: '210mm', boxSizing: 'border-box' }}>
