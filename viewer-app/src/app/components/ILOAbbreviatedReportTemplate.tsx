@@ -47,8 +47,9 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
   return (
     <div id="ilo-abbrev-report-template" className="bg-white text-[#1e1b4b] p-4 font-sans text-xs mx-auto" style={{ width: '210mm', boxSizing: 'border-box' }}>
       
-      <div className="text-center font-bold text-lg mb-4 text-black border-b-2 border-black pb-2">
-        ABBREVIATED RECORD OF ILO TERMINOLOGY CLASSIFICATION OF RADIOGRAPHS FOR PNEUMOCONIOSES
+      <div className="text-center mb-4 border-b-2 border-black pb-2">
+        <div className="font-bold text-xl text-black">ILO TERMINOLOGY</div>
+        <div className="font-bold text-lg text-black mt-1">ABBREVIATED RECORD OF CLASSIFICATION OF RADIOGRAPHS FOR PNEUMOCONIOSES</div>
       </div>
 
       {/* Header Info Block */}
