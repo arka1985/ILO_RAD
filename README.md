@@ -51,7 +51,15 @@ This software is provided in three distinct "Distributions" to fit different wor
 ---
 
 ## How to Run (Windows, Mac, Linux)
-*Prerequisite: You must have [Node.js](https://nodejs.org/) installed on your computer.*
+
+### Prerequisites
+1. **Node.js**: You must have Node.js installed to run this application. 
+   - Go to the [Node.js Official Website](https://nodejs.org/).
+   - Download and install the **LTS (Long Term Support)** version for your operating system (Windows, Mac, or Linux).
+   - Follow the standard installation prompts (you can leave all settings at their defaults).
+2. **Other Dependencies**: You do **not** need to manually install any other software dependencies. The startup scripts provided below will automatically download and install all necessary background packages (like npm modules) the first time you run them.
+
+### Running the Application
 
 **Windows:**
 1. Open the folder of your chosen distribution.
@@ -83,10 +91,17 @@ This software is provided in three distinct "Distributions" to fit different wor
 1. Launch the Pusher using the instructions above.
 2. The browser will open to `http://localhost:3002`.
 3. Find the IP Address of the doctor's computer (the one running the Viewer App).
-   - **Windows**: Open Command Prompt, type `ipconfig` (look for IPv4 Address).
-   - **Mac**: Open Terminal, type `ifconfig | grep inet` (or check System Settings > Network).
-   - **Linux**: Open Terminal, type `ip a` or `hostname -I`.
-   - *Example: `192.168.1.100`*
+   - **If on the same Local Network**:
+     - **Windows**: Open Command Prompt, type `ipconfig` (look for IPv4 Address).
+     - **Mac**: Open Terminal, type `ifconfig | grep inet` (or check System Settings > Network).
+     - **Linux**: Open Terminal, type `ip a` or `hostname -I`.
+     - *Example: `192.168.1.100`*
+   - **If on different networks (Remote pushing via Tailscale)**:
+     - You can use [Tailscale](https://tailscale.com/) to securely connect computers over the internet.
+     - 1. Download and install Tailscale on **both** the doctor's computer and the technician's (pusher's) computer.
+     - 2. Log in to the same Tailscale account on both machines.
+     - 3. Open the Tailscale app on the doctor's computer and copy its **Tailscale IP address** (it typically starts with `100.x.x.x`).
+     - *Example: `100.115.92.2`*
 4. In the Pusher App, enter the target address: `http://192.168.1.100:3000/api/dicom-receiver`
 5. Drag and drop a patient's `.dcm` file into the designated area.
 6. The image will instantly appear on the doctor's screen without them needing to refresh!
