@@ -31,7 +31,7 @@ then
 fi
 
 echo "[1/2] Installing dependencies for all applications..."
-npm install
+npm install --no-audit --no-fund
 npm run install:all
 
 echo "[2/2] Starting the suite..."

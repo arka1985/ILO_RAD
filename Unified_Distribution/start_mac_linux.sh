@@ -42,7 +42,7 @@ while true; do
         echo "Starting VIEWER Application..."
         echo "==================================================="
         echo "[1/2] Installing dependencies..."
-        npm install --prefix viewer-app
+        npm install --no-audit --no-fund --prefix viewer-app
         
         echo "[2/2] Launching Viewer..."
         echo "The Viewer App will be available at: http://localhost:3000"
@@ -58,7 +58,7 @@ while true; do
         echo "Starting PUSHER Application..."
         echo "==================================================="
         echo "[1/2] Installing dependencies..."
-        npm install --prefix pusher-app
+        npm install --no-audit --no-fund --prefix pusher-app
         
         echo "[2/2] Launching Pusher..."
         echo "The Pusher App will be available at: http://localhost:3002"

@@ -19,7 +19,7 @@ cd "$DIR"
 
 echo ""
 echo "Step 2: Installing Dependencies..."
-npm install
+npm install --no-audit --no-fund
 
 echo ""
 echo "Step 3: Compiling Application for Production..."

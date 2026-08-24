@@ -32,7 +32,7 @@ fi
 
 echo "[1/2] Installing dependencies for Pusher App..."
 cd pusher-app || exit
-npm install
+npm install --no-audit --no-fund
 
 echo "[2/2] Starting the Pusher App..."
 echo ""
