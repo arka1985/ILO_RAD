@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import DicomViewer from '../components/DicomViewer';
-import { Database, MonitorPlay, Upload, X, Search, Settings, Server, ShieldCheck, Wifi, Globe, Play, Download } from 'lucide-react';
+import { Database, MonitorPlay, Upload, X, Search, Settings, Server, ShieldCheck, Wifi, Globe, Play, Download, Info } from 'lucide-react';
 
 export default function PatientViewerPage() {
   const [standardUrl, setStandardUrl] = useState<string | undefined>('/standards/00_Normal_1.dcm');
@@ -12,6 +12,9 @@ export default function PatientViewerPage() {
   
   // Incoming Push State
   const [incomingImage, setIncomingImage] = useState<any>(null);
+
+  // Help Modal State
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   const isImageFormat = (url?: string, file?: File | null) => {
     if (file) {
@@ -216,6 +219,13 @@ export default function PatientViewerPage() {
         <div className="flex items-center space-x-2 text-white font-bold tracking-widest">
           <MonitorPlay size={16} className="text-blue-400" />
           <span>DICOM Viewer of Standard and Patient X Ray</span>
+          <button 
+            onClick={() => setShowHelpModal(true)} 
+            className="ml-2 text-blue-400 hover:text-blue-300 transition-colors flex items-center justify-center p-1 rounded hover:bg-[#1e293b]" 
+            title="How to use Measurement Tools"
+          >
+            <Info size={16} />
+          </button>
         </div>
         <div className="flex items-center space-x-4">
           <label className="flex items-center space-x-1 cursor-pointer bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded transition-colors text-white">
@@ -264,7 +274,7 @@ export default function PatientViewerPage() {
             Standard Radiograph: {standardLabel}
           </div>
           <div className="flex-1 relative">
-            <DicomViewer initialUrl={standardUrl} hideToolbar={true} />
+            <DicomViewer initialUrl={standardUrl} hideToolbar={false} />
           </div>
         </div>
 
@@ -281,7 +291,7 @@ export default function PatientViewerPage() {
                 className="max-w-full max-h-full object-contain" 
               />
             ) : (
-              <DicomViewer key={patientUrl || patientFile?.name || 'empty_patient'} patientFile={patientFile} initialUrl={patientUrl} hideToolbar={true} />
+              <DicomViewer key={patientUrl || patientFile?.name || 'empty_patient'} patientFile={patientFile} initialUrl={patientUrl} hideToolbar={false} />
             )}
           </div>
         </div>
@@ -473,6 +483,59 @@ export default function PatientViewerPage() {
           </div>
         </div>
       )}
+      {/* Help Modal */}
+      {showHelpModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4 backdrop-blur-sm">
+          <div className="bg-[#0f172a] border border-[#334155] rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className="p-4 border-b border-[#334155] flex justify-between items-center bg-[#1e293b] rounded-t-lg">
+              <h3 className="text-white font-bold text-lg flex items-center space-x-2">
+                <Info size={20} className="text-blue-400" />
+                <span>Measurement & Calibration Guide</span>
+              </h3>
+              <button onClick={() => setShowHelpModal(false)} className="text-gray-400 hover:text-white transition-colors">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto space-y-6 text-sm text-gray-300">
+              <div>
+                <h4 className="text-emerald-400 font-bold mb-2 uppercase tracking-wide text-xs">1. Measurement Tools</h4>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li><strong>Ruler Icon:</strong> Draws a straight line to measure length or distance.</li>
+                  <li><strong>Circle Icon:</strong> Draws an elliptical Region of Interest (ROI) to measure area and shape.</li>
+                  <li><strong>Active Tool:</strong> Only one tool can be active for your left mouse button at a time. Select the tool from the floating toolbar above the image.</li>
+                  <li><strong>Middle & Right Click:</strong> You can always pan with the middle mouse button and zoom with the right mouse button, regardless of what tool is selected.</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="text-orange-400 font-bold mb-2 uppercase tracking-wide text-xs">2. Calibration System</h4>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>If your DICOM file comes from a standard machine, it usually contains <em>Pixel Spacing</em> metadata. In this case, measurements are automatically calculated in <strong>Millimeters (mm)</strong>.</li>
+                  <li>If size metadata is missing (e.g., converted JPEGs or stripped headers), measurements default to <strong>Pixels (px)</strong>.</li>
+                  <li>The <strong>[ ] (Maximize) Icon</strong> on the toolbar will pulse orange and say "UNCALIBRATED" if metadata is missing.</li>
+                  <li>Click the Uncalibrated button to open the Calibration popup. Enter the known physical width and height of the original film or detector in millimeters. The system will calculate the scaling factors, and your tools will instantly update to measure in exact millimeters.</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="text-red-400 font-bold mb-2 uppercase tracking-wide text-xs">3. Erasing & Clearing</h4>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li><strong>Eraser Icon:</strong> Select this tool, then click on any specific measurement (line or circle) to delete just that item.</li>
+                  <li><strong>Trash Icon:</strong> Instantly clears all drawn measurements from the image.</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="p-4 border-t border-[#334155] bg-[#020617] rounded-b-lg flex justify-end">
+              <button onClick={() => setShowHelpModal(false)} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded font-bold transition-colors">
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

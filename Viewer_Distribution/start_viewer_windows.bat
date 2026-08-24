@@ -33,7 +33,7 @@ if %errorlevel% neq 0 (
 )
 
 echo [1/2] Installing dependencies for all applications...
-call npm install
+call npm install --no-audit --no-fund
 call npm run install:all
 
 echo [2/2] Starting the suite...
@@ -46,8 +46,8 @@ echo Leave this window open to keep the servers running.
 echo Press Ctrl+C to stop.
 echo.
 
-start /B powershell -Command "Start-Sleep -Seconds 5; Start-Process 'http://localhost:3000'"
-start /B powershell -Command "Start-Sleep -Seconds 5; Start-Process 'http://localhost:3001'"
+start /B powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Sleep -Seconds 5; Start-Process 'http://localhost:3000'"
+start /B powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Sleep -Seconds 5; Start-Process 'http://localhost:3001'"
 
 call npm run dev
 

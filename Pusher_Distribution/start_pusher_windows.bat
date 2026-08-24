@@ -34,7 +34,7 @@ if %errorlevel% neq 0 (
 
 echo [1/2] Installing dependencies for Pusher App...
 cd pusher-app
-call npm install
+call npm install --no-audit --no-fund
 
 echo [2/2] Starting the Pusher App...
 echo.
@@ -43,7 +43,7 @@ echo Leave this window open to keep the server running.
 echo Press Ctrl+C to stop.
 echo.
 
-start /B powershell -Command "Start-Sleep -Seconds 4; Start-Process 'http://localhost:3002'"
+start /B powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Sleep -Seconds 4; Start-Process 'http://localhost:3002'"
 call npm run dev
 
 pause

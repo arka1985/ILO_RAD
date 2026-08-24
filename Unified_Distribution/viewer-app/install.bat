@@ -16,7 +16,7 @@ IF %ERRORLEVEL% NEQ 0 (
 
 echo.
 echo Step 2: Installing Dependencies...
-call npm install
+call npm install --no-audit --no-fund
 
 echo.
 echo Step 3: Compiling Application for Production...
