@@ -1402,7 +1402,7 @@ export default function Home() {
           
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 pl-3">
             <div className="text-gray-300 text-xs flex-1">
-              <p className="font-bold text-gray-400 text-xs mb-1">Version: 1.0.0</p>
+              <p className="font-bold text-gray-400 text-xs mb-1">Version: 1.0.1</p>
               <p className="font-bold text-blue-300 text-sm mb-0.5">Developed by Dr. Arkaprabha Sau</p>
               <p className="font-medium text-gray-200">MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM</p>
               <p className="font-medium text-gray-200 mt-0.5 text-[10px] md:text-xs">Ph.D. (Computer Science and Engineering: AI & ML in Healthcare)</p>
