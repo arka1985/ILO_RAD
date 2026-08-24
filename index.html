@@ -261,21 +261,37 @@
         <p class="subtitle" style="margin-left: 0; margin-top: 1rem;">Its purpose is to provide a standardized, reproducible way to record the presence and severity of lung abnormalities, which is crucial for epidemiological research, screening, and medical surveillance of workers exposed to hazardous dusts. This software suite provides a digital side-by-side viewer of standard ILO reference images alongside patient DICOM files to assist physicians in grading these conditions.</p>
 
         <h2>How to Run (Windows, Mac, Linux)</h2>
-        <p style="color: var(--text-muted)"><em>Prerequisite: You must have <a href="https://nodejs.org/" target="_blank" style="color: var(--secondary-accent)">Node.js</a> installed on your computer.</em></p>
+        
+        <h3>Prerequisites</h3>
+        <ol>
+            <li><strong>Node.js</strong>: You must have Node.js installed to run this application.
+                <ul>
+                    <li>Go to the <a href="https://nodejs.org/" target="_blank" style="color: var(--secondary-accent)">Node.js Official Website</a>.</li>
+                    <li>Download and install the <strong>LTS (Long Term Support)</strong> version for your operating system (Windows, Mac, or Linux).</li>
+                    <li>Follow the standard installation prompts (you can leave all settings at their defaults).</li>
+                </ul>
+            </li>
+            <li><strong>Other Dependencies</strong>: You do <strong>not</strong> need to manually install any other software dependencies. The startup scripts provided below will automatically download and install all necessary background packages (like npm modules) the first time you run them.</li>
+        </ol>
+
+        <h3 style="margin-top: 1.5rem;">Running the Application</h3>
         
         <h3>Windows:</h3>
         <ol>
-            <li>Extract the downloaded ZIP folder completely.</li>
-            <li>Double-click the <code>.bat</code> file (e.g., <code>start_viewer_windows.bat</code>).</li>
-            <li>The script will automatically install dependencies on its first run, boot the server, and open your web browser.</li>
+            <li>Open the folder of your chosen distribution.</li>
+            <li>Double-click the <code>.bat</code> file (e.g., <code>start_windows.bat</code>, <code>start_viewer_windows.bat</code>, or <code>start_pusher_windows.bat</code>).</li>
+            <li>The script will automatically install dependencies on its first run, boot the server, and open your default web browser.</li>
         </ol>
 
         <h3>Mac / Linux:</h3>
         <ol>
-            <li>Open a terminal and navigate to the extracted folder.</li>
+            <li>Open a terminal and navigate to the folder of your chosen distribution.</li>
             <li>Make the script executable: <code>chmod +x start_mac_linux.sh</code> (or the equivalent script name).</li>
             <li>Run the script: <code>./start_mac_linux.sh</code></li>
+            <li>The script will install dependencies, boot the server, and open your default web browser.</li>
         </ol>
+        
+        <p style="color: var(--text-muted); font-size: 0.9rem;"><em>Note for Unified Distribution:</em> If you run the unified startup script, you will be prompted with a terminal menu to press <code>1</code> for the Viewer or <code>2</code> for the Pusher.</p>
 
         <h2>How to Use the Viewer App</h2>
         <ol>
@@ -292,14 +308,28 @@
             <li>Launch the Pusher using the instructions above. (Opens at <code>http://localhost:3002</code>).</li>
             <li>Find the IP Address of the doctor's computer (where the Viewer App is running).
                 <ul>
-                    <li><strong>Windows</strong>: Open Command Prompt and type <code>ipconfig</code> (look for IPv4 Address).</li>
-                    <li><strong>Mac</strong>: Open Terminal and type <code>ifconfig | grep inet</code>, or check System Settings > Network.</li>
-                    <li><strong>Linux</strong>: Open Terminal and type <code>ip a</code> or <code>hostname -I</code>.</li>
+                    <li><strong>If on the same Local Network:</strong>
+                        <ul>
+                            <li><strong>Windows</strong>: Open Command Prompt and type <code>ipconfig</code> (look for IPv4 Address).</li>
+                            <li><strong>Mac</strong>: Open Terminal and type <code>ifconfig | grep inet</code>, or check System Settings > Network.</li>
+                            <li><strong>Linux</strong>: Open Terminal and type <code>ip a</code> or <code>hostname -I</code>.</li>
+                            <li><em>Example: <code>192.168.1.100</code></em></li>
+                        </ul>
+                    </li>
+                    <li style="margin-top: 0.5rem;"><strong>If on different networks (Remote pushing via Tailscale):</strong>
+                        <ul>
+                            <li>You can use <a href="https://tailscale.com/" target="_blank" style="color: var(--secondary-accent)">Tailscale</a> to securely connect computers over the internet.</li>
+                            <li>1. Download and install Tailscale on <strong>both</strong> the doctor's computer and the technician's (pusher's) computer.</li>
+                            <li>2. Log in to the same Tailscale account on both machines.</li>
+                            <li>3. Open the Tailscale app on the doctor's computer and copy its <strong>Tailscale IP address</strong> (it typically starts with <code>100.x.x.x</code>).</li>
+                            <li><em>Example: <code>100.115.92.2</code></em></li>
+                        </ul>
+                    </li>
                 </ul>
             </li>
             <li>In the Pusher App, enter the target address: <code>http://192.168.1.100:3000/api/dicom-receiver</code></li>
             <li>Drag and drop a patient's <code>.dcm</code> file into the designated area.</li>
-            <li>The image will instantly appear on the doctor's screen!</li>
+            <li>The image will instantly appear on the doctor's screen without them needing to refresh!</li>
         </ol>
 
         <h2>How to Use PACS</h2>
