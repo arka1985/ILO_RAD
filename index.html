@@ -219,10 +219,6 @@
     </header>
 
     <div class="glass-panel">
-        <div class="infographic-wrapper">
-            <img src="infographic.jpg" alt="Distribution Infographic" class="infographic">
-        </div>
-
         <h2 style="text-align: center; margin-bottom: 2rem; color: white;">Download Your Distribution</h2>
         <div style="background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 1rem; margin-bottom: 2rem; border-radius: 0.25rem;">
             <p style="color: #fca5a5; font-size: 0.95rem; margin: 0;"><strong>Note on Download Size:</strong> The repository contains the standard ILO reference images in both JPEG and DICOM formats to allow for seamless offline classification. Because of this, the total size of the distribution is approximately <strong>1.4 GB</strong>. It may take some time to download depending on your internet connection.</p>
@@ -230,7 +226,8 @@
         
         <div class="grid">
             <!-- Viewer -->
-            <div class="card">
+            <div class="card" style="text-align: center;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem auto; display: block;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><path d="M12 7v6"></path><path d="M9 10h6"></path></svg>
                 <h3>Viewer Distribution</h3>
                 <p><strong>For the Doctor / Medical Interpreter.</strong> Includes the full ILO classification suite, reporting wizard, and DICOM viewer. Ready to receive images instantly.</p>
                 <a href="https://github.com/arka1985/ILO_RAD/archive/refs/heads/main.zip" class="btn btn-viewer">Download Package (.zip)</a>
@@ -238,17 +235,19 @@
             </div>
 
             <!-- Pusher -->
-            <div class="card">
+            <div class="card" style="text-align: center;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem auto; display: block;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                 <h3>Pusher Distribution</h3>
-                <p><strong>For the X-Ray Technician.</strong> A lightweight, drag-and-drop tool to push DICOM patient files directly to the doctor's screen over the local network (or remotely from anywhere using Tailscale).</p>
+                <p><strong>For the X-Ray Technician.</strong> A lightweight, simple interface to instantly push DICOM files directly to the doctor's screen over the network.</p>
                 <a href="https://github.com/arka1985/ILO_RAD/archive/refs/heads/main.zip" class="btn btn-pusher">Download Package (.zip)</a>
                 <p style="font-size: 0.8rem; text-align: center; margin-top: 0.5rem;">(Extract and open the <strong>Pusher_Distribution</strong> folder)</p>
             </div>
 
             <!-- Unified -->
-            <div class="card">
+            <div class="card" style="text-align: center;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem auto; display: block;"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line><path d="M12 10v4"></path></svg>
                 <h3>Unified Distribution</h3>
-                <p><strong>For All-in-One setups.</strong> Contains both applications. Running the startup script presents an interactive menu to choose your role.</p>
+                <p><strong>For General Use / Single Machine.</strong> Contains both apps. An interactive script lets you choose your role (Viewer or Pusher) on startup.</p>
                 <a href="https://github.com/arka1985/ILO_RAD/archive/refs/heads/main.zip" class="btn btn-unified">Download Package (.zip)</a>
                 <p style="font-size: 0.8rem; text-align: center; margin-top: 0.5rem;">(Extract and open the <strong>Unified_Distribution</strong> folder)</p>
             </div>
