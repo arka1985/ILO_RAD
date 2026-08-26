@@ -33,8 +33,8 @@ if %errorlevel% neq 0 (
 )
 
 echo [1/2] Installing dependencies for all applications...
+cd viewer-app
 call npm install --no-audit --no-fund
-call npm run install:all
 
 echo [2/2] Starting the suite...
 echo.

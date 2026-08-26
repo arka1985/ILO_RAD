@@ -136,7 +136,17 @@ export default function DicomViewerBase({ initialUrl, patientFile, hideToolbar =
     if (isMounted && containerRef.current) {
       try { 
         cornerstone.enable(containerRef.current); 
-        
+      } catch(e) {}
+      
+      const handleResize = () => {
+        if (containerRef.current) {
+          cornerstone.resize(containerRef.current);
+          cornerstone.fitToWindow(containerRef.current);
+        }
+      };
+      window.addEventListener('resize', handleResize);
+      
+      try { 
         // Add tools specifically to this element to avoid "Unable to find tool" errors
         cornerstoneTools.addToolForElement(containerRef.current, cornerstoneTools.WwwcTool);
         cornerstoneTools.addToolForElement(containerRef.current, cornerstoneTools.PanTool);
@@ -144,13 +154,19 @@ export default function DicomViewerBase({ initialUrl, patientFile, hideToolbar =
         cornerstoneTools.addToolForElement(containerRef.current, cornerstoneTools.LengthTool);
         cornerstoneTools.addToolForElement(containerRef.current, cornerstoneTools.EllipticalRoiTool);
         cornerstoneTools.addToolForElement(containerRef.current, cornerstoneTools.EraserTool);
-      } catch(e) {}
-    }
-    return () => {
-      if (containerRef.current) {
-        try { cornerstone.disable(containerRef.current); } catch(e) {}
+      } catch (e) {
+        console.warn("Cornerstone tools might already be added", e);
       }
-    };
+      
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        if (containerRef.current) {
+          try {
+            cornerstone.disable(containerRef.current);
+          } catch(e) {}
+        }
+      };
+    }
   }, [isMounted]);
 
   // Update active tool when it changes
@@ -197,33 +213,6 @@ export default function DicomViewerBase({ initialUrl, patientFile, hideToolbar =
   const handleImageLoaded = (image: any) => {
     if (!containerRef.current) return;
     
-    // --- MONOCHROME1 INVERSION FIX ---
-    // If the image is MONOCHROME1 (invert = true), dark areas have high numerical values.
-    // We invert the raw pixel data and turn off the invert flag so that ROI tools
-    // (Mean, StdDev) report intuitively (white = high value, dark = low value).
-    if (image.invert) {
-      const pixels = image.getPixelData();
-      const max = image.maxPixelValue;
-      const min = image.minPixelValue;
-      
-      if (pixels && max !== undefined && min !== undefined) {
-        for (let i = 0; i < pixels.length; i++) {
-          pixels[i] = max - (pixels[i] - min);
-        }
-        image.invert = false;
-        
-        // Ensure window levels still apply correctly to the newly inverted data
-        if (image.windowCenter !== undefined) {
-          if (Array.isArray(image.windowCenter)) {
-            image.windowCenter = image.windowCenter.map((wc: number) => max - (wc - min));
-          } else {
-            image.windowCenter = max - (image.windowCenter - min);
-          }
-        }
-      }
-    }
-    // ---------------------------------
-
     setLoadedImage(image);
     
     // Check if image has valid pixel spacing
@@ -238,6 +227,29 @@ export default function DicomViewerBase({ initialUrl, patientFile, hideToolbar =
     }
     
     cornerstone.displayImage(containerRef.current, image);
+    
+    // Robust auto-windowing to fix dark images and bypass broken DICOM tags
+    const pixels = image.getPixelData();
+    if (pixels && pixels.length > 0) {
+      const samples = [];
+      const step = Math.max(1, Math.floor(pixels.length / 10000));
+      for (let i = 0; i < pixels.length; i += step) {
+        samples.push(pixels[i]);
+      }
+      samples.sort((a, b) => a - b);
+      
+      const robustMin = samples[Math.floor(samples.length * 0.02)];
+      const robustMax = samples[Math.floor(samples.length * 0.98)];
+      
+      const viewport = cornerstone.getViewport(containerRef.current);
+      if (viewport) {
+        viewport.voi.windowWidth = Math.max(1, robustMax - robustMin);
+        viewport.voi.windowCenter = robustMin + (viewport.voi.windowWidth / 2);
+        cornerstone.setViewport(containerRef.current, viewport);
+      }
+    }
+    
+    cornerstone.fitToWindow(containerRef.current);
   };
 
   const applyCalibration = () => {

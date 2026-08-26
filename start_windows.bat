@@ -51,14 +51,15 @@ echo ===================================================
 echo Starting VIEWER Application...
 echo ===================================================
 echo [1/2] Installing dependencies...
-call npm install --no-audit --no-fund --prefix viewer-app
+cd viewer-app
+call npm install --no-audit --no-fund
 echo [2/2] Launching Viewer...
 echo The Viewer App will be available at: http://localhost:3000
 echo Leave this window open to keep the server running.
 echo Press Ctrl+C to stop.
 echo.
 start /B powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Sleep -Seconds 5; Start-Process 'http://localhost:3000'"
-call npm run dev --prefix viewer-app
+call npm run dev
 pause
 exit /b
 
@@ -68,13 +69,14 @@ echo ===================================================
 echo Starting PUSHER Application...
 echo ===================================================
 echo [1/2] Installing dependencies...
-call npm install --no-audit --no-fund --prefix pusher-app
+cd pusher-app
+call npm install --no-audit --no-fund
 echo [2/2] Launching Pusher...
 echo The Pusher App will be available at: http://localhost:3002
 echo Leave this window open to keep the server running.
 echo Press Ctrl+C to stop.
 echo.
 start /B powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Sleep -Seconds 4; Start-Process 'http://localhost:3002'"
-call npm run dev --prefix pusher-app
+call npm run dev
 pause
 exit /b

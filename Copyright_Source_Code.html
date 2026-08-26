@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Source Code Registration - {SOFTWARE_TITLE}</title>
+<style>
+    @page {
+        size: A4;
+        margin: 25mm 20mm;
+    }
+    body {
+        font-family: "Times New Roman", Times, serif;
+        color: black;
+        background: white;
+        margin: 0;
+        padding: 0;
+    }
+    .page-break {
+        page-break-before: always;
+    }
+    .cover-page {
+        text-align: center;
+        padding-top: 100px;
+    }
+    .cover-title {
+        font-size: 22pt;
+        font-weight: bold;
+        margin-bottom: 60px;
+        line-height: 1.4;
+    }
+    .cover-details {
+        font-size: 14pt;
+        text-align: left;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 2.2;
+        border-collapse: collapse;
+    }
+    .cover-details td {
+        padding: 8px 15px;
+        vertical-align: top;
+    }
+    .cover-details td:first-child {
+        font-weight: bold;
+        white-space: nowrap;
+        width: 40%;
+    }
+    .code-container {
+        font-family: "Courier New", Courier, monospace;
+        font-size: 10pt;
+        line-height: 1.35;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        margin-top: 20px;
+        margin-bottom: 50px;
+    }
+    .filename-header {
+        font-weight: bold;
+        font-size: 12pt;
+        margin-bottom: 10px;
+        border-bottom: 2px solid black;
+        padding-bottom: 5px;
+        font-family: Arial, sans-serif;
+    }
+    .footer-text {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 10pt;
+        font-family: Arial, sans-serif;
+        color: #333;
+        background: white;
+        padding-top: 10px;
+    }
+    
+    @media print {
+        .no-print {
+            display: none;
+        }
+    }
+    .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background: #000;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+
+<button class="no-print print-button" onclick="window.print()">Print to PDF</button>
+
+<div class="cover-page">
+    <div class="cover-title">SOURCE CODE REPRESENTATION<br>FOR COPYRIGHT REGISTRATION</div>
+    
+    <table class="cover-details">
+        <tr><td>Title of the Software:</td><td>PneumoRAD Suite: Digital Radiography System for Pneumoconiosis Classification</td></tr>
+        <tr><td>Type of Work:</td><td>Computer Programme / Software</td></tr>
+        <tr><td>Author:</td><td>Dr. Arkaprabha Sau</td></tr>
+        <tr><td>Copyright Applicant/Owner:</td><td>Dr. Arkaprabha Sau</td></tr>
+        <tr><td>Nature of Interest:</td><td>Author and Copyright Owner</td></tr>
+        <tr><td>Year of Creation:</td><td>2024</td></tr>
+        <tr><td>Status:</td><td>Unpublished</td></tr>
+    </table>
+</div>
+
+<div class="page-break"></div>
+
+<div class="filename-header">FIRST PAGE OF SOURCE CODE<br><span style="font-size:10pt; font-weight:normal;">Principal File: viewer-app/src/app/page.tsx</span></div>
+<div class="code-container">0001: &quot;use client&quot;;
+0002: 
+0003: import { useEffect, useState } from &#x27;react&#x27;;
+0004: import { ExternalLink, LayoutGrid, ClipboardList, ChevronRight, ChevronLeft, Save, Search, X, Info, AlertTriangle , Trash2, RefreshCw} from &#x27;lucide-react&#x27;;
+0005: import { ILOReportTemplate } from &#x27;./components/ILOReportTemplate&#x27;;
+0006: import { ILOAbbreviatedReportTemplate } from &#x27;./components/ILOAbbreviatedReportTemplate&#x27;;
+0007: 
+0008: type InterpretationStep = &#x27;1_quality&#x27; | &#x27;2_parenchymal&#x27; | &#x27;3_pleural&#x27; | &#x27;4_other&#x27;;
+0009: 
+0010: const INTERPRETATION_STEPS: { id: InterpretationStep, label: string }[] = [
+0011:   { id: &#x27;1_quality&#x27;, label: &#x27;1. Quality&#x27; },
+0012:   { id: &#x27;2_parenchymal&#x27;, label: &#x27;2. Parenchymal&#x27; },
+0013:   { id: &#x27;3_pleural&#x27;, label: &#x27;3. Pleural&#x27; },
+0014:   { id: &#x27;4_other&#x27;, label: &#x27;4. Other&#x27; }
+0015: ];
+0016: 
+0017: export default function Home() {
+0018:   const [activeStandard, setActiveStandard] = useState&lt;string&gt;(&#x27;0/0&#x27;);
+0019:   const [channel, setChannel] = useState&lt;BroadcastChannel | null&gt;(null);
+0020:   const [showHistoryModal, setShowHistoryModal] = useState(false);
+0021:   const [historySearch, setHistorySearch] = useState(&#x27;&#x27;);
+0022:   const [historyData, setHistoryData] = useState&lt;any[]&gt;([]);
+0023:   const [pendingPush, setPendingPush] = useState&lt;any&gt;(null);
+0024: 
+0025:   // Global State for the entire classification form
+0026:   const [wizardData, setWizardData] = useState({
+0027:     stage: 1, // 1 = Metadata (Doctor/Patient), 2 = Interpretation
+0028:     classificationMode: &#x27;&#x27;, // &#x27;Full&#x27; or &#x27;Abbreviated&#x27;
+0029:     currentInterpStep: 0,
+0030:     
+0031:     // DOCTOR
+0032:     classifyingPhysician: &#x27;&#x27;,
+0033:     readingDate: &#x27;&#x27;,
+0034:     physicianQualification: [&#x27;MBBS&#x27;],
+0035:     physicianQualificationOtherText: &#x27;&#x27;,
+0036:     facility: &#x27;&#x27;,
+0037:     orderingPhysician: &#x27;&#x27;,
+0038:     isTrained: &#x27;&#x27;, // &#x27;Yes&#x27; or &#x27;No&#x27;
+0039:     trainingInstitute: &#x27;&#x27;,
+0040:     trainingDate: &#x27;&#x27;,
+0041:     classificationPurpose: &#x27;&#x27;,
+0042:     classificationPurposeOtherText: &#x27;&#x27;,
+0043:     designation: &#x27;&#x27;,
+0044:     
+0045:     // PATIENT
+0046:     patientName: &#x27;&#x27;,
+0047:     patientId: &#x27;&#x27;,
+0048:     patientAddress: &#x27;&#x27;,
+0049:     dob: &#x27;&#x27;,
+0050:     radiographDate: &#x27;&#x27;,
+0051:     workingPlace: &#x27;&#x27;,
+0052:     establishmentName: &#x27;&#x27;,
+0053:     establishmentAddress: &#x27;&#x27;,
+0054:     examinationType: &#x27;&#x27;,
+0055:     examinationTypeOtherText: &#x27;&#x27;,
+0056:     workingPlaceOtherText: &#x27;&#x27;,
+0057:     
+0058:     // 1. QUALITY
+0059:     qualityGrade: &#x27;&#x27;,
+0060:     qualityDefects: [] as string[],
+</div>
+<div class="footer-text">Source Code &ndash; PneumoRAD Suite: Digital Radiography System for Pneumoconiosis Classification &ndash; Dr. Arkaprabha Sau</div>
+
+<div class="page-break"></div>
+
+<div class="filename-header">LAST PAGE OF SOURCE CODE<br><span style="font-size:10pt; font-weight:normal;">Principal File: viewer-app/src/app/page.tsx</span></div>
+<div class="code-container">1440:                 &lt;/button&gt;
+1441:               &lt;/div&gt;
+1442:               &lt;div className=&quot;p-4 border-b border-[#334155]&quot;&gt;
+1443:                 &lt;input 
+1444:                   type=&quot;text&quot; 
+1445:                   placeholder=&quot;Search by Patient Name or ID...&quot; 
+1446:                   value={historySearch} 
+1447:                   onChange={e =&gt; setHistorySearch(e.target.value)}
+1448:                   className=&quot;w-full bg-[#1e293b] border border-[#475569] text-white px-4 py-3 rounded outline-none focus:border-emerald-500 transition-colors&quot;
+1449:                 /&gt;
+1450:               &lt;/div&gt;
+1451:               &lt;div className=&quot;flex-1 overflow-y-auto p-4 space-y-2&quot;&gt;
+1452:                 {historyData.filter(r =&gt; 
+1453:                   (r.patientName || &#x27;&#x27;).toLowerCase().includes(historySearch.toLowerCase()) || 
+1454:                   (r.patientId || &#x27;&#x27;).toLowerCase().includes(historySearch.toLowerCase())
+1455:                 ).map((report, idx) =&gt; (
+1456:                   &lt;div key={idx} className=&quot;bg-[#1e293b] border border-[#334155] p-4 rounded hover:border-emerald-500 transition-colors flex justify-between items-center group&quot;&gt;
+1457:                     &lt;div&gt;
+1458:                       &lt;p className=&quot;text-white font-bold text-lg&quot;&gt;{report.patientName} &lt;span className=&quot;text-gray-400 text-sm font-normal&quot;&gt;({report.patientId})&lt;/span&gt;&lt;/p&gt;
+1459:                       &lt;p className=&quot;text-gray-400 text-sm mt-1&quot;&gt;Report Date: {report.historyDate || &#x27;Unknown&#x27;} | Mode: {report.classificationMode}&lt;/p&gt;
+1460:                     &lt;/div&gt;
+1461:                     &lt;div className=&quot;flex items-center space-x-2&quot;&gt;
+1462:                       &lt;button 
+1463:                         onClick={(e) =&gt; { e.stopPropagation(); deleteHistoricalPatient(report.historyId); }}
+1464:                         className=&quot;bg-red-900/50 hover:bg-red-600 text-red-200 px-3 py-2 rounded transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100&quot;
+1465:                         title=&quot;Delete this record&quot;
+1466:                       &gt;
+1467:                         &lt;Trash2 size={18} /&gt;
+1468:                       &lt;/button&gt;
+1469:                       &lt;button 
+1470:                         onClick={() =&gt; loadHistoricalPatient(report)}
+1471:                         className=&quot;bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded font-bold transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100&quot;
+1472:                       &gt;
+1473:                         Load Demographics
+1474:                       &lt;/button&gt;
+1475:                     &lt;/div&gt;
+1476:                   &lt;/div&gt;
+1477:                 ))}
+1478:                 {historyData.length === 0 &amp;&amp; (
+1479:                   &lt;div className=&quot;text-center text-gray-500 py-8&quot;&gt;
+1480:                     No previous reports found on this device.
+1481:                   &lt;/div&gt;
+1482:                 )}
+1483:               &lt;/div&gt;
+1484:             &lt;/div&gt;
+1485:           &lt;/div&gt;
+1486:         )}
+1487:       &lt;/div&gt;
+1488:     &lt;/div&gt;
+1489: 
+1490:     {/* HIDDEN REPORT TEMPLATE FOR PDF */}
+1491:     &lt;div id=&quot;pdf-report-container&quot; className=&quot;hidden print:block print:w-[210mm] print:mx-auto print:bg-white print:text-black&quot;&gt;
+1492:       {wizardData.classificationMode === &#x27;Abbreviated&#x27; 
+1493:         ? &lt;ILOAbbreviatedReportTemplate data={wizardData} /&gt;
+1494:         : &lt;ILOReportTemplate data={wizardData} /&gt;
+1495:       }
+1496:     &lt;/div&gt;
+1497:   &lt;/&gt;
+1498: );
+1499: }
+</div>
+<div class="footer-text">Source Code &ndash; PneumoRAD Suite: Digital Radiography System for Pneumoconiosis Classification &ndash; Dr. Arkaprabha Sau</div>
+
+</body>
+</html>

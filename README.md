@@ -61,6 +61,8 @@ This software is provided in three distinct "Distributions" to fit different wor
 
 ### Running the Application
 
+**Note:** We highly recommend using **Google Chrome** or **Mozilla Firefox** as your default web browser for the best experience and performance.
+
 **Windows:**
 1. Open the folder of your chosen distribution.
 2. Double-click the `.bat` file (e.g., `start_windows.bat`, `start_viewer_windows.bat`, or `start_pusher_windows.bat`).
