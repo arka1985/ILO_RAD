@@ -6,6 +6,7 @@ import { Database, MonitorPlay, Upload, X, Search, Settings, Server, ShieldCheck
 
 export default function PatientViewerPage() {
   const [standardUrl, setStandardUrl] = useState<string | undefined>('/standards/00_Normal_1.dcm');
+  const [standardFormat, setStandardFormat] = useState<'dicom' | 'jpeg'>('dicom');
   const [standardLabel, setStandardLabel] = useState<string>('0/0 (Normal)');
   const [patientFile, setPatientFile] = useState<File | null>(null);
   const [patientUrl, setPatientUrl] = useState<string | undefined>(undefined);
@@ -211,6 +212,16 @@ export default function PatientViewerPage() {
     }
   };
 
+  const getFormattedStandardUrl = () => {
+    if (!standardUrl) return undefined;
+    if (standardFormat === 'dicom') {
+      return standardUrl.replace('.jpg', '.dcm').replace('123u_Analog', '123u').replace('pleural', 'Pleural').replace('cpangle', 'CPangle');
+    } else {
+      return standardUrl.replace('.dcm', '.jpg').replace('123u.jpg', '123u_Analog.jpg').replace('Pleural.jpg', 'pleural.jpg').replace('CPangle.jpg', 'cpangle.jpg');
+    }
+  };
+  const activeStandardUrl = getFormattedStandardUrl();
+
   return (
     <div className="w-screen h-screen overflow-hidden bg-black flex flex-col text-gray-300 font-sans">
       
@@ -270,11 +281,26 @@ export default function PatientViewerPage() {
         
         {/* Left Half: ILO Standard */}
         <div className="w-1/2 h-full border-r border-[#1e293b] flex flex-col bg-black">
-          <div className="bg-[#020617] text-blue-400 p-2 text-center text-xs font-bold tracking-wider uppercase border-b border-[#1e293b]">
-            Standard Radiograph: {standardLabel}
+          <div className="bg-[#020617] text-blue-400 p-2 text-center text-xs font-bold tracking-wider uppercase border-b border-[#1e293b] flex justify-between items-center">
+            <span>Standard Radiograph: {standardLabel}</span>
+            <div className="flex bg-[#1e293b] rounded p-0.5 ml-4">
+              <button onClick={() => setStandardFormat('dicom')} className={`px-2 py-0.5 rounded ${standardFormat==='dicom' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}>DICOM</button>
+              <button onClick={() => setStandardFormat('jpeg')} className={`px-2 py-0.5 rounded ${standardFormat==='jpeg' ? 'bg-emerald-600 text-white' : 'text-gray-400 hover:text-white'}`}>JPEG</button>
+            </div>
           </div>
-          <div className="flex-1 relative">
-            <DicomViewer initialUrl={standardUrl} hideToolbar={false} />
+          <div className="flex-1 relative flex items-center justify-center bg-black overflow-hidden">
+            {isImageFormat(activeStandardUrl, null) ? (
+              <div className="relative w-full h-full flex items-center justify-center">
+                <img 
+                  src={activeStandardUrl} 
+                  alt="Standard Radiograph" 
+                  className="max-w-full max-h-full object-contain" 
+                  onContextMenu={e => e.preventDefault()}
+                />
+              </div>
+            ) : (
+              <DicomViewer initialUrl={activeStandardUrl} hideToolbar={false} />
+            )}
           </div>
         </div>
 

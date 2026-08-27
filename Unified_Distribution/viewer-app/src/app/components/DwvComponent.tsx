@@ -13,7 +13,7 @@ import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 import dicomParser from 'dicom-parser';
 // @ts-ignore
 import Hammer from 'hammerjs';
-import { Upload, Ruler, Circle, Maximize, X, Eraser, Trash2 } from 'lucide-react';
+import { Upload, Ruler, Circle, Maximize, X, Eraser, Trash2, Contrast } from 'lucide-react';
 
 let cornerstoneInitialized = false;
 
@@ -48,37 +48,6 @@ function initCornerstone() {
   cornerstoneTools.init({
     showSVGCursors: false,
   });
-
-  // --- HIDE MEAN AND STD DEV ---
-  // We monkey-patch the EllipticalRoiTool to prevent it from pushing Mean and StdDev 
-  // into the text box array during the render phase.
-  if (cornerstoneTools.EllipticalRoiTool) {
-    const origRender = cornerstoneTools.EllipticalRoiTool.prototype.renderToolData;
-    cornerstoneTools.EllipticalRoiTool.prototype.renderToolData = function(evt: any) {
-      const origPush = Array.prototype.push;
-      Array.prototype.push = function(...args: any[]) {
-        const filteredArgs = args.filter(arg => {
-          if (typeof arg === 'string') {
-            if (arg.startsWith('Mean:') || arg.startsWith('Std Dev:') || arg.startsWith('Max:') || arg.startsWith('Min:')) {
-              return false;
-            }
-          }
-          return true;
-        });
-        if (filteredArgs.length > 0) {
-          return origPush.apply(this, filteredArgs);
-        }
-        return this.length;
-      };
-      
-      try {
-        return origRender.call(this, evt);
-      } finally {
-        Array.prototype.push = origPush;
-      }
-    };
-  }
-  // -----------------------------
 
   cornerstoneWADOImageLoader.webWorkerManager.initialize({
     maxWebWorkers: navigator.hardwareConcurrency || 1,
@@ -140,8 +109,13 @@ export default function DicomViewerBase({ initialUrl, patientFile, hideToolbar =
       
       const handleResize = () => {
         if (containerRef.current) {
-          cornerstone.resize(containerRef.current);
-          cornerstone.fitToWindow(containerRef.current);
+          try {
+            cornerstone.resize(containerRef.current);
+            const enabledElement = cornerstone.getEnabledElement(containerRef.current);
+            if (enabledElement && enabledElement.viewport) {
+              cornerstone.fitToWindow(containerRef.current);
+            }
+          } catch (e) {}
         }
       };
       window.addEventListener('resize', handleResize);
@@ -210,6 +184,15 @@ export default function DicomViewerBase({ initialUrl, patientFile, hideToolbar =
     }
   };
 
+  const toggleInvert = () => {
+    if (!containerRef.current) return;
+    const viewport = cornerstone.getViewport(containerRef.current);
+    if (viewport) {
+      viewport.invert = !viewport.invert;
+      cornerstone.setViewport(containerRef.current, viewport);
+    }
+  };
+
   const handleImageLoaded = (image: any) => {
     if (!containerRef.current) return;
     
@@ -226,29 +209,36 @@ export default function DicomViewerBase({ initialUrl, patientFile, hideToolbar =
       setPhysicalHeight("");
     }
     
-    cornerstone.displayImage(containerRef.current, image);
-    
-    // Robust auto-windowing to fix dark images and bypass broken DICOM tags
-    const pixels = image.getPixelData();
-    if (pixels && pixels.length > 0) {
-      const samples = [];
-      const step = Math.max(1, Math.floor(pixels.length / 10000));
-      for (let i = 0; i < pixels.length; i += step) {
-        samples.push(pixels[i]);
-      }
-      samples.sort((a, b) => a - b);
+    // --- MONOCHROME1 INVERSION FIX ---
+    // If the image is MONOCHROME1 (invert = true), dark areas have high numerical values.
+    // We invert the raw pixel data and turn off the invert flag so that ROI tools
+    // (Mean, StdDev) report intuitively (white = high value, dark = low value).
+    if (image.invert) {
+      const pixels = image.getPixelData();
+      const max = image.maxPixelValue;
+      const min = image.minPixelValue;
       
-      const robustMin = samples[Math.floor(samples.length * 0.02)];
-      const robustMax = samples[Math.floor(samples.length * 0.98)];
-      
-      const viewport = cornerstone.getViewport(containerRef.current);
-      if (viewport) {
-        viewport.voi.windowWidth = Math.max(1, robustMax - robustMin);
-        viewport.voi.windowCenter = robustMin + (viewport.voi.windowWidth / 2);
-        cornerstone.setViewport(containerRef.current, viewport);
+      if (pixels && max !== undefined && min !== undefined) {
+        for (let i = 0; i < pixels.length; i++) {
+          pixels[i] = max - (pixels[i] - min);
+        }
+        image.invert = false;
+        
+        // Ensure window levels still apply correctly to the newly inverted data
+        if (image.windowCenter !== undefined) {
+          if (Array.isArray(image.windowCenter)) {
+            image.windowCenter = image.windowCenter.map((wc: number) => max - (wc - min));
+          } else {
+            image.windowCenter = max - (image.windowCenter - min);
+          }
+        }
       }
     }
+    // ---------------------------------
     
+    // Get the default viewport for this specific image to avoid inheriting previous image's windowing
+    const defaultViewport = cornerstone.getDefaultViewportForImage(containerRef.current, image);
+    cornerstone.displayImage(containerRef.current, image, defaultViewport);
     cornerstone.fitToWindow(containerRef.current);
   };
 
@@ -305,7 +295,8 @@ export default function DicomViewerBase({ initialUrl, patientFile, hideToolbar =
       ? initialUrl 
       : `${window.location.origin}${initialUrl.startsWith('/') ? '' : '/'}${initialUrl}`;
       
-    const imageId = `wadouri:${urlToLoad}`;
+    const isWebImage = urlToLoad.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/i);
+    const imageId = isWebImage ? urlToLoad : `wadouri:${urlToLoad}`;
     console.log("Cornerstone loading URL:", imageId);
     
     cornerstone.loadImage(imageId).then(handleImageLoaded).catch((err: any) => {
@@ -364,7 +355,17 @@ export default function DicomViewerBase({ initialUrl, patientFile, hideToolbar =
           </button>
           
           <div className="w-px h-6 bg-[#334155] mx-1"></div>
+
+          <button 
+            onClick={toggleInvert}
+            title="Invert Image Colors (Negative/Positive)"
+            className="p-2 rounded transition-colors text-gray-400 hover:text-white hover:bg-[#334155]"
+          >
+            <Contrast size={18} />
+          </button>
           
+          <div className="w-px h-6 bg-[#334155] mx-1"></div>
+
           <button 
             onClick={handleClearMeasurements}
             title="Clear All Measurements"

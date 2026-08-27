@@ -12,7 +12,18 @@ export default function IloFullForm() {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData({ ...formData, [name]: checked });
     } else {
-      setFormData({ ...formData, [name]: value });
+      let newFormData = { ...formData, [name]: value };
+      
+      // If quality is set to 1, clear all quality issues
+      if (name === 'imageQualityGrade' && value === '1') {
+        const issues = ['Overexposed (dark)', 'Underexposed (light)', 'Artifacts', 'Improper position', 'Poor contrast', 'Poor processing', 'Underinflation', 'Mottle', 'Excessive Edge Enhancement', 'Scapula Overlay', 'Other'];
+        issues.forEach(issue => {
+          delete (newFormData as any)[`quality_${issue}`];
+        });
+        delete (newFormData as any)['quality_OtherText'];
+      }
+      
+      setFormData(newFormData);
     }
   };
 
@@ -79,15 +90,15 @@ export default function IloFullForm() {
             <div className="flex-1 grid grid-cols-4 gap-1 text-[11px]">
               {['Overexposed (dark)', 'Underexposed (light)', 'Artifacts', 'Improper position', 'Poor contrast', 'Poor processing', 'Underinflation', 'Mottle', 'Excessive Edge Enhancement', 'Scapula Overlay'].map(issue => (
                 <label key={issue} className="flex items-center space-x-1 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                  <input type="checkbox" name={`quality_${issue}`} onChange={handleInputChange} />
+                  <input type="checkbox" name={`quality_${issue}`} onChange={handleInputChange} checked={!!(formData as any)[`quality_${issue}`]} />
                   <span>{issue}</span>
                 </label>
               ))}
               <div className="col-span-2 flex items-center p-1">
                 <label className="flex items-center space-x-1 w-full">
-                  <input type="checkbox" name="quality_Other" onChange={handleInputChange} />
+                  <input type="checkbox" name="quality_Other" onChange={handleInputChange} checked={!!(formData as any)['quality_Other']} />
                   <span>Other:</span>
-                  <input type="text" name="quality_OtherText" onChange={handleInputChange} className="flex-1 border-b border-gray-400 outline-none px-1 focus:bg-yellow-50" />
+                  <input type="text" name="quality_OtherText" onChange={handleInputChange} value={(formData as any)['quality_OtherText'] || ''} className="flex-1 border-b border-gray-400 outline-none px-1 focus:bg-yellow-50" />
                 </label>
               </div>
             </div>

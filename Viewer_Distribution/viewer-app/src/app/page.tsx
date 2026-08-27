@@ -781,7 +781,13 @@ export default function Home() {
                       <div className="grid grid-cols-4 gap-4">
                         {['1', '2', '3', '4'].map(grade => (
                           <label key={grade} className="flex-1 cursor-pointer">
-                            <input type="radio" name="quality" checked={wizardData.qualityGrade === grade} onChange={() => updateData({ qualityGrade: grade })} className="peer hidden" />
+                            <input type="radio" name="quality" checked={wizardData.qualityGrade === grade} onChange={() => {
+                              if (grade === '1') {
+                                updateData({ qualityGrade: grade, qualityDefects: [], qualityDefectsOtherText: '', abbrevQualityComment: '' });
+                              } else {
+                                updateData({ qualityGrade: grade });
+                              }
+                            }} className="peer hidden" />
                             <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors shadow-sm">
                               Grade {grade}
                             </div>

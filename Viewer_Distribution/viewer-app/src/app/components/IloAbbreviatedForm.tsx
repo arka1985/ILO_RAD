@@ -12,7 +12,14 @@ export default function IloAbbreviatedForm() {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData({ ...formData, [name]: checked });
     } else {
-      setFormData({ ...formData, [name]: value });
+      let newFormData = { ...formData, [name]: value };
+      
+      // If quality is set to 1, clear the comment
+      if (name === 'technicalQuality' && value === '1') {
+        delete (newFormData as any)['qualityComment'];
+      }
+      
+      setFormData(newFormData);
     }
   };
 
@@ -80,7 +87,7 @@ export default function IloAbbreviatedForm() {
                 <span>Comment on technical quality:</span>
                 <span className="font-normal italic text-[10px] text-gray-500">(If grade not 1 – comments required)</span>
               </label>
-              <textarea name="qualityComment" rows={2} onChange={handleInputChange} className="w-full p-1 border border-gray-400 outline-none focus:bg-yellow-50"></textarea>
+              <textarea name="qualityComment" rows={2} onChange={handleInputChange} value={(formData as any)['qualityComment'] || ''} className="w-full p-1 border border-gray-400 outline-none focus:bg-yellow-50"></textarea>
             </div>
           </div>
         </div>
