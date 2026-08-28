@@ -18,7 +18,7 @@ echo "Terms accepted. Launching..."
 
 
 echo "==================================================="
-echo "    ILO Radiograph Suite - Startup Menu"
+echo "    PulmoView: ILO Radiograph Suite - Startup Menu"
 echo "==================================================="
 echo ""
 

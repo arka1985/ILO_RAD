@@ -90,7 +90,7 @@ export default function PusherPage() {
       <header className="bg-[#0f172a] border-b border-[#1e293b] p-4 flex justify-between items-center shadow-md">
         <div className="flex items-center space-x-3 text-white">
           <UploadCloud className="text-emerald-500" size={24} />
-          <h1 className="font-bold text-xl tracking-wider">DICOM Push Utility</h1>
+          <h1 className="font-bold text-xl tracking-wider">PulmoView: DICOM Push Utility</h1>
         </div>
         <div className="text-xs text-gray-500">
           Source X-Ray Sender

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ILO Pneumoconiosis Classifier",
+  title: "PulmoView: ILO Pneumoconiosis Classifier",
   description: "AI-Assisted Web App for ILO Classification of Radiographs of Pneumoconioses",
 };
 

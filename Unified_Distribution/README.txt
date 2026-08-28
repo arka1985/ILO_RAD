@@ -1,6 +1,6 @@
 ===================================================
-      ILO RAD SUITE - UNIFIED DISTRIBUTION
-      ILO Radiography System for Pneumoconiosis Classification
+      PulmoView: ILO RAD SUITE - UNIFIED DISTRIBUTION
+      PulmoView: ILO Radiography System for Pneumoconiosis Classification
 ===================================================
 
 This package contains both the Viewer Application and the Pusher Application in one unified bundle.
@@ -64,5 +64,6 @@ To check if a newer version of the software is available, visit the [Official Up
 To make launching the software easier, we have included a script to automatically create a shortcut on your Desktop with a custom medical icon.
 1. Open the folder containing the software.
 2. Double-click the file named `Create_Desktop_Shortcut.vbs`.
-3. A shortcut named **"ILO RAD Suite"** will appear on your Desktop. You can now use this to start the application directly!
+3. A shortcut named **"PulmoView"** will appear on your Desktop. You can now use this to start the application directly!
+
 

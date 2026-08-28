@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DICOM Push Utility",
+  title: "PulmoView: DICOM Push Utility",
   description: "Secure DICOM Uploader for ILO Radiographs",
 };
 

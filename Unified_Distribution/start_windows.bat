@@ -16,10 +16,10 @@ if /I not "%accept%"=="Y" (
 )
 ECHO Terms accepted. Launching...
 
-TITLE ILO Radiograph Suite - Startup
+TITLE PulmoView: ILO Radiograph Suite - Startup
 
 echo ===================================================
-echo     ILO Radiograph Suite - Startup Menu
+echo     PulmoView: ILO Radiograph Suite - Startup Menu
 echo ===================================================
 echo.
 
