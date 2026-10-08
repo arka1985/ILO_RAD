@@ -41,12 +41,11 @@ This software is provided in three distinct "Distributions" to fit different wor
 ---
 
 ## How to Download from GitHub
-1. Go to the main GitHub repository page.
-2. Click the green **"Code"** button.
-3. Select **"Download ZIP"**.
-4. Once downloaded, **Extract/Unzip** the folder completely. (Do not try to run the scripts from inside the ZIP archive).
+1. Visit the [Official Download & Updates Page](https://arka1985.github.io/ILO_RAD/) to read the full setup documentation and click the specific **Download Package (.zip)** button for the distribution you want (Viewer, Pusher, or Unified).
+2. Alternatively, you can download the `.zip` packages directly from the [GitHub Releases](https://github.com/arka1985/ILO_RAD/releases/latest) section on the right side of the repository page.
+3. Once downloaded, **Extract/Unzip** the folder completely into a safe location like your `C:` drive. (Do not try to run the scripts from inside the ZIP archive, and do not extract directly in your Downloads folder).
 
-> **Note on Download Size:** The repository contains the standard ILO reference images in both JPEG and DICOM formats to allow for seamless offline classification. Because of this, the total size of the distribution is approximately **1.4 GB**. It may take some time to download depending on your internet connection.
+> **Note on Download Size:** The distributions contain the standard ILO reference images in high-resolution DICOM and JPEG formats to allow for seamless offline classification. Because of this, a single distribution is approximately **1.4 GB**. It may take some time to download depending on your internet connection.
 
 ---
 
