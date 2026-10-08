@@ -11,15 +11,6 @@ services:
       - PORT=3000
     restart: unless-stopped
 
-  bviewer-app:
-    build:
-      context: ./bviewer-app
-      dockerfile: Dockerfile
-    ports:
-      - "3001:3001"
-    environment:
-      - PORT=3001
-    restart: unless-stopped
 
   pusher-app:
     build:
