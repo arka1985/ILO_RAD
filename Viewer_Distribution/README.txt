@@ -1,9 +1,9 @@
 ===================================================
-      ILO RAD SUITE - VIEWER APPS
-      ILO Radiography System for Pneumoconiosis Classification
+      PulmoView: ILO RAD SUITE - STANDALONE VIEWER DISTRIBUTION
+      PulmoView: ILO Radiography System for Pneumoconiosis Classification
 ===================================================
 
-This package contains the standalone Viewer Applications (Full Viewer and Abbreviated Viewer) designed for the medical interpreter. 
+This package contains the standalone Viewer Application.
 
 REQUIREMENTS:
 -------------
@@ -11,26 +11,22 @@ REQUIREMENTS:
 
 HOW TO RUN:
 -----------
-1. Ensure the folder is unzipped (extracted) on your computer.
+1. Ensure this entire folder is unzipped (extracted) on your computer.
 2. If you are on Windows:
-   - Double-click the `start_viewer_windows.bat` file.
+   - Double-click the `start_windows.bat` file.
 3. If you are on Mac or Linux:
-   - Open a terminal in this folder and run: `./start_viewer_mac_linux.sh`
-   - (Note: You may need to run `chmod +x start_viewer_mac_linux.sh` first to make it executable).
+   - Open a terminal in this folder and run: `./start_mac_linux.sh`
+   - (Note: You may need to run `chmod +x start_mac_linux.sh` first to make it executable).
 
 USAGE:
 ------
-The script will install all necessary dependencies on its first run and then automatically open your default browser to:
-- http://localhost:3000 (Full Viewer)
-- http://localhost:3001 (Abbreviated Viewer)
-
-You can use the PACS Connection module within the app to connect to an external DICOMweb server, or use the Pusher App (on the source computer) to push images directly to this viewer.
+When you launch the script, it will install the viewer dependencies and automatically open the medical image viewer in your default web browser.
 
 Keep the black terminal window open while you are using the app. When you're done, simply close the window (or press Ctrl+C).
 
 
 ## Privacy & Data Confidentiality
-* **100% Local & Offline**: This software suite is designed to run entirely locally on your own hardware or local area network.
+* **100% Locally run inside your own computer & Offline**: (internet/LAN connection only require if PACS system is used).
 * **No Telemetry & No Cloud Storage**: We do not collect usage data, analytics, or store your patient data in any external cloud server. 
 * **Data Security**: DICOM files transferred via the Pusher App or loaded directly do not leave your network. It is the user's responsibility to ensure the host machine complies with local medical data regulations (e.g., HIPAA, GDPR).
 
@@ -42,7 +38,7 @@ Keep the black terminal window open while you are using the app. When you're don
 
 
 ## Updates and Versioning
-**Current Version:** 1.0.0
+**Current Version:** 1.0.2
 
 To check if a newer version of the software is available, visit the [Official Updates Page](https://arka1985.github.io/ILO_RAD/) (you can also click the "Updates" button in the Viewer App footer). 
 

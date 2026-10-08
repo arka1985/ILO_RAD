@@ -1,6 +1,6 @@
 {
-  "name": "bviewer-app",
-  "version": "1.0.1",
+  "name": "viewer-app",
+  "version": "1.0.2",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
@@ -21,7 +21,9 @@
     "lucide-react": "^1.30.0",
     "next": "16.3.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

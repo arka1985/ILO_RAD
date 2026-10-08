@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ExternalLink, LayoutGrid, ClipboardList, ChevronRight, ChevronLeft, Save, Search, X, Info, AlertTriangle , Trash2, RefreshCw} from 'lucide-react';
 import { ILOReportTemplate } from './components/ILOReportTemplate';
 import { ILOAbbreviatedReportTemplate } from './components/ILOAbbreviatedReportTemplate';
+import { FormIXReportTemplate } from './components/FormIXReportTemplate';
 
 type InterpretationStep = '1_quality' | '2_parenchymal' | '3_pleural' | '4_other';
 
@@ -18,6 +19,17 @@ export default function Home() {
   const [activeStandard, setActiveStandard] = useState<string>('0/0');
   const [channel, setChannel] = useState<BroadcastChannel | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showLicenseModal, setShowLicenseModal] = useState(false);
+  const [isFirstLaunch, setIsFirstLaunch] = useState(false);
+  
+  useEffect(() => {
+    if (!sessionStorage.getItem('hasAcceptedLicense')) {
+      setIsFirstLaunch(true);
+      setShowLicenseModal(true);
+    }
+  }, []);
+  const [showReferencesModal, setShowReferencesModal] = useState(false);
   const [historySearch, setHistorySearch] = useState('');
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [pendingPush, setPendingPush] = useState<any>(null);
@@ -388,23 +400,23 @@ export default function Home() {
       <div className="flex h-screen bg-[#0f172a] text-gray-300 font-sans overflow-hidden print:hidden">
       
       {/* Left Subpanel: Global Standard Library */}
-      <div className="w-[400px] flex flex-col border-r border-[#1e293b] bg-[#1e293b] z-10 shadow-xl">
-        <div className="bg-[#020617] text-blue-400 p-3 border-b border-[#334155] flex items-center space-x-2 shadow-md">
+      <div className="w-[400px] flex flex-col border-r border-cyan-700 bg-[#1e293b] z-10 shadow-xl">
+        <div className="bg-[#020617] text-blue-400 p-3 border-b border-cyan-700 flex items-center space-x-2 shadow-md">
           <LayoutGrid size={16} />
           <div className="font-bold tracking-widest text-xs">ILO STANDARD LIBRARY</div>
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-6 text-sm">
           <div>
-            <h3 className="font-bold text-gray-400 mb-2 border-b border-[#334155] pb-1">Normal</h3>
+            <h3 className="font-bold text-gray-400 mb-2 border-b border-cyan-700 pb-1">Normal</h3>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => loadStandard('/standards/00_Normal_1.dcm', '0/0 (Normal 1)')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-xs font-bold transition-colors">0/0 (Normal 1)</button>
-              <button onClick={() => loadStandard('/standards/00_Normal_2.dcm', '0/0 (Normal 2)')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-xs font-bold transition-colors">0/0 (Normal 2)</button>
+              <button onClick={() => loadStandard('/standards/00_Normal_1.dcm', '0/0 (Normal 1)')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-xs font-bold transition-colors">0/0 (Normal 1)</button>
+              <button onClick={() => loadStandard('/standards/00_Normal_2.dcm', '0/0 (Normal 2)')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-xs font-bold transition-colors">0/0 (Normal 2)</button>
             </div>
           </div>
           
           <div>
-            <h3 className="font-bold text-gray-400 mb-1 border-b border-[#334155] pb-1 flex flex-col">
+            <h3 className="font-bold text-gray-400 mb-1 border-b border-cyan-700 pb-1 flex flex-col">
               <span>Small Opacities</span>
               <span className="text-[10px] font-normal text-gray-500 mt-0.5">(opacity having the longest dimension not exceeding 10mm)</span>
             </h3>
@@ -412,55 +424,55 @@ export default function Home() {
             <div className="mt-2 mb-3">
               <h4 className="text-xs font-semibold text-gray-400 mb-2">Regular</h4>
               <div className="grid grid-cols-3 gap-2">
-                <button onClick={() => loadStandard('/standards/11_pp.dcm', '1/1 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 p/p</button>
-                <button onClick={() => loadStandard('/standards/11_qq.dcm', '1/1 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 q/q</button>
-                <button onClick={() => loadStandard('/standards/11_rr.dcm', '1/1 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 r/r</button>
+                <button onClick={() => loadStandard('/standards/11_pp.dcm', '1/1 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 p/p</button>
+                <button onClick={() => loadStandard('/standards/11_qq.dcm', '1/1 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 q/q</button>
+                <button onClick={() => loadStandard('/standards/11_rr.dcm', '1/1 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 r/r</button>
                 
-                <button onClick={() => loadStandard('/standards/22_pp.dcm', '2/2 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">2/2 p/p</button>
-                <button onClick={() => loadStandard('/standards/22_qq.dcm', '2/2 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">2/2 q/q</button>
-                <button onClick={() => loadStandard('/standards/22_rr.dcm', '2/2 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">2/2 r/r</button>
+                <button onClick={() => loadStandard('/standards/22_pp.dcm', '2/2 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 p/p</button>
+                <button onClick={() => loadStandard('/standards/22_qq.dcm', '2/2 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 q/q</button>
+                <button onClick={() => loadStandard('/standards/22_rr.dcm', '2/2 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 r/r</button>
                 
-                <button onClick={() => loadStandard('/standards/33_pp.dcm', '3/3 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">3/3 p/p</button>
-                <button onClick={() => loadStandard('/standards/33_qq.dcm', '3/3 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">3/3 q/q</button>
-                <button onClick={() => loadStandard('/standards/33_rr.dcm', '3/3 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">3/3 r/r</button>
+                <button onClick={() => loadStandard('/standards/33_pp.dcm', '3/3 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 p/p</button>
+                <button onClick={() => loadStandard('/standards/33_qq.dcm', '3/3 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 q/q</button>
+                <button onClick={() => loadStandard('/standards/33_rr.dcm', '3/3 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 r/r</button>
               </div>
             </div>
 
             <div className="mb-2">
               <h4 className="text-xs font-semibold text-gray-400 mb-2">Irregular</h4>
               <div className="grid grid-cols-3 gap-2">
-                <button onClick={() => loadStandard('/standards/11_ss.dcm', '1/1 s/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 s/s</button>
-                <button onClick={() => loadStandard('/standards/11_tt.dcm', '1/1 t/t')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">1/1 t/t</button>
-                <button onClick={() => loadStandard('/standards/22_ss.dcm', '2/2 s/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">2/2 s/s</button>
-                <button onClick={() => loadStandard('/standards/22_tt.dcm', '2/2 t/t')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">2/2 t/t</button>
-                <button onClick={() => loadStandard('/standards/33_ss.dcm', '3/3 s/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">3/3 s/s</button>
-                <button onClick={() => loadStandard('/standards/33_ts.dcm', '3/3 t/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">3/3 t/s</button>
-                <button onClick={() => loadStandard('/standards/123u.dcm', '123 u')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-[#475569] hover:border-blue-400 rounded text-center text-xs font-bold">123 u</button>
+                <button onClick={() => loadStandard('/standards/11_ss.dcm', '1/1 s/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 s/s</button>
+                <button onClick={() => loadStandard('/standards/11_tt.dcm', '1/1 t/t')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 t/t</button>
+                <button onClick={() => loadStandard('/standards/22_ss.dcm', '2/2 s/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 s/s</button>
+                <button onClick={() => loadStandard('/standards/22_tt.dcm', '2/2 t/t')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 t/t</button>
+                <button onClick={() => loadStandard('/standards/33_ss.dcm', '3/3 s/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 s/s</button>
+                <button onClick={() => loadStandard('/standards/33_ts.dcm', '3/3 t/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 t/s</button>
+                <button onClick={() => loadStandard('/standards/123u.dcm', '123 u')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">123 u</button>
               </div>
             </div>
           </div>
 
           <div>
-            <h3 className="font-bold text-gray-400 mb-2 border-b border-[#334155] pb-1 flex flex-col">
+            <h3 className="font-bold text-gray-400 mb-2 border-b border-cyan-700 pb-1 flex flex-col">
               <span>Large Opacities</span>
               <span className="text-[10px] font-normal text-gray-500 mt-0.5">(opacity having the longest dimension exceeding 10mm)</span>
             </h3>
             <div className="grid grid-cols-1 gap-2">
-              <button onClick={() => loadStandard('/standards/A_22_qq.dcm', 'Size A (2/2 q/q)')} className="p-2 bg-[#334155] hover:bg-emerald-600 border border-[#475569] hover:border-emerald-400 rounded text-xs font-bold">Size A (2/2 q/q)</button>
-              <button onClick={() => loadStandard('/standards/B_23_qr.dcm', 'Size B (2/3 q/r)')} className="p-2 bg-[#334155] hover:bg-emerald-600 border border-[#475569] hover:border-emerald-400 rounded text-xs font-bold">Size B (2/3 q/r)</button>
-              <button onClick={() => loadStandard('/standards/C_3+_rr.dcm', 'Size C (3/+ r/r)')} className="p-2 bg-[#334155] hover:bg-emerald-600 border border-[#475569] hover:border-emerald-400 rounded text-xs font-bold">Size C (3/+ r/r)</button>
+              <button onClick={() => loadStandard('/standards/A_22_qq.dcm', 'Size A (2/2 q/q)')} className="p-2 bg-[#334155] hover:bg-emerald-600 border border-cyan-500 hover:border-emerald-400 rounded text-xs font-bold">Size A (2/2 q/q)</button>
+              <button onClick={() => loadStandard('/standards/B_23_qr.dcm', 'Size B (2/3 q/r)')} className="p-2 bg-[#334155] hover:bg-emerald-600 border border-cyan-500 hover:border-emerald-400 rounded text-xs font-bold">Size B (2/3 q/r)</button>
+              <button onClick={() => loadStandard('/standards/C_3+_rr.dcm', 'Size C (3/+ r/r)')} className="p-2 bg-[#334155] hover:bg-emerald-600 border border-cyan-500 hover:border-emerald-400 rounded text-xs font-bold">Size C (3/+ r/r)</button>
             </div>
           </div>
 
           <div>
-            <h3 className="font-bold text-gray-400 mb-2 border-b border-[#334155] pb-1">Pleural</h3>
+            <h3 className="font-bold text-gray-400 mb-2 border-b border-cyan-700 pb-1">Pleural</h3>
             <div className="grid grid-cols-1 gap-2">
-              <button onClick={() => loadStandard('/standards/Pleural.dcm', 'Pleural Standard')} className="p-2 bg-[#334155] hover:bg-purple-600 border border-[#475569] hover:border-purple-400 rounded text-xs font-bold">Pleural Plaques Standard</button>
-              <button onClick={() => loadStandard('/standards/CPangle.dcm', 'Costophrenic Angle')} className="p-2 bg-[#334155] hover:bg-purple-600 border border-[#475569] hover:border-purple-400 rounded text-xs font-bold">C/P Angle Obliteration</button>
+              <button onClick={() => loadStandard('/standards/Pleural.dcm', 'Pleural Standard')} className="p-2 bg-[#334155] hover:bg-purple-600 border border-cyan-500 hover:border-purple-400 rounded text-xs font-bold">Pleural Plaques Standard</button>
+              <button onClick={() => loadStandard('/standards/CPangle.dcm', 'Costophrenic Angle')} className="p-2 bg-[#334155] hover:bg-purple-600 border border-cyan-500 hover:border-purple-400 rounded text-xs font-bold">C/P Angle Obliteration</button>
             </div>
           </div>
         </div>
-        <div className="bg-[#020617] p-2 text-[10px] text-center border-t border-[#334155] text-gray-500">
+        <div className="bg-[#020617] p-2 text-[10px] text-center border-t border-cyan-700 text-gray-500">
           Click any standard above to instantly load it into the Viewer Panel.
         </div>
       </div>
@@ -469,7 +481,7 @@ export default function Home() {
       <div className="flex-1 flex flex-col bg-[#0f172a] relative overflow-y-auto">
         
         {/* Header & Window Controls */}
-        <div className="bg-[#020617] text-white p-3 border-b border-[#1e293b] flex justify-between items-center shadow-md">
+        <div className="bg-[#020617] text-white p-3 border-b border-cyan-700 flex justify-between items-center shadow-md">
           <div className="flex items-center space-x-2">
             <ClipboardList size={18} className="text-emerald-400" />
             <div className="font-bold tracking-widest text-xs text-orange-400">PulmoView: ILO Radiography System for Pneumoconiosis Classification</div>
@@ -517,21 +529,21 @@ export default function Home() {
 
             {/* Doctor Form */}
             <div className="space-y-6 mb-8">
-              <h2 className="text-xl font-bold border-b border-[#334155] pb-2 text-white flex justify-between items-center">
+              <h2 className="text-xl font-bold border-b border-cyan-700 pb-2 text-white flex justify-between items-center">
                 <span>Details of Interpreting Doctor and Purpose</span>
                 <button onClick={saveDoctorProfile} className="flex items-center space-x-2 text-xs bg-[#334155] hover:bg-blue-600 px-3 py-1.5 rounded transition-colors text-white font-bold">
                   <Save size={14} />
                   <span>Save as Default</span>
                 </button>
               </h2>
-              <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg grid grid-cols-2 gap-4">
+              <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg grid grid-cols-2 gap-4">
                 <div className="col-span-2 md:col-span-1">
                   <label className="block text-gray-400 text-xs uppercase mb-1">Classifying Physician's Name *</label>
-                  <input type="text" value={wizardData.classifyingPhysician} onChange={e => updateData({ classifyingPhysician: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
+                  <input type="text" value={wizardData.classifyingPhysician} onChange={e => updateData({ classifyingPhysician: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-gray-400 text-xs uppercase mb-2">Physician Qualification *</label>
-                  <div className="flex flex-wrap gap-4 bg-[#0f172a] border border-[#475569] p-3 rounded">
+                  <div className="flex flex-wrap gap-4 bg-[#0f172a] border border-cyan-500 p-3 rounded">
                     {['MBBS', 'MD-Physician : Equivalent to MBBS'].map(opt => (
                       <label key={opt} className="flex items-center space-x-2 text-emerald-400 text-sm cursor-pointer hover:text-emerald-300 transition-colors">
                         <input type="checkbox" checked={wizardData.physicianQualification.includes(opt)} onChange={() => toggleArrayItem('physicianQualification', opt)} className="accent-emerald-500 w-4 h-4" />
@@ -554,19 +566,19 @@ export default function Home() {
                       type="text" 
                       value={wizardData.physicianQualificationOtherText || ""} 
                       onChange={e => updateData({ physicianQualificationOtherText: e.target.value })} 
-                      className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500 mt-2" 
+                      className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500 mt-2" 
                       placeholder="Please specify other qualification" 
                     />
                   )}
                 </div>
                 <div>
                   <label className="block text-gray-400 text-xs uppercase mb-1">Reading Date *</label>
-                  <input type="date" value={wizardData.readingDate} onChange={e => updateData({ readingDate: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <input type="date" value={wizardData.readingDate} onChange={e => updateData({ readingDate: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
                 </div>
                 
                 <div className="col-span-2">
                   <label className="block text-gray-400 text-xs uppercase mb-1">Designation of Examining Physician</label>
-                  <select value={wizardData.designation} onChange={e => updateData({ designation: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500">
+                  <select value={wizardData.designation} onChange={e => updateData({ designation: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500">
                     <option value="">- Select Designation -</option>
                     <option value="Registered Medical Practitioners or Medical Specialist">Registered Medical Practitioners or Medical Specialist</option>
                     <option value="Medical Officer under OSHWC Code 2020">Medical Officer under OSHWC Code 2020</option>
@@ -579,16 +591,16 @@ export default function Home() {
                 
                 <div>
                   <label className="block text-gray-400 text-xs uppercase mb-1">Radiology Facility</label>
-                  <input type="text" value={wizardData.facility} onChange={e => updateData({ facility: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <input type="text" value={wizardData.facility} onChange={e => updateData({ facility: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
                 </div>
                 <div>
                   <label className="block text-gray-400 text-xs uppercase mb-1">Ordering Physician</label>
-                  <input type="text" value={wizardData.orderingPhysician} onChange={e => updateData({ orderingPhysician: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <input type="text" value={wizardData.orderingPhysician} onChange={e => updateData({ orderingPhysician: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
                 </div>
 
                 <div className="col-span-2">
                   <label className="block text-gray-400 text-xs uppercase mb-1">Classification Purpose</label>
-                  <select value={wizardData.classificationPurpose} onChange={e => updateData({ classificationPurpose: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500">
+                  <select value={wizardData.classificationPurpose} onChange={e => updateData({ classificationPurpose: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500">
                     <option value="">- Select Purpose -</option>
                     <option value="Screening and Surveillance for Pneumoconesis under OSHWC Code 2020">Screening and Surveillance for Pneumoconesis under OSHWC Code 2020</option>
                     <option value="Epidemiological Studies">Epidemiological Studies</option>
@@ -596,12 +608,12 @@ export default function Home() {
                   </select>
                   {wizardData.classificationPurpose === 'Other' && (
                     <div className="mt-2 animate-in fade-in duration-300">
-                      <textarea maxLength={1500} value={wizardData.classificationPurposeOtherText} onChange={e => updateData({ classificationPurposeOtherText: e.target.value })} placeholder="Please specify (max 250 words)..." className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
+                      <textarea maxLength={1500} value={wizardData.classificationPurposeOtherText} onChange={e => updateData({ classificationPurposeOtherText: e.target.value })} placeholder="Please specify (max 250 words)..." className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
                     </div>
                   )}
                 </div>
 
-                <div className="col-span-2 border-t border-[#334155] pt-4 mt-2">
+                <div className="col-span-2 border-t border-cyan-700 pt-4 mt-2">
                   <label className="block text-gray-400 text-xs uppercase mb-2">Trained in ILO Radiography?</label>
                   <div className="flex space-x-4">
                     <label className="flex items-center space-x-2 cursor-pointer">
@@ -619,11 +631,11 @@ export default function Home() {
                   <>
                     <div className="col-span-2 md:col-span-1 animate-in fade-in duration-300">
                       <label className="block text-gray-400 text-xs uppercase mb-1">Trained from Which Institute *</label>
-                      <input type="text" value={wizardData.trainingInstitute} onChange={e => updateData({ trainingInstitute: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
+                      <input type="text" value={wizardData.trainingInstitute} onChange={e => updateData({ trainingInstitute: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
                     </div>
                     <div className="col-span-2 md:col-span-1 animate-in fade-in duration-300">
                       <label className="block text-gray-400 text-xs uppercase mb-1">Date of Training/Refresher *</label>
-                      <input type="date" value={wizardData.trainingDate} onChange={e => updateData({ trainingDate: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" />
+                      <input type="date" value={wizardData.trainingDate} onChange={e => updateData({ trainingDate: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
                     </div>
                   </>
                 )}
@@ -632,38 +644,38 @@ export default function Home() {
 
             {/* Patient Form */}
             <div className="space-y-6 mb-8">
-              <h2 className="text-xl font-bold border-b border-[#334155] pb-2 text-white flex justify-between items-center">
+              <h2 className="text-xl font-bold border-b border-cyan-700 pb-2 text-white flex justify-between items-center">
                 <span>Patient/Worker/Employee Details</span>
                 <button onClick={openHistoryModal} className="flex items-center space-x-2 text-xs bg-[#334155] hover:bg-emerald-600 px-3 py-1.5 rounded transition-colors text-white font-bold">
                   <Search size={14} />
-                  <span>Search History</span>
+                  <span>Search Patient History</span>
                 </button>
               </h2>
-              <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg grid grid-cols-2 gap-4">
+              <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="block text-gray-400 text-xs uppercase mb-1">Patient/Worker/Employee's Name *</label>
-                  <input type="text" value={wizardData.patientName} onChange={e => updateData({ patientName: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
+                  <input type="text" value={wizardData.patientName} onChange={e => updateData({ patientName: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
                 </div>
                 <div>
                   <label className="block text-gray-400 text-xs uppercase mb-1">Patient/Worker/Employee ID *</label>
-                  <input type="text" value={wizardData.patientId} onChange={e => updateData({ patientId: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
+                  <input type="text" value={wizardData.patientId} onChange={e => updateData({ patientId: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-gray-400 text-xs uppercase mb-1">Patient Address (including PIN)</label>
-                  <textarea value={wizardData.patientAddress} onChange={e => updateData({ patientAddress: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[60px]" placeholder="Address details"></textarea>
+                  <textarea value={wizardData.patientAddress} onChange={e => updateData({ patientAddress: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[60px]" placeholder="Address details"></textarea>
                 </div>
                 <div>
                   <label className="block text-gray-400 text-xs uppercase mb-1">Birth Date</label>
-                  <input type="date" value={wizardData.dob} onChange={e => updateData({ dob: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <input type="date" value={wizardData.dob} onChange={e => updateData({ dob: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-gray-400 text-xs uppercase mb-1">Radiograph Date</label>
-                  <input type="date" value={wizardData.radiographDate} onChange={e => updateData({ radiographDate: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <input type="date" value={wizardData.radiographDate} onChange={e => updateData({ radiographDate: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
                 </div>
 
-                <div className="col-span-2 border-t border-[#334155] pt-4 mt-2">
+                <div className="col-span-2 border-t border-cyan-700 pt-4 mt-2">
                   <label className="block text-gray-400 text-xs uppercase mb-1">Working Place</label>
-                  <select value={wizardData.workingPlace} onChange={e => updateData({ workingPlace: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500">
+                  <select value={wizardData.workingPlace} onChange={e => updateData({ workingPlace: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500">
                     <option value="">- Select Working Place -</option>
                     <option value="Factory">Factory</option>
                     <option value="Mines">Mines</option>
@@ -674,24 +686,24 @@ export default function Home() {
                   </select>
                   {wizardData.workingPlace === 'Any Other Establishment' && (
                     <div className="mt-2 animate-in fade-in duration-300">
-                      <textarea maxLength={1500} value={wizardData.workingPlaceOtherText} onChange={e => updateData({ workingPlaceOtherText: e.target.value })} placeholder="Please specify working place (max 250 words)..." className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
+                      <textarea maxLength={1500} value={wizardData.workingPlaceOtherText} onChange={e => updateData({ workingPlaceOtherText: e.target.value })} placeholder="Please specify working place (max 250 words)..." className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
                     </div>
                   )}
                 </div>
 
                 <div className="col-span-2">
                   <label className="block text-gray-400 text-xs uppercase mb-1">Name of The Establishment</label>
-                  <input type="text" value={wizardData.establishmentName} onChange={e => updateData({ establishmentName: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <input type="text" value={wizardData.establishmentName} onChange={e => updateData({ establishmentName: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
                 </div>
 
                 <div className="col-span-2">
                   <label className="block text-gray-400 text-xs uppercase mb-1">Address</label>
-                  <input type="text" value={wizardData.establishmentAddress} onChange={e => updateData({ establishmentAddress: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <input type="text" value={wizardData.establishmentAddress} onChange={e => updateData({ establishmentAddress: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
                 </div>
 
-                <div className="col-span-2 border-t border-[#334155] pt-4 mt-2">
+                <div className="col-span-2 border-t border-cyan-700 pt-4 mt-2">
                   <label className="block text-gray-400 text-xs uppercase mb-1">Type of Examination</label>
-                  <select value={wizardData.examinationType} onChange={e => updateData({ examinationType: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500">
+                  <select value={wizardData.examinationType} onChange={e => updateData({ examinationType: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500">
                     <option value="">- Select Type of Examination -</option>
                     <option value="Initial Medical Examination in Mines">Initial Medical Examination in Mines</option>
                     <option value="Pre Employment Medical Examination">Pre Employment Medical Examination</option>
@@ -701,7 +713,7 @@ export default function Home() {
                   </select>
                   {wizardData.examinationType === 'Other Purpose' && (
                     <div className="mt-2 animate-in fade-in duration-300">
-                      <textarea maxLength={1500} value={wizardData.examinationTypeOtherText} onChange={e => updateData({ examinationTypeOtherText: e.target.value })} placeholder="Please specify type of examination (max 250 words)..." className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
+                      <textarea maxLength={1500} value={wizardData.examinationTypeOtherText} onChange={e => updateData({ examinationTypeOtherText: e.target.value })} placeholder="Please specify type of examination (max 250 words)..." className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
                     </div>
                   )}
                 </div>
@@ -709,25 +721,25 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg mb-8">
+            <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg mb-8">
               <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">Classification Mode *</p>
               <div className="flex space-x-4">
                 <label className="flex-1 cursor-pointer">
                   <input type="radio" name="classificationMode" checked={wizardData.classificationMode === 'Full'} onChange={() => updateData({ classificationMode: 'Full' })} className="peer hidden" />
-                  <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">
+                  <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">
                     Full Classification
                   </div>
                 </label>
                 <label className="flex-1 cursor-pointer">
                   <input type="radio" name="classificationMode" checked={wizardData.classificationMode === 'Abbreviated'} onChange={() => updateData({ classificationMode: 'Abbreviated' })} className="peer hidden" />
-                  <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">
+                  <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">
                     Abbreviated Classification
                   </div>
                 </label>
               </div>
             </div>
 
-            <div className="flex justify-end mt-8 border-t border-[#334155] pt-6 pb-8">
+            <div className="flex justify-end mt-8 border-t border-cyan-700 pt-6 pb-8">
               <button 
                 suppressHydrationWarning
                 onClick={() => updateData({ stage: 2, currentInterpStep: 0 })}
@@ -745,10 +757,10 @@ export default function Home() {
         {wizardData.stage === 2 && (
           <div className="flex-1 flex flex-col relative animate-in slide-in-from-right duration-300">
             {/* Wizard Navigation */}
-            <div className="flex bg-[#1e293b] p-1 border-b border-[#334155] text-xs">
+            <div className="flex bg-[#1e293b] p-1 border-b border-cyan-700 text-xs">
               <button
                 onClick={() => updateData({ stage: 1 })}
-                className="px-4 py-3 font-bold text-gray-400 hover:bg-[#0f172a] border-r border-[#334155] flex items-center space-x-1"
+                className="px-4 py-3 font-bold text-gray-400 hover:bg-[#0f172a] border-r border-cyan-700 flex items-center space-x-1"
               >
                 <ChevronLeft size={14} /> <span>Metadata</span>
               </button>
@@ -774,8 +786,8 @@ export default function Home() {
                 <div className="flex-1 p-8 max-w-4xl mx-auto w-full text-sm overflow-y-auto">
               {visibleSteps[wizardData.currentInterpStep]?.id === '1_quality' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
-                  <h2 className="text-xl font-bold border-b border-[#334155] pb-2 text-white">1. IMAGE QUALITY</h2>
-                  <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg flex flex-col justify-between">
+                  <h2 className="text-xl font-bold border-b border-cyan-700 pb-2 text-white">1. IMAGE QUALITY</h2>
+                  <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg flex flex-col justify-between">
                     <div>
                       <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">TECHNICAL QUALITY *</p>
                       <div className="grid grid-cols-4 gap-4">
@@ -788,7 +800,7 @@ export default function Home() {
                                 updateData({ qualityGrade: grade });
                               }
                             }} className="peer hidden" />
-                            <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors shadow-sm">
+                            <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors shadow-sm">
                               Grade {grade}
                             </div>
                           </label>
@@ -798,7 +810,7 @@ export default function Home() {
                       {wizardData.classificationMode === 'Abbreviated' && wizardData.qualityGrade && wizardData.qualityGrade !== '1' && (
                         <div className="mt-6 animate-in fade-in duration-300">
                           <p className="mb-2 text-emerald-400 font-bold uppercase tracking-widest text-xs">Comment on technical quality *</p>
-                          <textarea maxLength={1500} value={wizardData.abbrevQualityComment} onChange={e => updateData({ abbrevQualityComment: e.target.value })} placeholder="Comments required here..." className="w-full bg-[#0f172a] border border-[#475569] rounded p-3 text-white outline-none focus:border-emerald-500 min-h-[100px]"></textarea>
+                          <textarea maxLength={1500} value={wizardData.abbrevQualityComment} onChange={e => updateData({ abbrevQualityComment: e.target.value })} placeholder="Comments required here..." className="w-full bg-[#0f172a] border border-cyan-500 rounded p-3 text-white outline-none focus:border-emerald-500 min-h-[100px]"></textarea>
                         </div>
                       )}
 
@@ -807,7 +819,7 @@ export default function Home() {
                           <p className="mb-2 text-emerald-400 font-bold uppercase tracking-widest text-xs">SELECT ALL DEFECTS THAT APPLY</p>
                           <div className="grid grid-cols-3 gap-2">
                             {QUALITY_DEFECTS.map(defect => (
-                              <label key={defect} className="flex items-center space-x-2 cursor-pointer bg-[#0f172a] p-3 rounded border border-[#475569] hover:border-emerald-500 transition-colors">
+                              <label key={defect} className="flex items-center space-x-2 cursor-pointer bg-[#0f172a] p-3 rounded border border-cyan-500 hover:border-emerald-500 transition-colors">
                                 <input type="checkbox" checked={wizardData.qualityDefects.includes(defect)} onChange={() => toggleArrayItem('qualityDefects', defect)} className="accent-emerald-500 w-4 h-4" />
                                 <span className="text-gray-300 text-xs">{defect}</span>
                               </label>
@@ -815,7 +827,7 @@ export default function Home() {
                           </div>
                           {wizardData.qualityDefects.includes('Other') && (
                             <div className="mt-4 animate-in fade-in duration-300">
-                              <textarea maxLength={1500} value={wizardData.qualityDefectsOtherText} onChange={e => updateData({ qualityDefectsOtherText: e.target.value })} placeholder="Please specify other defects (max 250 words)..." className="w-full bg-[#0f172a] border border-[#475569] rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
+                              <textarea maxLength={1500} value={wizardData.qualityDefectsOtherText} onChange={e => updateData({ qualityDefectsOtherText: e.target.value })} placeholder="Please specify other defects (max 250 words)..." className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
                             </div>
                           )}
                         </div>
@@ -825,18 +837,18 @@ export default function Home() {
 
                   {/* ESSENTIALLY NORMAL OVERRIDE */}
                   {wizardData.qualityGrade && wizardData.qualityGrade !== '4' && (
-                    <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg mt-6 animate-in fade-in duration-300">
+                    <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg mt-6 animate-in fade-in duration-300">
                       <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">OVERALL ASSESSMENT</p>
                       <p className="mb-4 text-sm text-gray-300">Based on history, signs, symptoms, and your best clinical judgment, is this essentially a normal X-ray? (No parenchymal, pleural, or other abnormalities)</p>
                       <div className="flex space-x-4">
                         <label className="flex-1 cursor-pointer">
-                          <div className={`border rounded-lg p-4 flex items-center space-x-3 transition-colors ${wizardData.isEssentiallyNormal === 'Yes' ? 'border-emerald-500 bg-emerald-900/20' : 'border-[#475569] bg-[#0f172a] hover:border-gray-400'}`}>
+                          <div className={`border rounded-lg p-4 flex items-center space-x-3 transition-colors ${wizardData.isEssentiallyNormal === 'Yes' ? 'border-emerald-500 bg-emerald-900/20' : 'border-cyan-500 bg-[#0f172a] hover:border-gray-400'}`}>
                             <input type="radio" name="isEssentiallyNormal" checked={wizardData.isEssentiallyNormal === 'Yes'} onChange={() => updateData({ isEssentiallyNormal: 'Yes', anyParenchymal: 'No', anyPleural: 'No', anyOther: 'No' })} className="accent-emerald-500 w-5 h-5" />
                             <span className={`font-bold ${wizardData.isEssentiallyNormal === 'Yes' ? 'text-emerald-400' : 'text-gray-300'}`}>Yes</span>
                           </div>
                         </label>
                         <label className="flex-1 cursor-pointer">
-                          <div className={`border rounded-lg p-4 flex items-center space-x-3 transition-colors ${wizardData.isEssentiallyNormal === 'No' ? 'border-emerald-500 bg-emerald-900/20' : 'border-[#475569] bg-[#0f172a] hover:border-gray-400'}`}>
+                          <div className={`border rounded-lg p-4 flex items-center space-x-3 transition-colors ${wizardData.isEssentiallyNormal === 'No' ? 'border-emerald-500 bg-emerald-900/20' : 'border-cyan-500 bg-[#0f172a] hover:border-gray-400'}`}>
                             <input type="radio" name="isEssentiallyNormal" checked={wizardData.isEssentiallyNormal === 'No'} onChange={() => updateData({ isEssentiallyNormal: 'No' })} className="accent-emerald-500 w-5 h-5" />
                             <span className={`font-bold ${wizardData.isEssentiallyNormal === 'No' ? 'text-emerald-400' : 'text-gray-300'}`}>No</span>
                           </div>
@@ -850,20 +862,20 @@ export default function Home() {
 
               {visibleSteps[wizardData.currentInterpStep]?.id === '2_parenchymal' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
-                  <h2 className="text-xl font-bold border-b border-[#334155] pb-2 text-white">2. PARENCHYMAL ABNORMALITIES</h2>
+                  <h2 className="text-xl font-bold border-b border-cyan-700 pb-2 text-white">2. PARENCHYMAL ABNORMALITIES</h2>
                   
                   {/* 2A (Full Mode Only) */}
                   {wizardData.classificationMode === 'Full' && (
-                    <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg">
+                    <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg">
                       <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">2A. ANY CLASSIFIABLE PARENCHYMAL ABNORMALITIES? *</p>
                       <div className="flex space-x-4">
                         <label className="flex-1 cursor-pointer">
                           <input type="radio" name="anyParenchymal" checked={wizardData.anyParenchymal === 'Yes'} onChange={() => updateData({ anyParenchymal: 'Yes' })} className="peer hidden" />
-                          <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">Yes (Proceed to 2B & 2C)</div>
+                          <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">Yes (Proceed to 2B & 2C)</div>
                         </label>
                         <label className="flex-1 cursor-pointer">
                           <input type="radio" name="anyParenchymal" checked={wizardData.anyParenchymal === 'No'} onChange={() => updateData({ anyParenchymal: 'No' })} className="peer hidden" />
-                          <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-gray-600 peer-checked:text-white peer-checked:border-gray-400 font-bold hover:bg-[#334155] transition-colors">No (Skip to Section 3A)</div>
+                          <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-gray-600 peer-checked:text-white peer-checked:border-gray-400 font-bold hover:bg-[#334155] transition-colors">No (Skip to Section 3A)</div>
                         </label>
                       </div>
                     </div>
@@ -872,21 +884,21 @@ export default function Home() {
                   {(wizardData.classificationMode === 'Abbreviated' || wizardData.anyParenchymal === 'Yes') && (
                     <div className="grid grid-cols-2 gap-6 animate-in slide-in-from-top-4 duration-300">
                       {/* 2B */}
-                      <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg">
+                      <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg">
                         <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">{wizardData.classificationMode === 'Abbreviated' ? 'SMALL OPACITIES' : '2B. SMALL OPACITIES'}</p>
                         
                         {wizardData.classificationMode === 'Abbreviated' ? (
                           <div className="space-y-4">
                             <div>
                               <span className="block text-gray-400 mb-1 text-xs">PROFUSION CATEGORY (4-point scale) *</span>
-                              <select value={wizardData.abbrevProfusion} onChange={e => updateData({ abbrevProfusion: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] text-white p-2 rounded outline-none focus:border-emerald-500">
+                              <select value={wizardData.abbrevProfusion} onChange={e => updateData({ abbrevProfusion: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 text-white p-2 rounded outline-none focus:border-emerald-500">
                                 <option value="-">- Select -</option>
                                 <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>
                               </select>
                             </div>
                             <div>
                               <span className="block text-gray-400 mb-1 text-xs">PREDOMINANT SHAPE AND SIZE *</span>
-                              <select value={wizardData.abbrevShape} onChange={e => updateData({ abbrevShape: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] text-white p-2 rounded outline-none focus:border-emerald-500">
+                              <select value={wizardData.abbrevShape} onChange={e => updateData({ abbrevShape: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 text-white p-2 rounded outline-none focus:border-emerald-500">
                                 <option value="-">- Select -</option>
                                 <option value="p">p</option><option value="q">q</option><option value="r">r</option>
                                 <option value="s">s</option><option value="t">t</option><option value="u">u</option>
@@ -901,13 +913,13 @@ export default function Home() {
                               <div className="flex space-x-2">
                                 <div className="flex-1">
                                   <label className="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Primary</label>
-                                  <select value={wizardData.primaryShape} onChange={e => updateData({ primaryShape: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] text-white p-2 rounded outline-none focus:border-emerald-500">
+                                  <select value={wizardData.primaryShape} onChange={e => updateData({ primaryShape: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 text-white p-2 rounded outline-none focus:border-emerald-500">
                                     <option value="-">- Select -</option><option value="p">p</option><option value="q">q</option><option value="r">r</option><option value="s">s</option><option value="t">t</option><option value="u">u</option>
                                   </select>
                                 </div>
                                 <div className="flex-1">
                                   <label className="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Secondary</label>
-                                  <select value={wizardData.secondaryShape} onChange={e => updateData({ secondaryShape: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] text-white p-2 rounded outline-none focus:border-emerald-500">
+                                  <select value={wizardData.secondaryShape} onChange={e => updateData({ secondaryShape: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 text-white p-2 rounded outline-none focus:border-emerald-500">
                                     <option value="-">- Select -</option><option value="p">p</option><option value="q">q</option><option value="r">r</option><option value="s">s</option><option value="t">t</option><option value="u">u</option>
                                   </select>
                                 </div>
@@ -921,8 +933,8 @@ export default function Home() {
                               </div>
                               <div className="flex space-x-6 text-gray-300">
                                 {/* Right Lung */}
-                                <div className="space-y-2 flex-1 bg-[#0f172a] p-2 rounded border border-[#475569]">
-                                  <div className="text-[10px] text-gray-500 uppercase tracking-widest text-center border-b border-[#334155] pb-1 mb-2">Right Lung</div>
+                                <div className="space-y-2 flex-1 bg-[#0f172a] p-2 rounded border border-cyan-500">
+                                  <div className="text-[10px] text-gray-500 uppercase tracking-widest text-center border-b border-cyan-700 pb-1 mb-2">Right Lung</div>
                                   <div className="flex flex-col items-center space-y-2">
                                     <label className="flex items-center space-x-3 cursor-pointer hover:bg-[#1e293b] p-1.5 rounded w-24">
                                       <input type="checkbox" checked={wizardData.zones.includes('RU')} onChange={() => toggleArrayItem('zones', 'RU')} className="accent-emerald-500 w-4 h-4" />
@@ -939,8 +951,8 @@ export default function Home() {
                                   </div>
                                 </div>
                                 {/* Left Lung */}
-                                <div className="space-y-2 flex-1 bg-[#0f172a] p-2 rounded border border-[#475569]">
-                                  <div className="text-[10px] text-gray-500 uppercase tracking-widest text-center border-b border-[#334155] pb-1 mb-2">Left Lung</div>
+                                <div className="space-y-2 flex-1 bg-[#0f172a] p-2 rounded border border-cyan-500">
+                                  <div className="text-[10px] text-gray-500 uppercase tracking-widest text-center border-b border-cyan-700 pb-1 mb-2">Left Lung</div>
                                   <div className="flex flex-col items-center space-y-2">
                                     <label className="flex items-center space-x-3 cursor-pointer hover:bg-[#1e293b] p-1.5 rounded w-24">
                                       <input type="checkbox" checked={wizardData.zones.includes('LU')} onChange={() => toggleArrayItem('zones', 'LU')} className="accent-emerald-500 w-4 h-4" />
@@ -961,7 +973,7 @@ export default function Home() {
                             
                             <div>
                               <span className="block text-gray-400 mb-1 text-xs">c. PROFUSION (12-point scale) *</span>
-                              <select value={wizardData.profusion} onChange={e => updateData({ profusion: e.target.value })} className="w-full bg-[#0f172a] border border-[#475569] text-white p-2 rounded outline-none focus:border-emerald-500">
+                              <select value={wizardData.profusion} onChange={e => updateData({ profusion: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 text-white p-2 rounded outline-none focus:border-emerald-500">
                                 <option value="-">- Select -</option>
                                 <option value="0/-">0/-</option><option value="0/0">0/0</option><option value="0/1">0/1</option>
                                 <option value="1/0">1/0</option><option value="1/1">1/1</option><option value="1/2">1/2</option>
@@ -973,13 +985,13 @@ export default function Home() {
                         )}
                       </div>
                       {/* 2C */}
-                      <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg flex flex-col">
+                      <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg flex flex-col">
                         <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">{wizardData.classificationMode === 'Abbreviated' ? 'LARGE OPACITIES' : '2C. LARGE OPACITIES'}</p>
                         <div className="grid grid-cols-2 gap-2 flex-1">
                           {['0', 'A', 'B', 'C'].map(size => (
                             <label key={size} className="flex-1 cursor-pointer">
                               <input type="radio" name="large_opacity" checked={wizardData.largeOpacity === size} onChange={() => updateData({ largeOpacity: size })} className="peer hidden" />
-                              <div className="h-full flex items-center justify-center p-2 border border-[#475569] text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">
+                              <div className="h-full flex items-center justify-center p-2 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">
                                 Size {size}
                               </div>
                             </label>
@@ -993,34 +1005,34 @@ export default function Home() {
 
               {visibleSteps[wizardData.currentInterpStep]?.id === '3_pleural' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
-                  <h2 className="text-xl font-bold border-b border-[#334155] pb-2 text-white">3. PLEURAL ABNORMALITIES</h2>
+                  <h2 className="text-xl font-bold border-b border-cyan-700 pb-2 text-white">3. PLEURAL ABNORMALITIES</h2>
                   
                   {/* 3A */}
                   {/* 3A */}
-                  <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg">
+                  <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg">
                     <p className="mb-4 text-purple-400 font-bold uppercase tracking-widest text-xs">{wizardData.classificationMode === 'Abbreviated' ? 'PLEURAL ABNORMALITIES *' : '3A. ANY CLASSIFIABLE PLEURAL ABNORMALITIES? *'}</p>
                     <div className="flex space-x-4">
                       <label className="flex-1 cursor-pointer">
                         <input type="radio" name="anyPleural" checked={wizardData.anyPleural === 'Yes'} onChange={() => updateData({ anyPleural: 'Yes' })} className="peer hidden" />
-                        <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">{wizardData.classificationMode === 'Abbreviated' ? 'Yes' : 'Yes (Proceed to 3B, 3C, 3D)'}</div>
+                        <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">{wizardData.classificationMode === 'Abbreviated' ? 'Yes' : 'Yes (Proceed to 3B, 3C, 3D)'}</div>
                       </label>
                       <label className="flex-1 cursor-pointer">
                         <input type="radio" name="anyPleural" checked={wizardData.anyPleural === 'No'} onChange={() => updateData({ anyPleural: 'No' })} className="peer hidden" />
-                        <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-gray-600 peer-checked:text-white peer-checked:border-gray-400 font-bold hover:bg-[#334155] transition-colors">{wizardData.classificationMode === 'Abbreviated' ? 'No' : 'No (Skip to Section 4A)'}</div>
+                        <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-gray-600 peer-checked:text-white peer-checked:border-gray-400 font-bold hover:bg-[#334155] transition-colors">{wizardData.classificationMode === 'Abbreviated' ? 'No' : 'No (Skip to Section 4A)'}</div>
                       </label>
                     </div>
                   </div>
 
                   {wizardData.anyPleural === 'Yes' && (
-                    <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
+                    <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
                       
                       {wizardData.classificationMode === 'Abbreviated' ? (
                         <div className="space-y-6">
                           <div>
-                            <p className="mb-3 text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-[#334155] pb-2">PLEURAL THICKENING - PT</p>
+                            <p className="mb-3 text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-cyan-700 pb-2">PLEURAL THICKENING - PT</p>
                             <div className="flex space-x-4">
                               {['0', 'R', 'L'].map(opt => (
-                                <label key={`pt-${opt}`} className="flex items-center space-x-2 cursor-pointer bg-[#0f172a] px-4 py-2 rounded border border-[#475569] hover:border-purple-500 transition-colors">
+                                <label key={`pt-${opt}`} className="flex items-center space-x-2 cursor-pointer bg-[#0f172a] px-4 py-2 rounded border border-cyan-500 hover:border-purple-500 transition-colors">
                                   <input type="checkbox" checked={wizardData.abbrevThickening.includes(opt)} onChange={() => toggleArrayItem('abbrevThickening', opt)} className="accent-emerald-500 w-4 h-4" />
                                   <span className="text-gray-300 font-bold">{opt === '0' ? '0=None' : opt === 'R' ? 'R=Right' : 'L=Left'}</span>
                                 </label>
@@ -1028,10 +1040,10 @@ export default function Home() {
                             </div>
                           </div>
                           <div>
-                            <p className="mb-3 text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-[#334155] pb-2">PLEURAL CALCIFICATION - PC</p>
+                            <p className="mb-3 text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-cyan-700 pb-2">PLEURAL CALCIFICATION - PC</p>
                             <div className="flex space-x-4">
                               {['0', 'R', 'L'].map(opt => (
-                                <label key={`pc-${opt}`} className="flex items-center space-x-2 cursor-pointer bg-[#0f172a] px-4 py-2 rounded border border-[#475569] hover:border-purple-500 transition-colors">
+                                <label key={`pc-${opt}`} className="flex items-center space-x-2 cursor-pointer bg-[#0f172a] px-4 py-2 rounded border border-cyan-500 hover:border-purple-500 transition-colors">
                                   <input type="checkbox" checked={wizardData.abbrevCalcification.includes(opt)} onChange={() => toggleArrayItem('abbrevCalcification', opt)} className="accent-emerald-500 w-4 h-4" />
                                   <span className="text-gray-300 font-bold">{opt === '0' ? '0=None' : opt === 'R' ? 'R=Right' : 'L=Left'}</span>
                                 </label>
@@ -1042,21 +1054,21 @@ export default function Home() {
                       ) : (
                         <div className="space-y-6">
                           {/* 3B. PLEURAL PLAQUES */}
-                          <div className="bg-[#0f172a] p-4 rounded border border-[#475569]">
-                            <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-[#334155] pb-2">3B. PLEURAL PLAQUES</p>
+                          <div className="bg-[#0f172a] p-4 rounded border border-cyan-500">
+                            <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-cyan-700 pb-2">3B. PLEURAL PLAQUES</p>
                             
                             <div className="grid grid-cols-4 gap-6">
                               {/* SITE */}
                               <div>
                                 <span className="block text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Site</span>
                                 <div className="space-y-2">
-                                  {[{l:'Profile', k:'plaqueSiteProfile'}, {l:'Face on', k:'plaqueSiteFaceOn'}, {l:'Diaphragm', k:'plaqueSiteDiaphragm'}, {l:'Other', k:'plaqueSiteOther'}].map(row => (
+                                  {[{l:'In profile', k:'plaqueSiteProfile'}, {l:'Face on', k:'plaqueSiteFaceOn'}, {l:'Diaphragm', k:'plaqueSiteDiaphragm'}, {l:'Other', k:'plaqueSiteOther'}].map(row => (
                                     <div key={`site-${row.k}`} className="flex items-center justify-between bg-[#1e293b] p-1.5 rounded">
                                       <span className="text-[10px] text-gray-400 w-16">{row.l}</span>
                                       <div className="flex space-x-1">
-                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
                                       </div>
                                     </div>
                                   ))}
@@ -1067,13 +1079,13 @@ export default function Home() {
                               <div>
                                 <span className="block text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Calcification</span>
                                 <div className="space-y-2">
-                                  {[{l:'Profile', k:'plaqueCalcProfile'}, {l:'Face on', k:'plaqueCalcFaceOn'}, {l:'Diaphragm', k:'plaqueCalcDiaphragm'}, {l:'Other', k:'plaqueCalcOther'}].map(row => (
+                                  {[{l:'In profile', k:'plaqueCalcProfile'}, {l:'Face on', k:'plaqueCalcFaceOn'}, {l:'Diaphragm', k:'plaqueCalcDiaphragm'}, {l:'Other', k:'plaqueCalcOther'}].map(row => (
                                     <div key={`calc-${row.k}`} className="flex items-center justify-between bg-[#1e293b] p-1.5 rounded">
                                       <span className="text-[10px] text-gray-400 w-16">{row.l}</span>
                                       <div className="flex space-x-1">
-                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
                                       </div>
                                     </div>
                                   ))}
@@ -1089,7 +1101,7 @@ export default function Home() {
                                     {['0', '1', '2', '3'].map(val => (
                                       <label key={`extR-${val}`} className="flex flex-col items-center cursor-pointer group">
                                         <input type="radio" checked={wizardData.plaqueExtentRight === val} onChange={() => updateData({ plaqueExtentRight: val })} className="hidden" />
-                                        <div className={`w-6 h-6 rounded-full border border-[#475569] flex items-center justify-center text-xs ${wizardData.plaqueExtentRight === val ? 'bg-emerald-600 text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
+                                        <div className={`w-6 h-6 rounded-full border border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueExtentRight === val ? 'bg-emerald-600 text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
                                           {val === '0' ? 'O' : val}
                                         </div>
                                       </label>
@@ -1100,7 +1112,7 @@ export default function Home() {
                                     {['0', '1', '2', '3'].map(val => (
                                       <label key={`extL-${val}`} className="flex flex-col items-center cursor-pointer group">
                                         <input type="radio" checked={wizardData.plaqueExtentLeft === val} onChange={() => updateData({ plaqueExtentLeft: val })} className="hidden" />
-                                        <div className={`w-6 h-6 rounded-full border border-[#475569] flex items-center justify-center text-xs ${wizardData.plaqueExtentLeft === val ? 'bg-emerald-600 text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
+                                        <div className={`w-6 h-6 rounded-full border border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueExtentLeft === val ? 'bg-emerald-600 text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
                                           {val === '0' ? 'O' : val}
                                         </div>
                                       </label>
@@ -1118,7 +1130,7 @@ export default function Home() {
                                     {['0', 'a', 'b', 'c'].map(val => (
                                       <label key={`widR-${val}`} className="flex flex-col items-center cursor-pointer group">
                                         <input type="radio" checked={wizardData.plaqueWidthRight === val} onChange={() => updateData({ plaqueWidthRight: val })} className="hidden" />
-                                        <div className={`w-6 h-6 rounded border border-[#475569] flex items-center justify-center text-xs ${wizardData.plaqueWidthRight === val ? 'bg-emerald-600 text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
+                                        <div className={`w-6 h-6 rounded border border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueWidthRight === val ? 'bg-emerald-600 text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
                                           {val === '0' ? 'O' : val}
                                         </div>
                                       </label>
@@ -1129,7 +1141,7 @@ export default function Home() {
                                     {['0', 'a', 'b', 'c'].map(val => (
                                       <label key={`widL-${val}`} className="flex flex-col items-center cursor-pointer group">
                                         <input type="radio" checked={wizardData.plaqueWidthLeft === val} onChange={() => updateData({ plaqueWidthLeft: val })} className="hidden" />
-                                        <div className={`w-6 h-6 rounded border border-[#475569] flex items-center justify-center text-xs ${wizardData.plaqueWidthLeft === val ? 'bg-emerald-600 text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
+                                        <div className={`w-6 h-6 rounded border border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueWidthLeft === val ? 'bg-emerald-600 text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
                                           {val === '0' ? 'O' : val}
                                         </div>
                                       </label>
@@ -1141,7 +1153,7 @@ export default function Home() {
                           </div>
 
                           {/* 3C. COSTOPHRENIC */}
-                          <div className="bg-[#0f172a] p-4 rounded border border-[#475569] flex items-center justify-between">
+                          <div className="bg-[#0f172a] p-4 rounded border border-cyan-500 flex items-center justify-between">
                             <p className="text-emerald-400 font-bold uppercase tracking-widest text-xs">3C. COSTOPHRENIC ANGLE OBLITERATION</p>
                             <div className="flex space-x-6">
                               <label className="flex items-center space-x-2 cursor-pointer">
@@ -1157,21 +1169,21 @@ export default function Home() {
 
                           {/* 3D. DIFFUSE */}
                           {(wizardData.costophrenicRight || wizardData.costophrenicLeft) && (
-                            <div className="bg-[#0f172a] p-4 rounded border border-[#475569]">
-                            <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-[#334155] pb-2">3D. DIFFUSE PLEURAL THICKENING</p>
+                            <div className="bg-[#0f172a] p-4 rounded border border-cyan-500">
+                            <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-cyan-700 pb-2">3D. DIFFUSE PLEURAL THICKENING</p>
                             
                             <div className="grid grid-cols-4 gap-6">
                               {/* SITE */}
                               <div>
                                 <span className="block text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Site</span>
                                 <div className="space-y-2">
-                                  {[{l:'Profile', k:'diffuseSiteProfile'}, {l:'Face on', k:'diffuseSiteFaceOn'}].map(row => (
+                                  {[{l:'In profile', k:'diffuseSiteProfile'}, {l:'Face on', k:'diffuseSiteFaceOn'}].map(row => (
                                     <div key={`dsite-${row.k}`} className="flex items-center justify-between bg-[#1e293b] p-1.5 rounded">
                                       <span className="text-[10px] text-gray-400 w-16">{row.l}</span>
                                       <div className="flex space-x-1">
-                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
                                       </div>
                                     </div>
                                   ))}
@@ -1182,13 +1194,13 @@ export default function Home() {
                               <div>
                                 <span className="block text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Calcification</span>
                                 <div className="space-y-2">
-                                  {[{l:'Profile', k:'diffuseCalcProfile'}, {l:'Face on', k:'diffuseCalcFaceOn'}].map(row => (
+                                  {[{l:'In profile', k:'diffuseCalcProfile'}, {l:'Face on', k:'diffuseCalcFaceOn'}].map(row => (
                                     <div key={`dcalc-${row.k}`} className="flex items-center justify-between bg-[#1e293b] p-1.5 rounded">
                                       <span className="text-[10px] text-gray-400 w-16">{row.l}</span>
                                       <div className="flex space-x-1">
-                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-[#475569] flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
                                       </div>
                                     </div>
                                   ))}
@@ -1204,7 +1216,7 @@ export default function Home() {
                                     {['0', '1', '2', '3'].map(val => (
                                       <label key={`dextR-${val}`} className="flex flex-col items-center cursor-pointer group">
                                         <input type="radio" checked={wizardData.diffuseExtentRight === val} onChange={() => updateData({ diffuseExtentRight: val })} className="hidden" />
-                                        <div className={`w-6 h-6 rounded-full border border-[#475569] flex items-center justify-center text-xs ${wizardData.diffuseExtentRight === val ? 'bg-emerald-600 text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
+                                        <div className={`w-6 h-6 rounded-full border border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseExtentRight === val ? 'bg-emerald-600 text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
                                           {val === '0' ? 'O' : val}
                                         </div>
                                       </label>
@@ -1215,7 +1227,7 @@ export default function Home() {
                                     {['0', '1', '2', '3'].map(val => (
                                       <label key={`dextL-${val}`} className="flex flex-col items-center cursor-pointer group">
                                         <input type="radio" checked={wizardData.diffuseExtentLeft === val} onChange={() => updateData({ diffuseExtentLeft: val })} className="hidden" />
-                                        <div className={`w-6 h-6 rounded-full border border-[#475569] flex items-center justify-center text-xs ${wizardData.diffuseExtentLeft === val ? 'bg-emerald-600 text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
+                                        <div className={`w-6 h-6 rounded-full border border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseExtentLeft === val ? 'bg-emerald-600 text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
                                           {val === '0' ? 'O' : val}
                                         </div>
                                       </label>
@@ -1233,7 +1245,7 @@ export default function Home() {
                                     {['0', 'a', 'b', 'c'].map(val => (
                                       <label key={`dwidR-${val}`} className="flex flex-col items-center cursor-pointer group">
                                         <input type="radio" checked={wizardData.diffuseWidthRight === val} onChange={() => updateData({ diffuseWidthRight: val })} className="hidden" />
-                                        <div className={`w-6 h-6 rounded border border-[#475569] flex items-center justify-center text-xs ${wizardData.diffuseWidthRight === val ? 'bg-emerald-600 text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
+                                        <div className={`w-6 h-6 rounded border border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseWidthRight === val ? 'bg-emerald-600 text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
                                           {val === '0' ? 'O' : val}
                                         </div>
                                       </label>
@@ -1244,7 +1256,7 @@ export default function Home() {
                                     {['0', 'a', 'b', 'c'].map(val => (
                                       <label key={`dwidL-${val}`} className="flex flex-col items-center cursor-pointer group">
                                         <input type="radio" checked={wizardData.diffuseWidthLeft === val} onChange={() => updateData({ diffuseWidthLeft: val })} className="hidden" />
-                                        <div className={`w-6 h-6 rounded border border-[#475569] flex items-center justify-center text-xs ${wizardData.diffuseWidthLeft === val ? 'bg-emerald-600 text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
+                                        <div className={`w-6 h-6 rounded border border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseWidthLeft === val ? 'bg-emerald-600 text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
                                           {val === '0' ? 'O' : val}
                                         </div>
                                       </label>
@@ -1264,43 +1276,43 @@ export default function Home() {
 
               {visibleSteps[wizardData.currentInterpStep]?.id === '4_other' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
-                  <h2 className="text-xl font-bold border-b border-[#334155] pb-2 text-white">4. OTHER ABNORMALITIES</h2>
+                  <h2 className="text-xl font-bold border-b border-cyan-700 pb-2 text-white">4. OTHER ABNORMALITIES</h2>
                   
                   {/* 4A (Full Mode Only) */}
                   {wizardData.classificationMode === 'Full' && (
-                    <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg">
+                    <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg">
                       <p className="mb-4 text-blue-400 font-bold uppercase tracking-widest text-xs">4A. ANY OTHER ABNORMALITIES? *</p>
                       <div className="flex space-x-4">
                         <label className="flex-1 cursor-pointer">
                           <input type="radio" name="anyOther" checked={wizardData.anyOther === 'Yes'} onChange={() => updateData({ anyOther: 'Yes' })} className="peer hidden" />
-                          <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">Yes (Proceed to 4B, 4C)</div>
+                          <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">Yes (Proceed to 4B, 4C)</div>
                         </label>
                         <label className="flex-1 cursor-pointer">
                           <input type="radio" name="anyOther" checked={wizardData.anyOther === 'No'} onChange={() => updateData({ anyOther: 'No' })} className="peer hidden" />
-                          <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-gray-600 peer-checked:text-white peer-checked:border-gray-400 font-bold hover:bg-[#334155] transition-colors">No (Complete Classification)</div>
+                          <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-gray-600 peer-checked:text-white peer-checked:border-gray-400 font-bold hover:bg-[#334155] transition-colors">No (Complete Classification)</div>
                         </label>
                       </div>
                     </div>
                   )}
 
                   {wizardData.classificationMode === 'Abbreviated' && (
-                    <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300 mb-6">
-                      <p className="mb-4 text-blue-400 font-bold uppercase tracking-widest text-xs border-b border-[#334155] pb-2">SYMBOLS *</p>
+                    <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300 mb-6">
+                      <p className="mb-4 text-blue-400 font-bold uppercase tracking-widest text-xs border-b border-cyan-700 pb-2">SYMBOLS *</p>
                       <div className="flex space-x-4 mb-6">
                         <label className="flex-1 cursor-pointer">
                           <input type="radio" name="abbrevSymbolsPresent" checked={wizardData.abbrevSymbolsPresent === 'Yes'} onChange={() => updateData({ abbrevSymbolsPresent: 'Yes' })} className="peer hidden" />
-                          <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">Yes</div>
+                          <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">Yes</div>
                         </label>
                         <label className="flex-1 cursor-pointer">
                           <input type="radio" name="abbrevSymbolsPresent" checked={wizardData.abbrevSymbolsPresent === 'No'} onChange={() => { updateData({ abbrevSymbolsPresent: 'No', symbols: [] }); }} className="peer hidden" />
-                          <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-gray-600 peer-checked:text-white peer-checked:border-gray-400 font-bold hover:bg-[#334155] transition-colors">No</div>
+                          <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-gray-600 peer-checked:text-white peer-checked:border-gray-400 font-bold hover:bg-[#334155] transition-colors">No</div>
                         </label>
                       </div>
                       
                       {wizardData.abbrevSymbolsPresent === 'Yes' && (
                         <div className="grid grid-cols-8 gap-2 animate-in fade-in duration-300">
                           {OBLIGATORY_SYMBOLS.map(sym => (
-                            <label key={sym} className="flex items-center justify-center border border-[#475569] p-2 rounded hover:bg-[#334155] cursor-pointer transition-colors">
+                            <label key={sym} className="flex items-center justify-center border border-cyan-500 p-2 rounded hover:bg-[#334155] cursor-pointer transition-colors">
                               <input type="checkbox" checked={wizardData.symbols.includes(sym)} onChange={() => toggleArrayItem('symbols', sym)} className="hidden peer" />
                               <span className="font-mono font-bold uppercase text-gray-400 peer-checked:text-emerald-400">{sym}</span>
                             </label>
@@ -1313,11 +1325,11 @@ export default function Home() {
                   {(wizardData.classificationMode === 'Full' && wizardData.anyOther === 'Yes') && (
                     <>
                       {/* 4B */}
-                      <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
-                        <p className="mb-4 text-blue-400 font-bold uppercase tracking-widest text-xs border-b border-[#334155] pb-2">4B. OTHER SYMBOLS (OBLIGATORY)</p>
+                      <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
+                        <p className="mb-4 text-blue-400 font-bold uppercase tracking-widest text-xs border-b border-cyan-700 pb-2">4B. OTHER SYMBOLS (OBLIGATORY)</p>
                         <div className="grid grid-cols-8 gap-2">
                           {OBLIGATORY_SYMBOLS.map(sym => (
-                            <label key={sym} title={OBLIGATORY_SYMBOLS_FULL[sym]} className="flex items-center justify-center border border-[#475569] p-2 rounded hover:bg-[#334155] cursor-pointer transition-colors">
+                            <label key={sym} title={OBLIGATORY_SYMBOLS_FULL[sym]} className="flex items-center justify-center border border-cyan-500 p-2 rounded hover:bg-[#334155] cursor-pointer transition-colors">
                               <input type="checkbox" checked={wizardData.symbols.includes(sym)} onChange={() => toggleArrayItem('symbols', sym)} className="hidden peer" />
                               <span className="font-mono font-bold uppercase text-gray-400 peer-checked:text-emerald-400">{sym}</span>
                             </label>
@@ -1327,7 +1339,7 @@ export default function Home() {
 
                       {/* 4C */}
                       {wizardData.classificationMode === 'Full' && (
-                        <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
+                        <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
                           <p className="mb-4 text-gray-400 font-bold uppercase tracking-widest text-xs">4C. Should Patient/Worker/Employee see personal physician because of findings in section 4? *</p>
                           <div className="flex space-x-4">
                             <label className="flex items-center space-x-2 cursor-pointer">
@@ -1345,21 +1357,21 @@ export default function Home() {
                   )}
 
                   {/* COMMENTS (Always visible at bottom of Step 4) */}
-                  <div className="bg-[#1e293b] p-6 border border-[#334155] shadow-sm rounded-lg">
+                  <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg">
                     <p className="mb-4 text-blue-400 font-bold uppercase tracking-widest text-xs">COMMENTS</p>
                     <div className="flex space-x-4 mb-4">
                       <label className="flex-1 cursor-pointer">
                         <input type="radio" name="hasComments" checked={wizardData.hasComments === 'Yes'} onChange={() => updateData({ hasComments: 'Yes' })} className="peer hidden" />
-                        <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">Yes</div>
+                        <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">Yes</div>
                       </label>
                       <label className="flex-1 cursor-pointer">
                         <input type="radio" name="hasComments" checked={wizardData.hasComments === 'No'} onChange={() => updateData({ hasComments: 'No' })} className="peer hidden" />
-                        <div className="p-4 border border-[#475569] text-center rounded peer-checked:bg-gray-600 peer-checked:text-white peer-checked:border-gray-400 font-bold hover:bg-[#334155] transition-colors">No</div>
+                        <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-gray-600 peer-checked:text-white peer-checked:border-gray-400 font-bold hover:bg-[#334155] transition-colors">No</div>
                       </label>
                     </div>
                     {wizardData.hasComments === 'Yes' && (
                       <div className="animate-in fade-in duration-300">
-                        <textarea maxLength={1500} value={wizardData.commentsText} onChange={e => updateData({ commentsText: e.target.value })} placeholder="Enter comments here (max 250 words)..." className="w-full bg-[#0f172a] border border-[#475569] rounded p-3 text-white outline-none focus:border-emerald-500 min-h-[120px]"></textarea>
+                        <textarea maxLength={1500} value={wizardData.commentsText} onChange={e => updateData({ commentsText: e.target.value })} placeholder="Enter comments here (max 250 words)..." className="w-full bg-[#0f172a] border border-cyan-500 rounded p-3 text-white outline-none focus:border-emerald-500 min-h-[120px]"></textarea>
                       </div>
                     )}
                   </div>
@@ -1368,10 +1380,10 @@ export default function Home() {
             </div>
 
             {/* Wizard Controls */}
-            <div className="p-8 border-t border-[#334155] flex justify-between bg-[#0f172a]">
+            <div className="p-8 border-t border-cyan-700 flex justify-between bg-[#0f172a]">
               <button 
                 onClick={prevStep}
-                className="flex items-center space-x-2 px-6 py-2 rounded font-bold transition-colors bg-[#334155] hover:bg-[#475569] text-white"
+                className="flex items-center space-x-2 px-6 py-2 rounded-xl font-bold transition-colors bg-[#334155] hover:bg-[#475569] text-white"
               >
                 <ChevronLeft size={16} />
                 <span>Previous</span>
@@ -1387,56 +1399,265 @@ export default function Home() {
                   <ChevronRight size={16} />
                 </button>
               ) : (
-                <button 
-                  disabled={!canProceedInterp(wizardData.currentInterpStep)}
-                  className={`flex items-center space-x-2 px-6 py-2 rounded font-bold transition-colors ${!canProceedInterp(wizardData.currentInterpStep) ? 'bg-blue-900/50 text-blue-700 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/50'}`}
-                  onClick={async () => {
-                    await generatePDF();
-                  }}
-                >
-                  <Save size={16} />
-                  <span>Save & Generate PDF</span>
-                </button>
+                <div className="flex space-x-4">
+                    <button 
+                      onClick={() => window.location.reload()}
+                      className="flex items-center space-x-2 px-6 py-2 rounded-xl font-bold transition-colors bg-gray-700 hover:bg-gray-600 text-white shadow-lg"
+                      title="Clear the form and start a new patient classification"
+                    >
+                      <RefreshCw size={16} />
+                      <span>Start New Patient</span>
+                    </button>
+                    <button 
+                      disabled={!canProceedInterp(wizardData.currentInterpStep)}
+                      className={`flex items-center space-x-2 px-6 py-2 rounded font-bold transition-colors ${!canProceedInterp(wizardData.currentInterpStep) ? 'bg-blue-900/50 text-blue-700 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/50'}`}
+                      onClick={async () => {
+                        await generatePDF();
+                      }}
+                    >
+                      <Save size={16} />
+                      <span>Save & Generate PDF</span>
+                    </button>
+                  </div>
               )}
             </div>
           </div>
         )}
 
         {/* Developer & Documentation Footer Box (Compact) */}
-        <div className="mt-6 bg-[#1e293b] border border-[#334155] p-3 rounded-lg shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-          
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 pl-3">
-            <div className="text-gray-300 text-xs flex-1">
-              <p className="font-bold text-gray-400 text-xs mb-1">Version: 1.0.1</p>
-              <p className="font-bold text-blue-300 text-sm mb-0.5">Developed by Dr. Arkaprabha Sau</p>
-              <p className="font-medium text-gray-200">MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM</p>
-              <p className="font-medium text-gray-200 mt-0.5 text-[10px] md:text-xs">Ph.D. (Computer Science and Engineering: AI & ML in Healthcare)</p>
-              <p className="font-medium text-blue-200 mt-1 text-[10px] md:text-xs">If any bug or any issue please email to: arka.doctor@gmail.com</p>
-            </div>
-            
-            <div className="flex flex-row space-x-2 w-full md:w-auto">
-              <a href="/ILO-2022.pdf" target="_blank" rel="noreferrer" className="bg-[#0f172a] hover:bg-blue-600 border border-[#334155] hover:border-blue-500 text-gray-300 hover:text-white px-3 py-1.5 rounded text-xs font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md flex-1 md:flex-none">
-                <ExternalLink size={12} />
-                <span>ILO_2022</span>
-              </a>
-              <a href="/ILO_2022-28-29.pdf" target="_blank" rel="noreferrer" className="bg-[#0f172a] hover:bg-blue-600 border border-[#334155] hover:border-blue-500 text-gray-300 hover:text-white px-3 py-1.5 rounded text-xs font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md flex-1 md:flex-none">
-                <ExternalLink size={12} />
-                <span>ILO_2020 (28-29)</span>
-              </a>
-              <a href="https://arka1985.github.io/ILO_RAD/" target="_blank" rel="noreferrer" className="bg-[#0f172a] hover:bg-gray-700 border border-[#334155] hover:border-gray-500 text-gray-300 hover:text-white px-3 py-1.5 rounded text-xs font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md flex-1 md:flex-none" title="Check GitHub for Updates">
-                <RefreshCw size={12} />
-                <span>Updates</span>
-              </a>
+          <div className="bg-[#1e293b] border-t border-cyan-700 p-4 mt-6 print:hidden relative z-[50]">
+            <div className="max-w-7xl mx-auto flex flex-row justify-between items-center gap-6 w-full">
+              
+              {/* Left Side: Developer Info */}
+              <div className="flex flex-col w-[45%]">
+                <p className="font-bold text-gray-400 text-[11px] mb-1">Version: 1.0.2</p>
+                <p className="font-bold text-blue-300 text-[13px] mb-0.5">Designed and Developed by <span className="text-orange-400">Dr. Arkaprabha Sau</span></p>
+                <p className="font-medium text-gray-200 text-[11px] leading-tight">
+                  MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM
+                </p>
+                <p className="font-medium text-gray-300 text-[10px] mt-0.5 leading-tight">
+                  Ph.D. (Computer Science and Engineering: AI & ML in Healthcare)
+                </p>
+                <p className="font-medium text-blue-200 mt-1.5 text-[10px]">
+                  For any suggestion, query, help, bug, or any issue report to: <a href="mailto:arka.doctor@gmail.com" className="underline hover:text-blue-100">arka.doctor@gmail.com</a>
+                </p>
+              </div>
+              
+              {/* Right Side: Buttons Grid */}
+              <div className="grid grid-cols-3 gap-2 w-[55%]">
+                <a href="/ILO-2022.pdf" target="_blank" rel="noreferrer" className="bg-[#0f172a] hover:bg-blue-600 border border-cyan-700 hover:border-blue-500 text-gray-300 hover:text-white p-2 rounded-xl text-[10px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
+                  <ExternalLink size={14} className="shrink-0" />
+                  <span className="leading-tight">ILO 2022</span>
+                </a>
+                
+                <a href="/ILO_2022-28-29.pdf" target="_blank" rel="noreferrer" className="bg-[#0f172a] hover:bg-blue-600 border border-cyan-700 hover:border-blue-500 text-gray-300 hover:text-white p-2 rounded-xl text-[10px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
+                  <ExternalLink size={14} className="shrink-0" />
+                  <span className="leading-tight">ILO 2022 (ENTRY FORM)</span>
+                </a>
+                
+                <a href="https://arka1985.github.io/ILO_RAD/" target="_blank" rel="noreferrer" className="bg-[#0f172a] hover:bg-gray-700 border border-cyan-700 hover:border-gray-500 text-gray-300 hover:text-white p-2 rounded-xl text-[10px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center" title="Check GitHub for Updates">
+                  <RefreshCw size={14} className="shrink-0" />
+                  <span className="leading-tight">Updates</span>
+                </a>
+
+                <button onClick={() => setShowHelpModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white border border-cyan-700 p-2 rounded-xl text-[10px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
+                  <Info size={14} className="shrink-0" />
+                  <span className="leading-tight">Help & Instructions</span>
+                </button>
+                
+                <button onClick={() => setShowLicenseModal(true)} className="bg-[#0f172a] hover:bg-emerald-600 border border-cyan-700 hover:border-emerald-500 text-gray-300 hover:text-white p-2 rounded-xl text-[10px] font-bold transition-colors flex items-center justify-center space-x-1 shadow-md h-full text-center leading-tight">
+                  <ClipboardList size={14} className="shrink-0" />
+                  <span>LICENSE & ACKNOWLEDGMENTS</span>
+                </button>
+                
+                <button onClick={() => setShowReferencesModal(true)} className="bg-[#0f172a] hover:bg-purple-600 border border-cyan-700 hover:border-purple-500 text-gray-300 hover:text-white p-2 rounded-xl text-[10px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
+                  <ExternalLink size={14} className="shrink-0" />
+                  <span className="leading-tight">REFERENCES</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* History Modal */}
-        {showHistoryModal && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4">
-            <div className="bg-[#0f172a] border border-[#334155] rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-              <div className="p-4 border-b border-[#334155] flex justify-between items-center bg-[#1e293b] rounded-t-lg">
+          {/* Modals */}
+          {showHelpModal && (
+              <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4" onClick={() => setShowHelpModal(false)}>
+                <div className="bg-[#0f172a] border border-cyan-700 rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+                  <div className="flex justify-between items-center p-4 border-b border-cyan-700 bg-[#1e293b]">
+                    <h2 className="text-xl font-bold text-white flex items-center space-x-2"><Info className="text-blue-400" /><span>Help & Instructions</span></h2>
+                    <button onClick={() => setShowHelpModal(false)} className="text-gray-400 hover:text-white transition-colors"><X size={24} /></button>
+                  </div>
+                  <div className="p-6 overflow-y-auto text-gray-300 space-y-4 text-sm">
+                    <h3 className="text-lg font-bold text-white">How to Use the App</h3>
+                    <ol className="list-decimal pl-5 space-y-2">
+                      <li>Fill out the <strong>Doctor Details</strong> and click "Save Doctor Info As Default".</li>
+                      <li>Fill out the <strong>Patient Details</strong> for your current classification.</li>
+                      <li>Click the <strong>Pop Out Dual Viewer Panel</strong> button to open the side-by-side DICOM viewer.</li>
+                      <li>Compare the patient's X-ray with the standard ILO references and complete the interpretation form on the left.</li>
+                      <li>Once you finish all steps, click <strong>Save & Generate PDF</strong> at the bottom.</li>
+                      <li>To begin the next patient, simply click <strong>Start New Patient</strong>.</li>
+                    </ol>
+      
+                    <h3 className="text-lg font-bold text-white mt-6 border-t border-cyan-700 pt-4">Data Backup & Migration</h3>
+                    <p>Your patient reports are permanently and securely saved to a database file on your computer. It is located at:</p>
+                    <code className="block bg-[#1e293b] text-emerald-400 p-2 rounded-xl border border-cyan-700 mt-2 mb-2 font-mono">Documents/ILO_RAD_Database/reports.db</code>
+                    <ul className="list-disc pl-5 space-y-2">
+                      <li><strong>To Backup:</strong> Copy the <code className="text-emerald-400">reports.db</code> file to a secure USB drive or cloud backup.</li>
+                      <li><strong>To Move Computers:</strong> Install the app on the new computer, then copy your old <code className="text-emerald-400">reports.db</code> file into the new computer's <code className="text-emerald-400">Documents/ILO_RAD_Database</code> folder.</li>
+                      <li><strong>App Updates:</strong> Because this database is stored in your Documents folder (outside the app folder), you can safely delete the old app folder when an update comes out without losing any patient records!</li>
+                    </ul>
+                  </div>
+                  <div className="p-4 border-t border-cyan-700 bg-[#1e293b] flex justify-end">
+                    <button onClick={() => setShowHelpModal(false)} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-bold transition-colors">Close Help</button>
+                  </div>
+                </div>
+              </div>
+          )}
+          
+          {showLicenseModal && (
+            <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[200] p-4" onClick={() => !isFirstLaunch && setShowLicenseModal(false)}>
+              <div className="bg-[#0f172a] border border-cyan-700 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center p-5 border-b border-cyan-700 bg-[#1e293b]">
+                  <h2 className="text-xl font-black text-white flex items-center space-x-2">
+                    <ClipboardList className="text-emerald-400" />
+                    <span>PULMOVIEW LICENSE & ACKNOWLEDGMENTS</span>
+                  </h2>
+                  {!isFirstLaunch && <button onClick={() => setShowLicenseModal(false)} className="text-gray-400 hover:text-white transition-colors"><X size={24} /></button>}
+                </div>
+                
+                <div className="p-8 overflow-y-auto text-gray-300 space-y-6 text-sm leading-relaxed">
+                  
+                  {isFirstLaunch && (
+                    <div className="bg-orange-900/20 border-l-4 border-orange-500 p-4 rounded-r">
+                      <p className="font-bold text-orange-400 mb-1 uppercase">Welcome to PulmoView!</p>
+                      <p className="text-orange-200">Please read and accept these terms before using the application.</p>
+                    </div>
+                  )}
+
+                  <div className="bg-orange-900/30 border-l-4 border-orange-500 p-4 rounded-r shadow-lg">
+                    <p className="text-orange-400 font-black uppercase text-base text-center">
+                      IT IS ABSOLUTELY FREE OF COST TO USE, NO PAID OR SUBSCRIPTION IS NEEDED.
+                    </p>
+                  </div>
+
+                  <div className="bg-[#1e293b] p-4 rounded-lg border border-cyan-700">
+                    <h3 className="font-bold text-white text-base mb-2">Designed and Developed by:</h3>
+                    <p className="font-bold text-orange-400 text-lg">Dr. Arkaprabha Sau</p>
+                    <p className="text-gray-300 mt-1">MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM</p>
+                    <p className="text-gray-300">Ph.D. (Computer Science and Engineering: AI & ML in Healthcare)</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold text-white border-b border-cyan-700 pb-2">Software Purpose & Important Acknowledgments</h3>
+                    <div className="bg-[#1e293b] p-4 rounded-xl border border-cyan-700">
+                      <p className="text-orange-400 font-black uppercase text-sm mb-1">THIS IS NOT AN AI-BASED TOOL.</p>
+                      <p className="text-gray-300">
+                        This software is strictly a digital interface tool designed solely to facilitate the classification and filling of forms according to the latest ILO International Classification of Radiographs of Pneumoconioses. It acts as a digital worksheet to assist medical professionals in organizing their findings.
+                      </p>
+                    </div>
+
+                    <ul className="list-disc pl-5 space-y-2 text-gray-300">
+                      <li>The entire methodology is based solely on the official <strong>ILO International Classification of Radiographs of Pneumoconioses (2022 Guidelines)</strong>.</li>
+                      <li><strong>Interpretation and classification MUST be solely performed by a Medical Officer / Qualified Medical Practitioner</strong> who is appropriately trained at a recognized institute.</li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold text-white border-b border-cyan-700 pb-2">Privacy and Confidentiality Disclaimer & Terms of Use</h3>
+                    <p>PulmoView operates <strong>100% locally</strong> on your machine. No patient data is collected, transmitted, or stored on external servers by this application.</p>
+                    <p>However, <strong>YOU are solely responsible</strong> for ensuring that the computer on which this software is installed complies with all applicable local, regional, and national healthcare data privacy laws and regulations (e.g., DPDP Act, HIPAA, GDPR, or equivalent).</p>
+                    <p>You must ensure that the local database and generated PDF reports are stored securely and protected against unauthorized access.</p>
+                    <p className="uppercase text-xs text-gray-400 mt-2">
+                      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3 text-justify">
+                    <h3 className="text-lg font-bold text-white border-b border-cyan-700 pb-2">PULMOVIEW — Free Use and Attribution License</h3>
+                    <p className="font-bold text-gray-200">Copyright © 2026 Dr. Arkaprabha Sau.</p>
+                    <p>
+                      PULMOVIEW is provided free of charge for academic, educational, research, institutional, professional, and other lawful purposes. Users are permitted to use, copy, distribute, modify, and adapt the software, provided that the original copyright notice and this license are retained and appropriate acknowledgement is given to the developer.
+                    </p>
+                    <p className="font-bold text-emerald-400">
+                      Any publication, research article, thesis, dissertation, presentation, report, website, software, or other work that uses or incorporates PULMOVIEW or a substantial portion of its code, algorithms, functionality, or outputs must acknowledge:
+                      <br/><br/>
+                      <span className="text-white">Dr. Arkaprabha Sau, MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM, Ph.D. (Computer Science and Engineering: AI & ML in Healthcare).</span>
+                    </p>
+                    <p>
+                      Modification and redistribution are permitted, provided that modified versions clearly indicate that changes have been made and do not falsely represent the modified software as the original PULMOVIEW. Commercial use is permitted without a software license fee, subject to these attribution and copyright conditions.
+                    </p>
+                    <p>
+                      Ownership and copyright of the original PULMOVIEW remain with Dr. Arkaprabha Sau, and no rights of ownership are transferred to any user or organization. Use of PULMOVIEW does not imply endorsement by the developer or any associated institution.
+                    </p>
+                    <p className="uppercase text-xs text-gray-400 mt-2 font-bold">
+                      PULMOVIEW is provided "AS IS", without warranties of any kind, and users are responsible for independently evaluating its accuracy, suitability, reliability, and limitations, particularly when used for medical, occupational-health, clinical, research, or professional purposes. By downloading, installing, copying, modifying, distributing, or using PULMOVIEW, the user agrees to these terms.
+                    </p>
+                    <p className="mt-2">
+                      This work incorporates elements governed by the <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline font-bold">Creative Commons Attribution 4.0 International License (CC BY 4.0)</a>.
+                    </p>
+                  </div>
+                  
+                </div>
+                
+                <div className="p-5 border-t border-cyan-700 bg-[#1e293b] flex justify-end">
+                  {isFirstLaunch ? (
+                    <button 
+                      onClick={() => {
+                        sessionStorage.setItem('hasAcceptedLicense', 'true');
+                        setIsFirstLaunch(false);
+                        setShowLicenseModal(false);
+                      }} 
+                      className="bg-red-600 hover:bg-red-500 active:bg-green-500 focus:bg-green-500 text-white px-8 py-3 rounded-xl font-black transition-all shadow-lg uppercase tracking-wide"
+                    >
+                      I Have Read and Accept These Terms
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => setShowLicenseModal(false)} 
+                      className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-bold transition-colors shadow-lg"
+                    >
+                      Close
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showReferencesModal && (
+            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4" onClick={() => setShowReferencesModal(false)}>
+              <div className="bg-[#0f172a] border border-cyan-700 rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center p-4 border-b border-cyan-700 bg-[#1e293b]">
+                  <h2 className="text-xl font-bold text-white flex items-center space-x-2"><span>References</span></h2>
+                  <button onClick={() => setShowReferencesModal(false)} className="text-gray-400 hover:text-white transition-colors"><X size={24} /></button>
+                </div>
+                <div className="p-6 overflow-y-auto text-gray-300 space-y-6 text-sm">
+                  <div>
+                    <h3 className="font-bold text-white mb-2 border-b border-cyan-700 pb-1">1. ILO 2022 Guidelines</h3>
+                    <p>International Labour Office. <em>Guidelines for the use of the ILO International Classification of Radiographs of Pneumoconioses</em>. Revised edition 2022. Geneva: ILO; 2022.</p>
+                    <a href="https://www.ilo.org/resource/other/ilo-international-classification-radiographs-pneumoconioses" target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-300 underline mt-1 inline-block break-all">
+                      https://www.ilo.org/resource/other/ilo-international-classification-radiographs-pneumoconioses
+                    </a>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white mb-2 border-b border-cyan-700 pb-1">2. OSHWC Code 2020</h3>
+                    <p>Ministry of Labour and Employment, Government of India. <em>The Occupational Safety, Health and Working Conditions Code, 2020</em>. No. 37 of 2020. New Delhi: The Gazette of India; 2020 Sept 29.</p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white mb-2 border-b border-cyan-700 pb-1">3. Central Rules 2026 (Form IX)</h3>
+                    <p>Ministry of Labour and Employment, Government of India. <em>The Occupational Safety, Health and Working Conditions (Central) Rules, 2026</em>. New Delhi: The Gazette of India; 2026. (Form IX: Report of Medical Examination).</p>
+                  </div>
+                </div>
+                <div className="p-4 border-t border-cyan-700 bg-[#1e293b] flex justify-end">
+                  <button onClick={() => setShowReferencesModal(false)} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-bold transition-colors">Close</button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+{showHistoryModal && (
+            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4 print:hidden">
+            <div className="bg-[#0f172a] border border-cyan-700 rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+              <div className="p-4 border-b border-cyan-700 flex justify-between items-center bg-[#1e293b] rounded-t-lg">
                 <h3 className="text-white font-bold text-lg flex items-center space-x-2">
                   <Search size={18} />
                   <span>Search Previous Patients</span>
@@ -1445,13 +1666,13 @@ export default function Home() {
                   <X size={20} />
                 </button>
               </div>
-              <div className="p-4 border-b border-[#334155]">
+              <div className="p-4 border-b border-cyan-700">
                 <input 
                   type="text" 
                   placeholder="Search by Patient Name or ID..." 
                   value={historySearch} 
                   onChange={e => setHistorySearch(e.target.value)}
-                  className="w-full bg-[#1e293b] border border-[#475569] text-white px-4 py-3 rounded outline-none focus:border-emerald-500 transition-colors"
+                  className="w-full bg-[#1e293b] border border-cyan-500 text-white px-4 py-3 rounded-xl outline-none focus:border-emerald-500 transition-colors"
                 />
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -1459,7 +1680,7 @@ export default function Home() {
                   (r.patientName || '').toLowerCase().includes(historySearch.toLowerCase()) || 
                   (r.patientId || '').toLowerCase().includes(historySearch.toLowerCase())
                 ).map((report, idx) => (
-                  <div key={idx} className="bg-[#1e293b] border border-[#334155] p-4 rounded hover:border-emerald-500 transition-colors flex justify-between items-center group">
+                  <div key={idx} className="bg-[#1e293b] border border-cyan-700 p-4 rounded-xl hover:border-emerald-500 transition-colors flex justify-between items-center group">
                     <div>
                       <p className="text-white font-bold text-lg">{report.patientName} <span className="text-gray-400 text-sm font-normal">({report.patientId})</span></p>
                       <p className="text-gray-400 text-sm mt-1">Report Date: {report.historyDate || 'Unknown'} | Mode: {report.classificationMode}</p>
@@ -1467,17 +1688,27 @@ export default function Home() {
                     <div className="flex items-center space-x-2">
                       <button 
                         onClick={(e) => { e.stopPropagation(); deleteHistoricalPatient(report.historyId); }}
-                        className="bg-red-900/50 hover:bg-red-600 text-red-200 px-3 py-2 rounded transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                        className="bg-red-900/50 hover:bg-red-600 text-red-200 px-3 py-2 rounded-xl transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
                         title="Delete this record"
                       >
                         <Trash2 size={18} />
                       </button>
-                      <button 
-                        onClick={() => loadHistoricalPatient(report)}
-                        className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded font-bold transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
-                      >
+                      <button
+                          onClick={() => {
+                            updateData(report);
+                            setShowHistoryModal(false);
+                            setTimeout(() => window.print(), 2000);
+                          }}
+                          className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                        >
+                          Print Report
+                        </button>
+                        <button
+                          onClick={() => loadHistoricalPatient(report)}
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                        >
                         Load Demographics
-                      </button>
+                        </button>
                     </div>
                   </div>
                 ))}
@@ -1499,7 +1730,10 @@ export default function Home() {
         ? <ILOAbbreviatedReportTemplate data={wizardData} />
         : <ILOReportTemplate data={wizardData} />
       }
+      <div style={{ pageBreakBefore: "always", breakBefore: "page" }}></div>
+      <FormIXReportTemplate reportData={wizardData} />
     </div>
-  </>
-);
+  
+    </>
+  );
 }

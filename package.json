@@ -1,6 +1,6 @@
 {
   "name": "ilo-rad-suite",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "private": true,
   "description": "A comprehensive DICOM Radiograph viewer suite for ILO standard classification.",
   "scripts": {

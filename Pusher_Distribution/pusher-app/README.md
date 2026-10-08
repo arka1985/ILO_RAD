@@ -31,7 +31,7 @@ This suite uses a direct, modern web-based transfer system. You do NOT need to c
 
 
 ## Privacy & Data Confidentiality
-* **100% Local & Offline**: This software suite is designed to run entirely locally on your own hardware or local area network.
+* **100% Locally run inside your own computer & Offline**: (internet/LAN connection only require if PACS system is used).
 * **No Telemetry & No Cloud Storage**: We do not collect usage data, analytics, or store your patient data in any external cloud server. 
 * **Data Security**: DICOM files transferred via the Pusher App or loaded directly do not leave your network. It is the user's responsibility to ensure the host machine complies with local medical data regulations (e.g., HIPAA, GDPR).
 

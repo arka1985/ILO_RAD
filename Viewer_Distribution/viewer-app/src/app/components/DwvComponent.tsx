@@ -23,11 +23,16 @@ const customSpacings: Record<string, {rowPixelSpacing: number, columnPixelSpacin
 function customMetaDataProvider(type: string, imageId: string) {
   if (type === 'imagePlaneModule') {
     if (customSpacings[imageId]) {
+        return {
+          rowPixelSpacing: customSpacings[imageId].rowPixelSpacing,
+          columnPixelSpacing: customSpacings[imageId].columnPixelSpacing
+        };
+      }
+      // Force all images to have no physical spacing until manually calibrated!
       return {
-        rowPixelSpacing: customSpacings[imageId].rowPixelSpacing,
-        columnPixelSpacing: customSpacings[imageId].columnPixelSpacing
+        rowPixelSpacing: null,
+        columnPixelSpacing: null
       };
-    }
   }
   return undefined;
 }
@@ -198,16 +203,10 @@ export default function DicomViewerBase({ initialUrl, patientFile, hideToolbar =
     
     setLoadedImage(image);
     
-    // Check if image has valid pixel spacing
-    if (image.columnPixelSpacing && image.rowPixelSpacing) {
-      setIsCalibrated(true);
-      setPhysicalWidth((image.columnPixelSpacing * image.width).toFixed(1));
-      setPhysicalHeight((image.rowPixelSpacing * image.height).toFixed(1));
-    } else {
+    // Force uncalibrated state for ALL images (Standard and Patient)
       setIsCalibrated(false);
       setPhysicalWidth("");
       setPhysicalHeight("");
-    }
     
     // --- MONOCHROME1 INVERSION FIX ---
     // If the image is MONOCHROME1 (invert = true), dark areas have high numerical values.

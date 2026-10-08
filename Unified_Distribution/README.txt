@@ -32,7 +32,7 @@ Keep the black terminal window open while you are using the app. When you're don
 
 
 ## Privacy & Data Confidentiality
-* **100% Local & Offline**: This software suite is designed to run entirely locally on your own hardware or local area network.
+* **100% Locally run inside your own computer & Offline**: (internet/LAN connection only require if PACS system is used).
 * **No Telemetry & No Cloud Storage**: We do not collect usage data, analytics, or store your patient data in any external cloud server. 
 * **Data Security**: DICOM files transferred via the Pusher App or loaded directly do not leave your network. It is the user's responsibility to ensure the host machine complies with local medical data regulations (e.g., HIPAA, GDPR).
 
@@ -44,7 +44,7 @@ Keep the black terminal window open while you are using the app. When you're don
 
 
 ## Updates and Versioning
-**Current Version:** 1.0.0
+**Current Version:** 1.0.2
 
 To check if a newer version of the software is available, visit the [Official Updates Page](https://arka1985.github.io/ILO_RAD/) (you can also click the "Updates" button in the Viewer App footer). 
 

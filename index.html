@@ -208,6 +208,62 @@
             color: white;
             margin-bottom: 0.5rem;
         }
+        .pulsatile {
+            animation: pulse-text 2s infinite ease-in-out;
+            display: inline-block;
+        }
+
+        @keyframes pulse-text {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.03); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        /* Diagram Styles */
+        .diagram-wrapper {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px dashed var(--glass-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+    
+        /* Modern Cards Layout */
+        .modern-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+            align-items: start;
+        }
+        .modern-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            height: 100%;
+            box-sizing: border-box;
+        }
+        .modern-card > h2 {
+            margin-top: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+        .modern-card h3 {
+            font-size: 1.25rem;
+            margin-top: 1.5rem;
+        }
+        .modern-card ul, .modern-card ol {
+            padding-left: 1.25rem;
+        }
+        .modern-card li {
+            margin-bottom: 0.5rem;
+        }
+
     </style>
 </head>
 <body>
@@ -216,12 +272,13 @@
     <header>
         <h1>PulmoView: ILO Radiograph Suite</h1>
         <p class="subtitle">A comprehensive, fully local web application suite for PulmoView: ILO Radiography System for Pneumoconiosis Classification customised to Indian Context</p>
+        <p class="pulsatile" style="color: var(--primary-accent); font-size: 1.1rem; font-weight: 600; margin-top: 1rem;">Version: 1.0.2 | Updated: October 8, 2026</p>
     </header>
 
     <div class="glass-panel">
         <h2 style="text-align: center; margin-bottom: 2rem; color: white;">Download Your Distribution</h2>
         <div style="background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 1rem; margin-bottom: 2rem; border-radius: 0.25rem;">
-            <p style="color: #fca5a5; font-size: 0.95rem; margin: 0;"><strong>Note on Download Size:</strong> The repository contains the standard ILO reference images in both JPEG and DICOM formats to allow for seamless offline classification. Because of this, the total size of the distribution is approximately <strong>1.4 GB</strong>. It may take some time to download depending on your internet connection.</p>
+            <p style="color: #fca5a5; font-size: 0.95rem; margin: 0;"><strong>Note on Download Size:</strong> The repository contains the standard ILO reference images in both JPEG and DICOM formats to allow for seamless offline classification. Because of this, the total size of the viewer and unified distribution is approximately <strong>1.5 GB</strong>. It may take some time to download depending on your internet connection.</p>
         </div>
         
         <div class="grid">
@@ -230,7 +287,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem auto; display: block;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><path d="M12 7v6"></path><path d="M9 10h6"></path></svg>
                 <h3>Viewer Distribution</h3>
                 <p><strong>For the Doctor / Medical Interpreter.</strong> Includes the full ILO classification suite, reporting wizard, and DICOM viewer. Ready to receive images instantly.</p>
-                <a href="https://github.com/arka1985/ILO_RAD/archive/refs/heads/main.zip" class="btn btn-viewer">Download Package (.zip)</a>
+                <a href="https://github.com/arka1985/ILO_RAD/releases/latest/download/Viewer_Distribution.zip" class="btn btn-viewer">Download Package (.zip)</a>
                 <p style="font-size: 0.8rem; text-align: center; margin-top: 0.5rem;">(Extract and open the <strong>Viewer_Distribution</strong> folder)</p>
             </div>
 
@@ -239,7 +296,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem auto; display: block;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                 <h3>Pusher Distribution</h3>
                 <p><strong>For the X-Ray Technician.</strong> A lightweight, simple interface to instantly push DICOM files directly to the doctor's screen over the network.</p>
-                <a href="https://github.com/arka1985/ILO_RAD/archive/refs/heads/main.zip" class="btn btn-pusher">Download Package (.zip)</a>
+                <a href="https://github.com/arka1985/ILO_RAD/releases/latest/download/Pusher_Distribution.zip" class="btn btn-pusher">Download Package (.zip)</a>
                 <p style="font-size: 0.8rem; text-align: center; margin-top: 0.5rem;">(Extract and open the <strong>Pusher_Distribution</strong> folder)</p>
             </div>
 
@@ -248,133 +305,240 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem auto; display: block;"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line><path d="M12 10v4"></path></svg>
                 <h3>Unified Distribution</h3>
                 <p><strong>For General Use / Single Machine.</strong> Contains both apps. An interactive script lets you choose your role (Viewer or Pusher) on startup.</p>
-                <a href="https://github.com/arka1985/ILO_RAD/archive/refs/heads/main.zip" class="btn btn-unified">Download Package (.zip)</a>
+                <a href="https://github.com/arka1985/ILO_RAD/releases/latest/download/Unified_Distribution.zip" class="btn btn-unified">Download Package (.zip)</a>
                 <p style="font-size: 0.8rem; text-align: center; margin-top: 0.5rem;">(Extract and open the <strong>Unified_Distribution</strong> folder)</p>
+            </div>
+        </div>
+        
+        <div style="background-color: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 1.5rem; margin-top: 0; border-radius: 0.25rem;">
+            <p style="color: #93c5fd; font-size: 0.95rem; margin: 0 0 0.5rem 0;"><strong>Important Setup Instructions:</strong></p>
+            <ol style="color: #93c5fd; font-size: 0.95rem; margin: 0 0 1rem 1.25rem; padding: 0;">
+                <li style="margin-bottom: 0.25rem;">After downloading, <strong>cut or copy</strong> the downloaded <code>.zip</code> file from your Downloads folder.</li>
+                <li style="margin-bottom: 0.25rem;"><strong>Paste it into your C: drive</strong> (or any separate safe storage space depending on your OS). <em>Why? It is highly undesirable to unzip directly into the Downloads folder because that folder is frequently cleared out. If the software is accidentally deleted, you will lose your local patient data and have to redownload the large package.</em></li>
+                <li style="margin-bottom: 0.25rem;">Once pasted in the safe location, <strong style="color: #fb923c;">unzip it</strong> (e.g., Right-click the file and select "Extract All").</li>
+                <li style="margin-bottom: 0.5rem;">After extraction, you can safely <strong>delete the original .zip file</strong> so it doesn't block your storage space.</li>
+            </ol>
+            <p style="color: #fb923c; font-size: 0.95rem; margin: 0 0 0.75rem 0;"><strong>Desktop Shortcut:</strong> Inside the downloaded folder, you can double-click <code>Create_Desktop_Shortcut.vbs</code> to create an easy launch shortcut on your Desktop.</p>
+            <p style="color: #93c5fd; font-size: 0.95rem; margin: 0;"><strong>Please read the instructions on this page carefully before using the software.</strong></p>
+        </div>
+    </div>
+
+    <div class="docs-section" style="background: transparent; border: none; padding: 0;">
+    
+    <!-- Intro Card -->
+    <div class="modern-card" style="margin-bottom: 2rem;">
+        <h2>What is ILO Radiography?</h2>
+        <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 1rem;">The International Labour Organization (ILO) International Classification of Radiographs of Pneumoconioses is a standard system for classifying chest radiographs (PA view X-rays) for pneumoconiosis (dust-induced lung diseases like silicosis, coal worker's pneumoconiosis, and asbestosis, etc) in a systematic, simple and reproducible manner.</p>
+        <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 0;">Its purpose is to provide a standardized, reproducible way to record the presence and severity of lung abnormalities, which is crucial for epidemiological research, screening, and medical surveillance of workers exposed to hazardous dusts. This software suite provides a digital side-by-side viewer of standard ILO reference images alongside patient DICOM files to assist physicians in grading these conditions.</p>
+    </div>
+
+    <!-- Hardware Card -->
+    <div class="modern-card" style="margin-bottom: 2rem;">
+        <h2>Hardware & Configuration Requirements</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr)); gap: 2rem;">
+            <div>
+                <h3 style="margin-top: 0; color: #a78bfa;">Computer Requirements</h3>
+                <ul>
+                    <li><strong>Operating System:</strong> Windows 10/11, macOS, or Linux.</li>
+                    <li><strong>Processor:</strong> Modern multi-core processor (Intel Core i5 / AMD Ryzen 5 / Apple M1 or better recommended).</li>
+                    <li><strong>Memory (RAM):</strong> Minimum 8 GB (16 GB or higher recommended).</li>
+                    <li><strong>Storage:</strong> At least 2 GB of free disk space.</li>
+                    <li><strong>Web Browser:</strong> Latest version of Google Chrome or Mozilla Firefox.</li>
+                    <li><strong>Internet Connection:</strong> Only required for PACS features. Otherwise, fully offline.</li>
+                </ul>
+                <h3 style="margin-top: 1.5rem; color: #a78bfa;">Diagnostic Monitor (As per ILO)</h3>
+                <ul>
+                    <li><strong>Type:</strong> Flat Panel display terminal.</li>
+                    <li><strong>Resolution:</strong> Minimum 3 Megapixels (e.g., 2048 &times; 1536).</li>
+                    <li><strong>Luminance:</strong> Maximum luminance of at least 250 cd/m&sup2;.</li>
+                    <li><strong>Contrast Ratio:</strong> Minimum contrast ratio of 250:1.</li>
+                    <li><strong>Calibration:</strong> DICOM Part 14 Grayscale Standard Display Function (GSDF).</li>
+                    <li><strong>Display Size:</strong> Minimum 21 inches diagonal.</li>
+                </ul>
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1);">
+                <h3 style="margin-top: 0; text-align: center; color: white;">Laptop Setup</h3>
+                <svg viewBox="0 0 800 120" width="100%" height="auto" style="max-width: 100%; display: block;" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <style>
+                      .box { fill: rgba(255,255,255,0.05); stroke: rgba(255,255,255,0.2); stroke-width: 1.5; rx: 6; }
+                      .box-med { fill: rgba(251,146,60,0.05); stroke: #fb923c; stroke-width: 1.5; rx: 6; }
+                      .txt-title { fill: #fff; font-family: system-ui, sans-serif; font-size: 16px; font-weight: 600; text-anchor: middle; }
+                      .txt-title-med { fill: #fb923c; font-family: system-ui, sans-serif; font-size: 16px; font-weight: 600; text-anchor: middle; }
+                      .txt-sub { fill: #9ca3af; font-family: system-ui, sans-serif; font-size: 14px; text-anchor: middle; }
+                      .txt-arrow { fill: #60a5fa; font-family: system-ui, sans-serif; font-size: 13px; font-weight: 600; text-anchor: middle; }
+                      .line { stroke: #60a5fa; stroke-width: 2; fill: none; marker-end: url(#arrow-head); }
+                    </style>
+                    <marker id="arrow-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                      <path d="M 0 0 L 10 5 L 0 10 z" fill="#60a5fa" />
+                    </marker>
+                  </defs>
+                  <rect x="100" y="20" width="220" height="70" class="box" />
+                  <text x="210" y="50" class="txt-title">Laptop Screen</text>
+                  <text x="210" y="70" class="txt-sub">Data Entry</text>
+                  <path d="M 320 55 L 470 55" class="line" />
+                  <text x="395" y="45" class="txt-arrow">HDMI/USB-C</text>
+                  <rect x="480" y="20" width="220" height="70" class="box-med" />
+                  <text x="590" y="50" class="txt-title-med">Medical Monitor</text>
+                  <text x="590" y="70" class="txt-sub">Dual Viewer</text>
+                </svg>
+
+                <h3 style="text-align: center; color: white; margin-top: 2rem;">Desktop Setup</h3>
+                <svg viewBox="0 0 800 220" width="100%" height="auto" style="max-width: 100%; display: block;" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="100" y="75" width="220" height="70" class="box" />
+                  <text x="210" y="105" class="txt-title">Desktop PC</text>
+                  <text x="210" y="125" class="txt-sub">Running App</text>
+                  <path d="M 320 110 L 370 110 L 370 55 L 470 55" class="line" />
+                  <text x="420" y="45" class="txt-arrow">Main Port</text>
+                  <rect x="480" y="20" width="220" height="70" class="box" />
+                  <text x="590" y="50" class="txt-title">Standard Monitor</text>
+                  <text x="590" y="70" class="txt-sub">Data Entry</text>
+                  <path d="M 320 110 L 370 110 L 370 165 L 470 165" class="line" />
+                  <text x="420" y="155" class="txt-arrow">Splitter/Port 2</text>
+                  <rect x="480" y="130" width="220" height="70" class="box-med" />
+                  <text x="590" y="160" class="txt-title-med">Medical Monitor</text>
+                  <text x="590" y="180" class="txt-sub">Dual Viewer</text>
+                </svg>
             </div>
         </div>
     </div>
 
-    <div class="docs-section">
-        <h2>What is ILO Radiography?</h2>
-        <p class="subtitle" style="margin-left: 0;">The International Labour Organization (ILO) International Classification of Radiographs of Pneumoconioses is a standard system for classifying chest radiographs (X-rays) for pneumoconiosis (dust-induced lung diseases like silicosis, coal worker's pneumoconiosis, and asbestosis).</p>
-        <p class="subtitle" style="margin-left: 0; margin-top: 1rem;">Its purpose is to provide a standardized, reproducible way to record the presence and severity of lung abnormalities, which is crucial for epidemiological research, screening, and medical surveillance of workers exposed to hazardous dusts. This software suite provides a digital side-by-side viewer of standard ILO reference images alongside patient DICOM files to assist physicians in grading these conditions.</p>
+    <!-- Quick Start Grid -->
+    <div class="modern-grid">
+        <div class="modern-card">
+            <h2>How to Run</h2>
+            
+            <h3 style="margin-top: 0; color: #a78bfa;">Prerequisites</h3>
+            <ul style="margin-bottom: 1.5rem;">
+                <li><span style="color: #fb923c;"><strong>Node.js</strong>: Required to run this application.</span> <a href="https://nodejs.org/" target="_blank" style="color: var(--secondary-accent)">Download the LTS version</a>.</li>
+                <li><strong>Other Dependencies</strong>: Automatically installed on first run.</li>
+            </ul>
+            
+            <div style="background-color: rgba(251, 146, 60, 0.1); border-left: 4px solid #fb923c; padding: 1rem; margin-bottom: 1rem; border-radius: 0.25rem;">
+                <p style="color: #fdba74; margin: 0; font-size: 0.95rem;"><strong>Browser Note:</strong> We highly recommend using Google Chrome or Mozilla Firefox.</p>
+            </div>
+            
+            <h3 style="color: #a78bfa;">Windows</h3>
+            <ol style="margin-bottom: 1.5rem;">
+                <li>Double-click the <code>.bat</code> file (e.g., <code>start_windows.bat</code>).</li>
+                <li>The script installs dependencies, boots the server, and opens your browser.</li>
+                <li><strong>Unified Distribution:</strong> Press <code>1</code> for Viewer or <code>2</code> for Pusher.</li>
+            </ol>
 
-        <h2>How to Run (Windows, Mac, Linux)</h2>
-        
-        <h3>Prerequisites</h3>
-        <ol>
-            <li><strong>Node.js</strong>: You must have Node.js installed to run this application.
-                <ul>
-                    <li>Go to the <a href="https://nodejs.org/" target="_blank" style="color: var(--secondary-accent)">Node.js Official Website</a>.</li>
-                    <li>Download and install the <strong>LTS (Long Term Support)</strong> version for your operating system (Windows, Mac, or Linux).</li>
-                    <li>Follow the standard installation prompts (you can leave all settings at their defaults).</li>
+            <h3 style="color: #a78bfa;">Mac / Linux</h3>
+            <ol>
+                <li>Open a terminal and run <code>chmod +x start_mac_linux.sh</code>.</li>
+                <li>Run <code>./start_mac_linux.sh</code>.</li>
+                <li><strong>Unified Distribution:</strong> Press <code>1</code> for Viewer or <code>2</code> for Pusher.</li>
+            </ol>
+        </div>
+
+        <div class="modern-card">
+            <h2>How to Use the Viewer App</h2>
+            <ol>
+                <li>Launch the Viewer (Opens at <code>http://localhost:3000</code>).</li>
+                <li>Fill out the <strong>Reporting Wizard</strong> on the left side of the screen.</li>
+                <li>Click <strong>"POP OUT DUAL VIEWER PANEL"</strong> to open the side-by-side image viewer in a new window.<br>
+                <div style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.2); border-left: 4px solid #fb923c; border-radius: 4px;">
+                    <span style="color: #fb923c;"><em>Note: For optimal workflow, the dual viewer panel should be extended to your secondary diagnostic screen. If using a laptop, connect your secondary monitor directly. If using a desktop, use an HDMI splitter (or secondary display port).<br><br><strong>How to Extend Your Display:</strong> Press <strong>Windows Key + P</strong> (or System Preferences &rarr; Displays on Mac) and select <strong>"Extend"</strong>. Drag the popped-out window to the medical monitor.</em></span>
+                </div>
+                </li>
+                <li style="margin-top: 1rem;">Load a patient DICOM file (via Upload, PACS, or pushed from the Technician).</li>
+                <li>Compare the patient's X-ray against the ILO Standard Reference Images and fill the form systematically.</li>
+                <li>Generate and save your final PDF report.</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Advanced Usage Grid -->
+    <div class="modern-grid">
+        <div class="modern-card">
+            <h2>How to Use the Pusher App</h2>
+            <ol>
+                <li>Launch the Pusher (Opens at <code>http://localhost:3002</code>).</li>
+                <li>Find the IP Address of the doctor's computer.
+                    <ul>
+                        <li><strong>Local Network:</strong> Use <code>ipconfig</code> (Windows), <code>ifconfig</code> (Mac), or <code>ip a</code> (Linux). <em>Example: <code>192.168.1.100</code></em></li>
+                        <li><strong>Remote Network:</strong> Use <a href="https://tailscale.com/" target="_blank" style="color: var(--secondary-accent)">Tailscale</a> to get a secure IP (e.g. <code>100.115.92.2</code>).</li>
+                    </ul>
+                </li>
+                <li>In the Pusher App, enter the target address: <br><code style="display: block; margin: 0.5rem 0; background: rgba(0,0,0,0.3); padding: 0.5rem;">http://192.168.1.100:3000/api/dicom-receiver</code></li>
+                <li>Drag and drop a patient's <code>.dcm</code> file into the designated area, or upload it directly from any local or external storage drive.</li>
+                <li>The image will instantly appear on the doctor's screen without them needing to refresh!</li>
+            </ol>
+        </div>
+
+        <div class="modern-card">
+            <h2>How to Use PACS</h2>
+            <p style="color: var(--text-muted)">If your facility uses a PACS server (like Orthanc) with a DICOMweb endpoint enabled:</p>
+            <ol>
+                <li>Open the Viewer App and click the <strong>"Connect to PACS"</strong> button.</li>
+                <li>In the <strong>"Network Setup"</strong> tab, enter your PACS DICOMweb URL <br><code style="display: block; margin: 0.5rem 0; background: rgba(0,0,0,0.3); padding: 0.5rem;">http://192.168.1.50:8042/dicom-web</code></li>
+                <li>Provide a Username and Password if required.</li>
+                <li>Go to the <strong>"Query / Retrieve"</strong> tab.</li>
+                <li>Enter the Patient Name or ID and click <strong>Search</strong>.</li>
+                <li>Click on any study to instantly fetch and render the DICOM files!</li>
+            </ol>
+
+            <h3 style="color: #22c55e;">Privacy & Data Confidentiality</h3>
+            <div style="background-color: rgba(34, 197, 94, 0.1); border-left: 4px solid #22c55e; padding: 1rem; border-radius: 0.25rem;">
+                <ul style="color: #86efac; font-size: 0.95rem; margin: 0;">
+                    <li><strong>100% Locally run inside your own computer & Offline:</strong> (internet/LAN connection only require if PACS system is used).</li>
+                    <li><strong>No Telemetry & No Cloud Storage:</strong> No data leaves your computer.</li>
+                    <li><strong>Data Security:</strong> Compliant with local setups as long as hardware is secured.</li>
                 </ul>
-            </li>
-            <li><strong>Other Dependencies</strong>: You do <strong>not</strong> need to manually install any other software dependencies. The startup scripts provided below will automatically download and install all necessary background packages (like npm modules) the first time you run them.</li>
-        </ol>
+            </div>
+        </div>
+    </div>
 
-        <h3 style="margin-top: 1.5rem;">Running the Application</h3>
-        
-        <h3>Windows:</h3>
-        <p><strong>Note: We highly recommend using Google Chrome or Mozilla Firefox as your default web browser for the best experience and performance.</strong></p>
-        <ol>
-            <li>Open the folder of your chosen distribution.</li>
-            <li>Double-click the <code>.bat</code> file (e.g., <code>start_windows.bat</code>, <code>start_viewer_windows.bat</code>, or <code>start_pusher_windows.bat</code>).</li>
-            <li>The script will automatically install dependencies on its first run, boot the server, and open your default web browser.</li>
-        </ol>
-
-        <h3>Mac / Linux:</h3>
-        <ol>
-            <li>Open a terminal and navigate to the folder of your chosen distribution.</li>
-            <li>Make the script executable: <code>chmod +x start_mac_linux.sh</code> (or the equivalent script name).</li>
-            <li>Run the script: <code>./start_mac_linux.sh</code></li>
-            <li>The script will install dependencies, boot the server, and open your default web browser.</li>
-        </ol>
-        
-        <p style="color: var(--text-muted); font-size: 0.9rem;"><em>Note for Unified Distribution:</em> If you run the unified startup script, you will be prompted with a terminal menu to press <code>1</code> for the Viewer or <code>2</code> for the Pusher.</p>
-
-        <h2>How to Use the Viewer App</h2>
-        <ol>
-            <li>Launch the Viewer using the instructions above. (Opens at <code>http://localhost:3000</code>).</li>
-            <li>Fill out the <strong>Reporting Wizard</strong> on the left side of the screen.</li>
-            <li>Click <strong>"POP OUT DUAL VIEWER PANEL"</strong> to open the side-by-side image viewer in a new window.</li>
-            <li>Load a patient DICOM file (via Upload button, PACS, or pushed from the Technician).</li>
-            <li>Compare the patient's X-ray against the ILO Standard Reference Images.</li>
-            <li>Generate and save your final PDF report.</li>
-        </ol>
-
-        <h2>How to Use the Pusher App</h2>
-        <ol>
-            <li>Launch the Pusher using the instructions above. (Opens at <code>http://localhost:3002</code>).</li>
-            <li>Find the IP Address of the doctor's computer (where the Viewer App is running).
-                <ul>
-                    <li><strong>If on the same Local Network:</strong>
-                        <ul>
-                            <li><strong>Windows</strong>: Open Command Prompt and type <code>ipconfig</code> (look for IPv4 Address).</li>
-                            <li><strong>Mac</strong>: Open Terminal and type <code>ifconfig | grep inet</code>, or check System Settings > Network.</li>
-                            <li><strong>Linux</strong>: Open Terminal and type <code>ip a</code> or <code>hostname -I</code>.</li>
-                            <li><em>Example: <code>192.168.1.100</code></em></li>
-                        </ul>
-                    </li>
-                    <li style="margin-top: 0.5rem;"><strong>If on different networks (Remote pushing via Tailscale):</strong>
-                        <ul>
-                            <li>You can use <a href="https://tailscale.com/" target="_blank" style="color: var(--secondary-accent)">Tailscale</a> to securely connect computers over the internet.</li>
-                            <li>1. Download and install Tailscale on <strong>both</strong> the doctor's computer and the technician's (pusher's) computer.</li>
-                            <li>2. Log in to the same Tailscale account on both machines.</li>
-                            <li>3. Open the Tailscale app on the doctor's computer and copy its <strong>Tailscale IP address</strong> (it typically starts with <code>100.x.x.x</code>).</li>
-                            <li><em>Example: <code>100.115.92.2</code></em></li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-            <li>In the Pusher App, enter the target address: <code>http://192.168.1.100:3000/api/dicom-receiver</code></li>
-            <li>Drag and drop a patient's <code>.dcm</code> file into the designated area.</li>
-            <li>The image will instantly appear on the doctor's screen without them needing to refresh!</li>
-        </ol>
-
-        <h2>How to Use PACS</h2>
-        <p style="color: var(--text-muted)">If your facility uses a PACS server (like Orthanc) with a DICOMweb endpoint enabled:</p>
-        <ol>
-            <li>Open the Viewer App and click the <strong>"Connect to PACS"</strong> button.</li>
-            <li>In the <strong>"Network Setup"</strong> tab, enter your PACS DICOMweb URL (e.g., <code>http://192.168.1.50:8042/dicom-web</code>).</li>
-            <li>Provide a Username and Password if required.</li>
-            <li>Go to the <strong>"Query / Retrieve"</strong> tab.</li>
-            <li>Enter the Patient Name or ID and click <strong>Search</strong>.</li>
-            <li>Click on any study to instantly fetch and render the DICOM files!</li>
-        </ol>
-
-        <h2>Privacy & Data Confidentiality</h2>
-        <div style="background-color: rgba(34, 197, 94, 0.1); border-left: 4px solid #22c55e; padding: 1rem; margin-bottom: 2rem; border-radius: 0.25rem;">
-            <ul style="color: #86efac; font-size: 0.95rem; margin: 0; padding-left: 1.5rem;">
-                <li><strong>100% Local & Offline:</strong> Operates completely inside your local network.</li>
-                <li><strong>No Telemetry & No Cloud Storage:</strong> No data ever leaves your computer or is sent to third parties.</li>
-                <li><strong>Data Security:</strong> Compliant with local setups as long as your hardware is secured.</li>
+    <!-- Legal & Updates Grid -->
+    <div class="modern-grid">
+        <div class="modern-card">
+            <h2>Updates and Versioning</h2>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                <span style="font-size: 1.25rem;"><strong>Current Version:</strong></span>
+                <span style="background: rgba(167, 139, 250, 0.2); color: #a78bfa; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: bold;">1.0.2</span>
+            </div>
+            <p style="color: var(--text-muted);">You are currently on the official updates page! Compare this version with the one shown in your Viewer App's footer.</p>
+            
+            <h3 style="color: #a78bfa;">How to Install an Update:</h3>
+            <ol>
+                <li>Download the new <code>.zip</code> package and extract it to a <strong>new folder</strong>.</li>
+                <li><strong>Do not overwrite</strong> the old folder immediately.</li>
+                <li>Your patient history and doctor profile are saved in your browser's <code>localStorage</code>. They automatically carry over as long as you use the same browser.</li>
+                <li>Once verified, safely delete the old folder.</li>
+            </ol>
+            
+            <h3 style="color: #a78bfa; margin-top: 2rem;">Why This Suite is Novel</h3>
+            <ul>
+                <li><strong>Zero Server Configuration:</strong> Direct DICOM pushing without heavy backend installations.</li>
+                <li><strong>Integrated Standard Viewing:</strong> Seamless side-by-side comparison against digital ILO standards.</li>
+                <li><strong>Interactive Reporting:</strong> Fill forms and generate PDFs in one workflow.</li>
             </ul>
         </div>
 
-        <h2>Why This Suite is Novel</h2>
-        <ul>
-            <li><strong>Zero Server Configuration:</strong> Push DICOM files directly from the acquisition PC to the doctor's screen instantly without heavy backend installations.</li>
-            <li><strong>Integrated Standard Viewing:</strong> Seamless side-by-side comparison of patient X-rays against digital ILO Reference Standards.</li>
-            <li><strong>Interactive Reporting:</strong> Fill out forms and generate PDF reports directly within the same workflow.</li>
-        </ul>
+        <div class="modern-card">
+            <h2>License & Acknowledgments</h2>
+            
+            <h3 style="margin-top: 0; color: #a78bfa;">Copyright & Free Use</h3>
+            <p style="color: var(--text-muted);">Copyright &copy; 2026 Dr. Arkaprabha Sau. All Rights Reserved.</p>
+            <p style="color: var(--text-muted);">Available free of charge under the <strong>PULMOVIEW Free Use and Attribution License v1.0</strong>. Users may use, copy, distribute, modify, and integrate the software for lawful purposes. No license fee is required.</p>
 
-        <h2>Updates and Versioning</h2>
-        <p style="margin-bottom: 0.5rem;"><strong>Current Version:</strong> 1.0.1</p>
-        <p style="margin-bottom: 0.5rem;">You are currently on the official updates page! (You can always return here by clicking the "Updates" button in the Viewer App footer).</p>
-        <p style="margin-bottom: 1rem;"><strong>How to check for updates:</strong> Compare the "Current Version" listed above with the version number shown in your Viewer App's footer. If this page shows a newer version, download the latest <code>.zip</code> package for your distribution from the <strong>Download Your Distribution</strong> section above.</p>
-        
-        <h3 style="color: white; margin-bottom: 0.5rem;">How to Install an Update:</h3>
-        <ol style="margin-bottom: 2rem;">
-            <li>Download the new <code>.zip</code> package from GitHub and extract it to a <strong>new folder</strong>.</li>
-            <li><strong>Do not overwrite</strong> the old folder immediately.</li>
-            <li>Since the software runs locally, your patient history and doctor profile are saved in your browser's <code>localStorage</code>. They will automatically carry over as long as you open the new version in the same browser on the same computer.</li>
-            <li>Once you have verified the new version works, you can safely delete the old folder.</li>
-        </ol>
+            <h3 style="color: #a78bfa;">Attribution &mdash; Required (CC BY 4.0)</h3>
+            <p style="color: var(--text-muted);">This software is licensed under terms aligned with the <strong>Creative Commons Attribution 4.0 International (CC BY 4.0)</strong> license. Users must acknowledge the developer when PULMOVIEW is used, distributed, or modified.</p>
+            <blockquote style="border-left: 4px solid var(--secondary-accent); margin-left: 0; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 4px; font-style: italic; font-size: 0.95rem;">
+                PULMOVIEW was developed by Dr. Arkaprabha Sau, MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM, Ph.D. (Computer Science and Engineering: AI & ML in Healthcare).
+            </blockquote>
+
+            <h3 style="color: #ef4444;">Medical Disclaimer</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">PULMOVIEW is a software tool and does not replace professional medical judgment, clinical examination, diagnostic procedures, or applicable regulatory requirements. Users are responsible for evaluating suitability.</p>
+        </div>
     </div>
+</div>
 
     <footer>
-        <div class="footer-name">Developed by Dr. Arkaprabha Sau</div>
+        <div class="footer-name" style="color: #fb923c;">Developed by Dr. Arkaprabha Sau</div>
         <div>MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM</div>
         <div>Ph.D. (Computer Science and Engineering: AI & ML in Healthcare)</div>
         <div style="font-size: 0.85em; margin-top: 0.5rem; color: #93c5fd;">If any bug or any issue please email to: arka.doctor@gmail.com</div>

@@ -36,8 +36,6 @@ body {
   }
   #ilo-report-template, #ilo-abbrev-report-template {
     width: 200mm !important;
-    max-height: 287mm !important;
-    overflow: hidden !important;
     transform: scale(0.85);
     transform-origin: top left;
     margin: 0 !important;

@@ -14,7 +14,7 @@ A comprehensive, fully local web application suite for ILO pneumoconiosis classi
 ---
 
 ## What is ILO Radiography?
-The International Labour Organization (ILO) International Classification of Radiographs of Pneumoconioses is a standard system for classifying chest radiographs (X-rays) for pneumoconiosis (dust-induced lung diseases like silicosis, coal worker's pneumoconiosis, and asbestosis). 
+The International Labour Organization (ILO) International Classification of Radiographs of Pneumoconioses is a standard system for classifying chest radiographs (PA view X-rays) for pneumoconiosis (dust-induced lung diseases like silicosis, coal worker's pneumoconiosis, and asbestosis, etc) in a systematic, simple and reproducible manner. 
 
 Its purpose is to provide a standardized, reproducible way to record the presence and severity of lung abnormalities, which is crucial for epidemiological research, screening, and medical surveillance of workers exposed to hazardous dusts. This software suite provides a digital side-by-side viewer of standard ILO reference images alongside patient DICOM files to assist physicians in grading these conditions.
 
@@ -65,7 +65,7 @@ This software is provided in three distinct "Distributions" to fit different wor
 
 **Windows:**
 1. Open the folder of your chosen distribution.
-2. Double-click the `.bat` file (e.g., `start_windows.bat`, `start_viewer_windows.bat`, or `start_pusher_windows.bat`).
+2. Double-click the `.bat` file (e.g., `start_windows.bat` or `start_pusher_windows.bat`).
 3. The script will automatically install dependencies on its first run, boot the server, and open your default web browser.
 
 **Mac / Linux:**
@@ -105,7 +105,7 @@ This software is provided in three distinct "Distributions" to fit different wor
      - 3. Open the Tailscale app on the doctor's computer and copy its **Tailscale IP address** (it typically starts with `100.x.x.x`).
      - *Example: `100.115.92.2`*
 4. In the Pusher App, enter the target address: `http://192.168.1.100:3000/api/dicom-receiver`
-5. Drag and drop a patient's `.dcm` file into the designated area.
+5. Drag and drop a patient's `.dcm` file into the designated area, or upload it directly from any local or external storage drive.
 6. The image will instantly appear on the doctor's screen without them needing to refresh!
 
 ---
@@ -123,7 +123,7 @@ If your facility uses a PACS server (like Orthanc) with a DICOMweb endpoint enab
 
 
 ## Privacy & Data Confidentiality
-* **100% Local & Offline**: This software suite is designed to run entirely locally on your own hardware or local area network.
+* **100% Locally run inside your own computer & Offline**: (internet/LAN connection only require if PACS system is used).
 * **No Telemetry & No Cloud Storage**: We do not collect usage data, analytics, or store your patient data in any external cloud server. 
 * **Data Security**: DICOM files transferred via the Pusher App or loaded directly do not leave your network. It is the user's responsibility to ensure the host machine complies with local medical data regulations (e.g., HIPAA, GDPR).
 
@@ -135,7 +135,7 @@ If your facility uses a PACS server (like Orthanc) with a DICOMweb endpoint enab
 
 
 ## Updates and Versioning
-**Current Version:** 1.0.1
+**Current Version:** 1.0.2
 
 To check if a newer version of the software is available, visit the [Official Updates Page](https://arka1985.github.io/ILO_RAD/) (you can also click the "Updates" button in the Viewer App footer). 
 

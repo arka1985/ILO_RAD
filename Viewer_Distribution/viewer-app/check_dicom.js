@@ -1,0 +1,18 @@
+const fs = require('fs');
+const dicomParser = require('dicom-parser');
+
+const dir = 'public/standards';
+const files = fs.readdirSync(dir).filter(f => f.endsWith('.dcm'));
+
+for (const file of files) {
+  const buf = fs.readFileSync(dir + '/' + file);
+  try {
+    const dataSet = dicomParser.parseDicom(new Uint8Array(buf));
+    const wc = dataSet.string('x00281050');
+    const ww = dataSet.string('x00281051');
+    const bitsStored = dataSet.uint16('x00280101');
+    console.log(file, 'WC:', wc, 'WW:', ww, 'BitsStored:', bitsStored);
+  } catch(e) {
+    console.log(file, 'Error parsing', e.message);
+  }
+}
