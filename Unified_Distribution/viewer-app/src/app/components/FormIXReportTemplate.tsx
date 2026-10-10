@@ -1,50 +1,92 @@
 import React from 'react';
 
 export function FormIXReportTemplate({ reportData }: { reportData: any }) {
+  const isAbbreviated = reportData.classificationMode === 'Abbreviated';
+
   // Helpers
-  const isParenchymalPresent = reportData.anyParenchymal === 'Yes';
+  const isParenchymalPresent = isAbbreviated
+    ? ((reportData.abbrevProfusion && reportData.abbrevProfusion !== '-' && reportData.abbrevProfusion !== '0') ||
+       (reportData.largeOpacity && reportData.largeOpacity !== '0' && reportData.largeOpacity !== 'None'))
+    : reportData.anyParenchymal === 'Yes';
   
   // Grade calculations
   const techGrade = reportData.qualityGrade || 'Not Specified';
-  const opacityGrade = (reportData.profusion && reportData.profusion !== '-') ? reportData.profusion : 'Not Specified';
+  
+  let opacityGrade = isAbbreviated
+    ? ((reportData.abbrevProfusion && reportData.abbrevProfusion !== '-') ? reportData.abbrevProfusion : 'Not Specified')
+    : ((reportData.profusion && reportData.profusion !== '-') ? reportData.profusion : 'Not Specified');
+
+  if (!isParenchymalPresent && opacityGrade === 'Not Specified') {
+    opacityGrade = 'None';
+  }
+    
   const largeOpacity = (reportData.largeOpacity && reportData.largeOpacity !== '0') ? reportData.largeOpacity : 'None';
   
   // Types calculation
+  const isZeroProfusion = isAbbreviated 
+    ? reportData.abbrevProfusion === '0' 
+    : (reportData.profusion === '0/-' || reportData.profusion === '0/0');
+
   let types = [];
   
-  if (reportData.zones && reportData.zones.length > 0) {
-    types.push(`Zones of Involvement: ${reportData.zones.join(', ')}`);
-  }
-  
-  if (reportData.primaryShape !== '-' || reportData.secondaryShape !== '-') {
-    const p = reportData.primaryShape !== '-' ? reportData.primaryShape : '';
-    const s = reportData.secondaryShape !== '-' ? reportData.secondaryShape : '';
-    types.push(`Shape/Size: ${p}${s ? '/' + s : ''}`);
-  }
+  if (isAbbreviated) {
+    if (isZeroProfusion) {
+      types.push(`Shape: Not Applicable`);
+    } else if (reportData.abbrevShape && reportData.abbrevShape !== '-') {
+      types.push(`Shape: ${reportData.abbrevShape}`);
+    }
+    
+    if (reportData.abbrevThickening?.length > 0) {
+      types.push(`Pleural Thickening: ${reportData.abbrevThickening.join(', ')}`);
+    }
+    
+    if (reportData.abbrevCalcification?.length > 0) {
+      types.push(`Pleural Calcification: ${reportData.abbrevCalcification.join(', ')}`);
+    }
+    
+    if (reportData.symbols?.length > 0) {
+      types.push(`Other Abnormalities: ${reportData.symbols.join(', ')}`);
+    }
+  } else {
+    if (isZeroProfusion) {
+      types.push(`Zones of Involvement: Not Applicable`);
+      types.push(`Shape/Size: Not Applicable`);
+    } else {
+      if (reportData.zones && reportData.zones.length > 0) {
+        types.push(`Zones of Involvement: ${reportData.zones.join(', ')}`);
+      }
+      
+      if (reportData.primaryShape !== '-' || reportData.secondaryShape !== '-') {
+        const p = reportData.primaryShape !== '-' ? reportData.primaryShape : '';
+        const s = reportData.secondaryShape !== '-' ? reportData.secondaryShape : '';
+        types.push(`Shape/Size: ${p}${s ? '/' + s : ''}`);
+      }
+    }
 
-  // Pleural Plaques
-  const hasPlaques = reportData.plaqueSiteProfile?.length > 0 || reportData.plaqueSiteFaceOn?.length > 0 || reportData.plaqueSiteDiaphragm?.length > 0;
-  if (hasPlaques) {
-    types.push('Pleural Plaques: Present');
-  }
+    // Pleural Plaques
+    const hasPlaques = reportData.plaqueSiteProfile?.length > 0 || reportData.plaqueSiteFaceOn?.length > 0 || reportData.plaqueSiteDiaphragm?.length > 0;
+    if (hasPlaques) {
+      types.push('Pleural Plaques: Present');
+    }
 
-  // Costophrenic Angle
-  if (reportData.costophrenicRight || reportData.costophrenicLeft) {
-    const cp = [];
-    if (reportData.costophrenicRight) cp.push('Right');
-    if (reportData.costophrenicLeft) cp.push('Left');
-    types.push(`Costophrenic Angle Obliteration: ${cp.join(', ')}`);
-  }
+    // Costophrenic Angle
+    if (reportData.costophrenicRight || reportData.costophrenicLeft) {
+      const cp = [];
+      if (reportData.costophrenicRight) cp.push('Right');
+      if (reportData.costophrenicLeft) cp.push('Left');
+      types.push(`Costophrenic Angle Obliteration: ${cp.join(', ')}`);
+    }
 
-  // Diffuse Pleural Thickening
-  const hasDiffuse = reportData.diffuseSiteProfile?.length > 0 || reportData.diffuseSiteFaceOn?.length > 0;
-  if (hasDiffuse) {
-    types.push('Diffuse Pleural Thickening: Present');
-  }
+    // Diffuse Pleural Thickening
+    const hasDiffuse = reportData.diffuseSiteProfile?.length > 0 || reportData.diffuseSiteFaceOn?.length > 0;
+    if (hasDiffuse) {
+      types.push('Diffuse Pleural Thickening: Present');
+    }
 
-  // Any other abnormality
-  if (reportData.anyOther === 'Yes' && reportData.symbols?.length > 0) {
-    types.push(`Other Abnormalities: ${reportData.symbols.join(', ')}`);
+    // Any other abnormality
+    if (reportData.anyOther === 'Yes' && reportData.symbols?.length > 0) {
+      types.push(`Other Abnormalities: ${reportData.symbols.join(', ')}`);
+    }
   }
 
   if (types.length === 0) {
@@ -68,6 +110,8 @@ export function FormIXReportTemplate({ reportData }: { reportData: any }) {
         <div>Patient ID: <span className="font-normal">{reportData.patientId}</span></div>
         <div>Date of Examination: <span className="font-normal">{reportData.radiographDate || reportData.readingDate}</span></div>
         <div>Classifying Physician: <span className="font-normal">{reportData.classifyingPhysician}</span></div>
+        <div>Reading Date: <span className="font-normal">{reportData.readingDate}</span></div>
+        <div>Establishment Name: <span className="font-normal">{reportData.establishmentName || 'Not Specified'}</span></div>
       </div>
 
       <div className="mb-4">

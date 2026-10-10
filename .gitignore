@@ -12,3 +12,14 @@ build/
 temp-dicom/
 public/temp-dicom/
 ILO_Radiograph_Suite.zip
+*.zip
+
+# Scratch scripts
+check*.js
+check*.py
+fix*.js
+redo_logic.py
+update_*.js
+update_*.py
+rezip.py
+find_comments.js

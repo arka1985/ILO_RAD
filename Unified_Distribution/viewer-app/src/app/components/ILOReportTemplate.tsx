@@ -43,6 +43,10 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
       pData.zones = [];
       pData.profusion = null;
       pData.largeOpacity = null;
+  } else if (pData.profusion === '0/-' || pData.profusion === '0/0') {
+      pData.primaryShape = null;
+      pData.secondaryShape = null;
+      pData.zones = [];
   }
   if (isUnreadable || anyPleural === 'No') {
       pData.plaqueSiteProfile = [];

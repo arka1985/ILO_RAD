@@ -38,7 +38,7 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
 
   // Handle abbreviated specific mappings
   const profusion = isUnreadable || isEssentiallyNormal ? null : data.abbrevProfusion;
-  const shape = isUnreadable || isEssentiallyNormal ? null : data.abbrevShape;
+  const shape = (isUnreadable || isEssentiallyNormal || data.abbrevProfusion === '0') ? null : data.abbrevShape;
   const largeOpacity = isUnreadable || isEssentiallyNormal ? null : data.largeOpacity;
   const thickening = isUnreadable || isEssentiallyNormal ? [] : (data.abbrevThickening || []);
   const calcification = isUnreadable || isEssentiallyNormal ? [] : (data.abbrevCalcification || []);
