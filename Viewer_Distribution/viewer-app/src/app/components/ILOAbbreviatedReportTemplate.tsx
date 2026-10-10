@@ -8,7 +8,7 @@ export interface ILOReportProps {
 const Checkbox = ({ checked, label, className = "", boxClass = "w-4 h-4", style }: { checked: boolean, label?: string, className?: string, boxClass?: string, style?: React.CSSProperties }) => (
   <span className={`inline-block whitespace-nowrap align-middle ${className}`} style={{ lineHeight: '1', ...style }}>
     <span className={`inline-block ${boxClass} border ${checked ? 'border-black text-black font-extrabold' : 'border-[#ef4444] text-transparent'} text-center text-[12px] align-middle bg-white overflow-hidden`} style={{ lineHeight: boxClass.includes('22px') ? '20px' : '14px' }}>
-      {checked ? 'X' : '\u00A0'}
+      {checked ? <span className="opacity-60">X</span> : '\u00A0'}
     </span>
     {label && <span className="align-middle ml-1.5 text-black text-[11px] whitespace-normal">{label}</span>}
   </span>
@@ -18,7 +18,7 @@ const LetterBox = ({ checked, label, className = "" }: { checked: boolean, label
   <span className={`relative inline-block w-[22px] h-[22px] border ${checked ? 'border-black text-black' : 'border-[#ef4444] text-[#ef4444]'} bg-white text-center text-[12px] align-middle overflow-hidden ${className}`} style={{ lineHeight: '20px' }}>
     <span className="relative z-10">{label}</span>
     {checked && (
-      <span className="absolute text-black font-normal" style={{ fontSize: '22px', left: 0, top: 0, width: '100%', height: '100%', lineHeight: '20px', textAlign: 'center', zIndex: 20 }}>
+      <span className="absolute text-black font-normal opacity-50" style={{ fontSize: '22px', left: 0, top: 0, width: '100%', height: '100%', lineHeight: '20px', textAlign: 'center', zIndex: 20 }}>
         X
       </span>
     )}
@@ -40,8 +40,9 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
   const profusion = isUnreadable || isEssentiallyNormal ? null : data.abbrevProfusion;
   const shape = (isUnreadable || isEssentiallyNormal || data.abbrevProfusion === '0') ? null : data.abbrevShape;
   const largeOpacity = isUnreadable || isEssentiallyNormal ? null : data.largeOpacity;
-  const thickening = isUnreadable || isEssentiallyNormal ? [] : (data.abbrevThickening || []);
-  const calcification = isUnreadable || isEssentiallyNormal ? [] : (data.abbrevCalcification || []);
+  const thickening = isUnreadable || isEssentiallyNormal ? [] : (data.anyPleural === 'No' ? ['0'] : (data.abbrevThickening || []));
+  const calcification = isUnreadable || isEssentiallyNormal ? [] : (data.anyPleural === 'No' ? ['0'] : (data.abbrevCalcification || []));
+  const cpAngle = isUnreadable || isEssentiallyNormal || data.anyPleural === 'No' ? [] : (data.abbrevCPAngle || []);
   const symbols = isUnreadable || isEssentiallyNormal ? [] : (data.symbols || []);
 
   return (
@@ -61,7 +62,7 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
         </div>
         <div>
           <p><span className="font-bold">Reader Name:</span> {data.classifyingPhysician || 'N/A'}</p>
-          <p><span className="font-bold">Classification Mode:</span> {data.classificationMode} &nbsp; | &nbsp; <span className="font-bold">Purpose:</span> {data.classificationPurpose === 'Other' ? data.classificationPurposeOtherText : data.classificationPurpose}</p>
+          <p><span className="font-bold">Classification Mode:</span> {data.classificationMode} &nbsp; | &nbsp; <span className="font-bold">Purpose:</span> {data.classificationPurpose === 'Other' ? data.classificationPurposeOtherText : data.classificationPurpose} <br/> <span className="font-bold">Type of Examination:</span> {data.examinationType === 'Other Purpose' ? data.examinationTypeOtherText : data.examinationType}</p>
         </div>
       </div>
 
@@ -123,7 +124,7 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
             <div>
               <p className="font-bold mb-1 text-xs uppercase">Large Opacities</p>
               <div className="flex space-x-2">
-                <LetterBox checked={largeOpacity === 'O'} label="O" />
+                <LetterBox checked={largeOpacity === '0'} label="0" />
                 <LetterBox checked={largeOpacity === 'A'} label="A" />
                 <LetterBox checked={largeOpacity === 'B'} label="B" />
                 <LetterBox checked={largeOpacity === 'C'} label="C" />
@@ -134,8 +135,8 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
 
         {/* 3. PLEURAL ABNORMALITIES */}
         <div className="mb-6 border-b border-gray-300 pb-4">
-          <h3 className="font-bold mb-4">3. Pleural Abnormalities <span className="italic font-normal text-xs ml-4">(0 = None, R = Right, L = Left)</span></h3>
-          <div className={`grid grid-cols-2 gap-4 ${isEssentiallyNormal || isUnreadable ? 'opacity-30' : ''}`}>
+          <h3 className="font-bold mb-4 flex items-center">3. Pleural Abnormalities <span className="italic font-normal text-xs ml-4">(0 = None, R = Right, L = Left)</span></h3>
+          <div className={`grid grid-cols-3 gap-4 ${isEssentiallyNormal || isUnreadable ? 'opacity-30' : ''}`}>
             <div>
               <p className="font-bold mb-2">PLEURAL THICKENING - PT</p>
               <div className="flex space-x-4">
@@ -152,6 +153,15 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
                 <span className="flex items-center"><Checkbox checked={calcification.includes('L')} boxClass="w-5 h-5 mr-1" /> L</span>
               </div>
             </div>
+              {!cpAngle.includes('0') && cpAngle.length > 0 && (
+                <div>
+                  <p className="font-bold mb-2">CP ANGLE OBLITERATION</p>
+                  <div className="flex space-x-4">
+                    <span className="flex items-center"><Checkbox checked={cpAngle.includes('R')} boxClass="w-5 h-5 mr-1" /> R</span>
+                    <span className="flex items-center"><Checkbox checked={cpAngle.includes('L')} boxClass="w-5 h-5 mr-1" /> L</span>
+                  </div>
+                </div>
+              )}
           </div>
         </div>
 
@@ -212,9 +222,15 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
                 <p className="text-gray-800">{data.orderingPhysician || '_______________________'}</p>
               </div>
             </div>
-            <div className="mt-4">
-              <p className="mb-1 text-base text-black">_______________________</p>
-              <p className="font-bold text-black text-[10px]">Date</p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <div>
+                <p className="font-bold text-black text-[10px] mb-1">Reading Date</p>
+                <p className="text-xs text-black">{data.readingDate || '_______________________'}</p>
+              </div>
+              <div>
+                <p className="font-bold text-black text-[10px] mb-1">Establishment Name</p>
+                <p className="text-xs text-black">{data.establishmentName || '_______________________'}</p>
+              </div>
             </div>
           </div>
         </div>

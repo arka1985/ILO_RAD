@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { ExternalLink, LayoutGrid, ClipboardList, ChevronRight, ChevronLeft, Save, Search, X, Info, AlertTriangle , Trash2, RefreshCw} from 'lucide-react';
+import { ExternalLink, LayoutGrid, ClipboardList, ChevronRight, ChevronLeft, Save, Search, X, Info, AlertTriangle, Trash2, RefreshCw, Sun, Moon } from 'lucide-react';
 import { ILOReportTemplate } from './components/ILOReportTemplate';
 import { ILOAbbreviatedReportTemplate } from './components/ILOAbbreviatedReportTemplate';
 import { FormIXReportTemplate } from './components/FormIXReportTemplate';
@@ -19,6 +19,28 @@ export default function Home() {
   const [activeStandard, setActiveStandard] = useState<string>('0/0');
   const [channel, setChannel] = useState<BroadcastChannel | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme as 'dark' | 'light');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    localStorage.setItem('theme', next);
+    if (next === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
   const [isFirstLaunch, setIsFirstLaunch] = useState(false);
@@ -116,6 +138,7 @@ export default function Home() {
     anyOther: '', // 'Yes' or 'No'
     symbols: [] as string[],
     seePhysician: '', // 'Yes' or 'No'
+      notifiedDate: '', // <--- NEW
     
     // Abbreviated fields
     abbrevQualityComment: '',
@@ -123,6 +146,7 @@ export default function Home() {
     abbrevShape: '-',
     abbrevThickening: [] as string[],
     abbrevCalcification: [] as string[],
+      abbrevCPAngle: [] as string[],
     abbrevSymbolsPresent: '', // Yes/No
     hasComments: '',
     commentsText: '',
@@ -341,8 +365,16 @@ export default function Home() {
     }
     // Rely on native browser print dialog, which perfectly handles all modern CSS, Lab colors, and CORS fonts.
     // The @media print CSS in globals.css ensures only the report is visible.
-    window.print();
-  };
+    const pName = wizardData.patientName ? wizardData.patientName.replace(/[^a-zA-Z0-9 -]/g, '').trim().replace(/\s+/g, '_') : 'Patient';
+      const pId = wizardData.patientId ? wizardData.patientId.replace(/[^a-zA-Z0-9 -]/g, '').trim().replace(/\s+/g, '_') : 'NoID';
+      const rDate = wizardData.readingDate || 'NoDate';
+      const origTitle = document.title;
+      document.title = `ILO_Report_${pName}_${pId}_${rDate}`;
+      
+      window.print();
+      
+      setTimeout(() => { document.title = origTitle; }, 1000);
+    };
 
   // Stage 1 Validation
   const canStartInterpretation = () => {
@@ -395,6 +427,8 @@ export default function Home() {
       return true; // detailed checkboxes are optional if Yes in Full mode
     }
     if (stepId === '4_other') {
+      const hasOD = wizardData.symbols.includes('OD') || wizardData.symbols.includes('od');
+      if (hasOD && (!wizardData.commentsText || !wizardData.commentsText.trim())) return false;
       if (wizardData.classificationMode === 'Abbreviated') {
         if (!wizardData.abbrevSymbolsPresent) return false;
         if (!wizardData.hasComments) return false;
@@ -432,100 +466,105 @@ export default function Home() {
 
   return (
     <>
-      <div className="flex h-screen bg-[#0f172a] text-gray-300 font-sans overflow-hidden print:hidden">
+      <div className="flex h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-800 dark:text-gray-300 font-sans overflow-hidden print:hidden">
       
       {/* Left Subpanel: Global Standard Library */}
-      <div className="w-[400px] flex flex-col border-r border-cyan-700 bg-[#1e293b] z-10 shadow-xl">
-        <div className="bg-[#020617] text-blue-400 p-3 border-b border-cyan-700 flex items-center space-x-2 shadow-md">
-          <LayoutGrid size={16} />
-          <div className="font-bold tracking-widest text-xs">ILO STANDARD LIBRARY</div>
+      <div className="w-[400px] flex flex-col border-r border-slate-300 dark:border-cyan-700 bg-white dark:bg-[#1e293b] z-10 shadow-xl">
+        <div className="bg-slate-200 dark:bg-[#020617] text-blue-600 dark:text-blue-400 p-3 border-b border-slate-300 dark:border-cyan-700 flex items-center justify-between shadow-md">
+          <div className="flex items-center space-x-2">
+            <LayoutGrid size={16} />
+            <div className="font-bold tracking-widest text-xs">ILO STANDARD LIBRARY</div>
+          </div>
+          <button onClick={toggleTheme} className="p-1 hover:bg-slate-300 dark:hover:bg-[#1e293b] rounded transition-colors" title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}>
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-6 text-sm">
           <div>
-            <h3 className="font-bold text-gray-400 mb-2 border-b border-cyan-700 pb-1">Normal</h3>
+            <h3 className="font-bold text-slate-600 dark:text-gray-400 mb-2 border-b border-slate-300 dark:border-cyan-700 pb-1">Normal</h3>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => loadStandard('/standards/00_Normal_1.dcm', '0/0 (Normal 1)')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-xs font-bold transition-colors">0/0 (Normal 1)</button>
-              <button onClick={() => loadStandard('/standards/00_Normal_2.dcm', '0/0 (Normal 2)')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-xs font-bold transition-colors">0/0 (Normal 2)</button>
+              <button onClick={() => loadStandard('/standards/00_Normal_1.dcm', '0/0 (Normal 1)')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-xs font-bold transition-colors">0/0 (Normal 1)</button>
+              <button onClick={() => loadStandard('/standards/00_Normal_2.dcm', '0/0 (Normal 2)')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-xs font-bold transition-colors">0/0 (Normal 2)</button>
             </div>
           </div>
           
           <div>
-            <h3 className="font-bold text-gray-400 mb-1 border-b border-cyan-700 pb-1 flex flex-col">
+            <h3 className="font-bold text-slate-600 dark:text-gray-400 mb-1 border-b border-slate-300 dark:border-cyan-700 pb-1 flex flex-col">
               <span>Small Opacities</span>
-              <span className="text-[10px] font-normal text-gray-500 mt-0.5">(opacity having the longest dimension not exceeding 10mm)</span>
+              <span className="text-[10px] font-normal text-slate-500 dark:text-gray-500 mt-0.5">(opacity having the longest dimension not exceeding 10mm)</span>
             </h3>
             
             <div className="mt-2 mb-3">
-              <h4 className="text-xs font-semibold text-gray-400 mb-2">Regular</h4>
+              <h4 className="text-xs font-semibold text-slate-600 dark:text-gray-400 mb-2">Regular</h4>
               <div className="grid grid-cols-3 gap-2">
-                <button onClick={() => loadStandard('/standards/11_pp.dcm', '1/1 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 p/p</button>
-                <button onClick={() => loadStandard('/standards/11_qq.dcm', '1/1 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 q/q</button>
-                <button onClick={() => loadStandard('/standards/11_rr.dcm', '1/1 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 r/r</button>
+                <button onClick={() => loadStandard('/standards/11_pp.dcm', '1/1 p/p')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 p/p</button>
+                <button onClick={() => loadStandard('/standards/11_qq.dcm', '1/1 q/q')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 q/q</button>
+                <button onClick={() => loadStandard('/standards/11_rr.dcm', '1/1 r/r')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 r/r</button>
                 
-                <button onClick={() => loadStandard('/standards/22_pp.dcm', '2/2 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 p/p</button>
-                <button onClick={() => loadStandard('/standards/22_qq.dcm', '2/2 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 q/q</button>
-                <button onClick={() => loadStandard('/standards/22_rr.dcm', '2/2 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 r/r</button>
+                <button onClick={() => loadStandard('/standards/22_pp.dcm', '2/2 p/p')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 p/p</button>
+                <button onClick={() => loadStandard('/standards/22_qq.dcm', '2/2 q/q')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 q/q</button>
+                <button onClick={() => loadStandard('/standards/22_rr.dcm', '2/2 r/r')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 r/r</button>
                 
-                <button onClick={() => loadStandard('/standards/33_pp.dcm', '3/3 p/p')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 p/p</button>
-                <button onClick={() => loadStandard('/standards/33_qq.dcm', '3/3 q/q')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 q/q</button>
-                <button onClick={() => loadStandard('/standards/33_rr.dcm', '3/3 r/r')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 r/r</button>
+                <button onClick={() => loadStandard('/standards/33_pp.dcm', '3/3 p/p')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 p/p</button>
+                <button onClick={() => loadStandard('/standards/33_qq.dcm', '3/3 q/q')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 q/q</button>
+                <button onClick={() => loadStandard('/standards/33_rr.dcm', '3/3 r/r')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 r/r</button>
               </div>
             </div>
 
             <div className="mb-2">
-              <h4 className="text-xs font-semibold text-gray-400 mb-2">Irregular</h4>
+              <h4 className="text-xs font-semibold text-slate-600 dark:text-gray-400 mb-2">Irregular</h4>
               <div className="grid grid-cols-3 gap-2">
-                <button onClick={() => loadStandard('/standards/11_ss.dcm', '1/1 s/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 s/s</button>
-                <button onClick={() => loadStandard('/standards/11_tt.dcm', '1/1 t/t')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 t/t</button>
-                <button onClick={() => loadStandard('/standards/22_ss.dcm', '2/2 s/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 s/s</button>
-                <button onClick={() => loadStandard('/standards/22_tt.dcm', '2/2 t/t')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 t/t</button>
-                <button onClick={() => loadStandard('/standards/33_ss.dcm', '3/3 s/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 s/s</button>
-                <button onClick={() => loadStandard('/standards/33_ts.dcm', '3/3 t/s')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 t/s</button>
-                <button onClick={() => loadStandard('/standards/123u.dcm', '123 u')} className="p-2 bg-[#334155] hover:bg-blue-600 border border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">123 u</button>
+                <button onClick={() => loadStandard('/standards/11_ss.dcm', '1/1 s/s')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 s/s</button>
+                <button onClick={() => loadStandard('/standards/11_tt.dcm', '1/1 t/t')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">1/1 t/t</button>
+                <button onClick={() => loadStandard('/standards/22_ss.dcm', '2/2 s/s')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 s/s</button>
+                <button onClick={() => loadStandard('/standards/22_tt.dcm', '2/2 t/t')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">2/2 t/t</button>
+                <button onClick={() => loadStandard('/standards/33_ss.dcm', '3/3 s/s')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 s/s</button>
+                <button onClick={() => loadStandard('/standards/33_ts.dcm', '3/3 t/s')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">3/3 t/s</button>
+                <button onClick={() => loadStandard('/standards/123u.dcm', '123 u')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 border border-slate-400 dark:border-cyan-500 hover:border-blue-400 rounded text-center text-xs font-bold">123 u</button>
               </div>
             </div>
           </div>
 
           <div>
-            <h3 className="font-bold text-gray-400 mb-2 border-b border-cyan-700 pb-1 flex flex-col">
+            <h3 className="font-bold text-slate-600 dark:text-gray-400 mb-2 border-b border-slate-300 dark:border-cyan-700 pb-1 flex flex-col">
               <span>Large Opacities</span>
-              <span className="text-[10px] font-normal text-gray-500 mt-0.5">(opacity having the longest dimension exceeding 10mm)</span>
+              <span className="text-[10px] font-normal text-slate-500 dark:text-gray-500 mt-0.5">(opacity having the longest dimension exceeding 10mm)</span>
             </h3>
             <div className="grid grid-cols-1 gap-2">
-              <button onClick={() => loadStandard('/standards/A_22_qq.dcm', 'Size A (2/2 q/q)')} className="p-2 bg-[#334155] hover:bg-emerald-600 border border-cyan-500 hover:border-emerald-400 rounded text-xs font-bold">Size A (2/2 q/q)</button>
-              <button onClick={() => loadStandard('/standards/B_23_qr.dcm', 'Size B (2/3 q/r)')} className="p-2 bg-[#334155] hover:bg-emerald-600 border border-cyan-500 hover:border-emerald-400 rounded text-xs font-bold">Size B (2/3 q/r)</button>
-              <button onClick={() => loadStandard('/standards/C_3+_rr.dcm', 'Size C (3/+ r/r)')} className="p-2 bg-[#334155] hover:bg-emerald-600 border border-cyan-500 hover:border-emerald-400 rounded text-xs font-bold">Size C (3/+ r/r)</button>
+              <button onClick={() => loadStandard('/standards/A_22_qq.dcm', 'Size A (2/2 q/q)')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-emerald-600 border border-slate-400 dark:border-cyan-500 hover:border-emerald-400 rounded text-xs font-bold">Size A (2/2 q/q)</button>
+              <button onClick={() => loadStandard('/standards/B_23_qr.dcm', 'Size B (2/3 q/r)')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-emerald-600 border border-slate-400 dark:border-cyan-500 hover:border-emerald-400 rounded text-xs font-bold">Size B (2/3 q/r)</button>
+              <button onClick={() => loadStandard('/standards/C_3+_rr.dcm', 'Size C (3/+ r/r)')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-emerald-600 border border-slate-400 dark:border-cyan-500 hover:border-emerald-400 rounded text-xs font-bold">Size C (3/+ r/r)</button>
             </div>
           </div>
 
           <div>
-            <h3 className="font-bold text-gray-400 mb-2 border-b border-cyan-700 pb-1">Pleural</h3>
+            <h3 className="font-bold text-slate-600 dark:text-gray-400 mb-2 border-b border-slate-300 dark:border-cyan-700 pb-1">Pleural</h3>
             <div className="grid grid-cols-1 gap-2">
-              <button onClick={() => loadStandard('/standards/Pleural.dcm', 'Pleural Standard')} className="p-2 bg-[#334155] hover:bg-purple-600 border border-cyan-500 hover:border-purple-400 rounded text-xs font-bold">Pleural Plaques Standard</button>
-              <button onClick={() => loadStandard('/standards/CPangle.dcm', 'Costophrenic Angle')} className="p-2 bg-[#334155] hover:bg-purple-600 border border-cyan-500 hover:border-purple-400 rounded text-xs font-bold">C/P Angle Obliteration</button>
+              <button onClick={() => loadStandard('/standards/Pleural.dcm', 'Pleural Standard')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-purple-600 border border-slate-400 dark:border-cyan-500 hover:border-purple-400 rounded text-xs font-bold">Pleural Plaques Standard</button>
+              <button onClick={() => loadStandard('/standards/CPangle.dcm', 'Costophrenic Angle')} className="p-2 bg-slate-200 dark:bg-[#334155] hover:bg-purple-600 border border-slate-400 dark:border-cyan-500 hover:border-purple-400 rounded text-xs font-bold">C/P Angle Obliteration</button>
             </div>
           </div>
         </div>
-        <div className="bg-[#020617] p-2 text-[10px] text-center border-t border-cyan-700 text-gray-500">
+        <div className="bg-slate-200 dark:bg-[#020617] p-2 text-[10px] text-center border-t border-slate-300 dark:border-cyan-700 text-slate-500 dark:text-gray-500">
           Click any standard above to instantly load it into the Viewer Panel.
         </div>
       </div>
 
       {/* Right Panel: Data Entry Wizard */}
-      <div className="flex-1 flex flex-col bg-[#0f172a] relative overflow-y-auto">
+      <div className="flex-1 flex flex-col bg-slate-50 dark:bg-[#0f172a] relative overflow-y-auto">
         
         {/* Header & Window Controls */}
-        <div className="bg-[#020617] text-white p-3 border-b border-cyan-700 flex justify-between items-center shadow-md">
+        <div className="bg-slate-200 dark:bg-[#020617] text-slate-900 dark:text-white p-3 border-b border-slate-300 dark:border-cyan-700 flex justify-between items-center shadow-md">
           <div className="flex items-center space-x-2">
-            <ClipboardList size={18} className="text-emerald-400" />
-            <div className="font-bold tracking-widest text-xs text-orange-400">PulmoView: ILO Radiography System for Pneumoconiosis Classification</div>
+            <ClipboardList size={18} className="text-emerald-700 dark:text-emerald-400" />
+            <div className="font-bold tracking-widest text-xs text-orange-700 dark:text-orange-400">PulmoView: ILO Radiography System for Pneumoconiosis Classification</div>
           </div>
           <div className="flex items-center space-x-4">
             {pendingPush && (
-              <div className="flex items-center space-x-2 bg-blue-900/50 border border-blue-500 text-blue-300 px-3 py-1.5 rounded animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]">
+              <div className="flex items-center space-x-2 bg-blue-100 dark:bg-blue-900/50 border border-blue-500 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]">
                 <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                <span className="text-xs font-bold uppercase tracking-widest text-white shadow-black drop-shadow-md">New X-Ray Waiting</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white shadow-black drop-shadow-md">New X-Ray Waiting</span>
               </div>
             )}
             <button 
@@ -539,14 +578,14 @@ export default function Home() {
         </div>
 
         {wizardData.isNonDicom && (
-          <div className="bg-red-900/40 border-l-4 border-red-500 p-4 m-8 mb-0 rounded shadow-lg animate-in slide-in-from-top-4 duration-500">
+          <div className="bg-red-50 dark:bg-red-900/40 border-l-4 border-red-500 p-4 m-8 mb-0 rounded shadow-lg animate-in slide-in-from-top-4 duration-500">
             <div className="flex items-start">
               <div className="flex-shrink-0 mt-0.5">
-                <AlertTriangle className="text-red-400" size={20} />
+                <AlertTriangle className="text-red-600 dark:text-red-400" size={20} />
               </div>
               <div className="ml-3">
-                <h3 className="text-red-400 font-bold text-sm tracking-widest uppercase">NON-DICOM IMAGE LOADED</h3>
-                <p className="text-red-200 mt-1 text-xs">
+                <h3 className="text-red-600 dark:text-red-400 font-bold text-sm tracking-widest uppercase">NON-DICOM IMAGE LOADED</h3>
+                <p className="text-red-800 dark:text-red-200 mt-1 text-xs">
                   A non-DICOM format image (e.g. JPG/PNG) is currently loaded in the viewer. According to official guidelines, non-DICOM images are <strong>strictly for training and educational purposes only</strong> and are not legally accepted for primary medical diagnosis or official ILO classification.
                 </p>
               </div>
@@ -557,41 +596,41 @@ export default function Home() {
         {/* STAGE 1: METADATA */}
         {wizardData.stage === 1 && (
           <div className="flex-1 p-8 max-w-4xl mx-auto w-full text-sm overflow-y-auto animate-in fade-in duration-300">
-            <div className="bg-blue-900/30 border border-blue-500/30 p-4 rounded-lg mb-8">
-              <h2 className="text-blue-400 font-bold mb-1">STAGE 1: Metadata Setup</h2>
-              <p className="text-gray-400 text-xs">Please provide the interpreting doctor and patient details to begin the official ILO classification sequence.</p>
+            <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-500/30 p-4 rounded-lg mb-8">
+              <h2 className="text-blue-600 dark:text-blue-400 font-bold mb-1">STAGE 1: Metadata Setup</h2>
+              <p className="text-slate-600 dark:text-gray-400 text-xs">Please provide the interpreting doctor and patient details to begin the official ILO classification sequence.</p>
             </div>
 
             {/* Doctor Form */}
             <div className="space-y-6 mb-8">
-              <h2 className="text-xl font-bold border-b border-cyan-700 pb-2 text-white flex justify-between items-center">
+              <h2 className="text-xl font-bold border-b border-slate-300 dark:border-cyan-700 pb-2 text-slate-900 dark:text-white flex justify-between items-center">
                 <span>Details of Interpreting Doctor and Purpose</span>
-                <button onClick={saveDoctorProfile} className="flex items-center space-x-2 text-xs bg-[#334155] hover:bg-blue-600 px-3 py-1.5 rounded transition-colors text-white font-bold">
+                <button onClick={saveDoctorProfile} className="flex items-center space-x-2 text-xs bg-slate-200 dark:bg-[#334155] hover:bg-blue-600 px-3 py-1.5 rounded transition-colors text-slate-900 dark:text-white font-bold">
                   <Save size={14} />
                   <span>Save as Default</span>
                 </button>
               </h2>
-              <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg grid grid-cols-2 gap-4">
+              <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg grid grid-cols-2 gap-4">
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Classifying Physician's Name *</label>
-                  <input type="text" value={wizardData.classifyingPhysician} onChange={e => updateData({ classifyingPhysician: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Classifying Physician's Name *</label>
+                  <input type="text" value={wizardData.classifyingPhysician} onChange={e => updateData({ classifyingPhysician: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500" placeholder="Required" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-gray-400 text-xs uppercase mb-2">Physician Qualification *</label>
-                  <div className="flex flex-wrap gap-4 bg-[#0f172a] border border-cyan-500 p-3 rounded">
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-2">Physician Qualification *</label>
+                  <div className="flex flex-wrap gap-4 bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 p-3 rounded">
                     {['MBBS', 'MD-Physician : Equivalent to MBBS'].map(opt => (
-                      <label key={opt} className="flex items-center space-x-2 text-emerald-400 text-sm cursor-pointer hover:text-emerald-300 transition-colors">
+                      <label key={opt} className="flex items-center space-x-2 text-emerald-700 dark:text-emerald-400 text-sm cursor-pointer hover:text-emerald-300 transition-colors">
                         <input type="checkbox" checked={wizardData.physicianQualification.includes(opt)} onChange={() => toggleArrayItem('physicianQualification', opt)} className="accent-emerald-500 w-4 h-4" />
                         <span className="font-bold">{opt}</span>
                       </label>
                     ))}
                     {['DIH', 'DPH', 'AFIH', 'Diploma', 'MPH', 'MD', 'MS', 'DNB', 'FNB', 'DM', 'MCH', 'PhD'].map(opt => (
-                      <label key={opt} className="flex items-center space-x-2 text-white text-sm cursor-pointer hover:text-emerald-400 transition-colors">
+                      <label key={opt} className="flex items-center space-x-2 text-slate-900 dark:text-white text-sm cursor-pointer hover:text-emerald-400 transition-colors">
                         <input type="checkbox" checked={wizardData.physicianQualification.includes(opt)} onChange={() => toggleArrayItem('physicianQualification', opt)} className="accent-emerald-500 w-4 h-4" />
                         <span>{opt}</span>
                       </label>
                     ))}
-                    <label className="flex items-center space-x-2 text-white text-sm cursor-pointer hover:text-emerald-400 transition-colors">
+                    <label className="flex items-center space-x-2 text-slate-900 dark:text-white text-sm cursor-pointer hover:text-emerald-400 transition-colors">
                       <input type="checkbox" checked={wizardData.physicianQualification.includes('Others')} onChange={() => toggleArrayItem('physicianQualification', 'Others')} className="accent-emerald-500 w-4 h-4" />
                       <span>Others</span>
                     </label>
@@ -601,19 +640,19 @@ export default function Home() {
                       type="text" 
                       value={wizardData.physicianQualificationOtherText || ""} 
                       onChange={e => updateData({ physicianQualificationOtherText: e.target.value })} 
-                      className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500 mt-2" 
+                      className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500 mt-2" 
                       placeholder="Please specify other qualification" 
                     />
                   )}
                 </div>
                 <div>
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Reading Date *</label>
-                  <input type="date" value={wizardData.readingDate} onChange={e => updateData({ readingDate: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Reading Date *</label>
+                  <input type="date" value={wizardData.readingDate} onChange={e => updateData({ readingDate: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500" />
                 </div>
                 
                 <div className="col-span-2">
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Designation of Examining Physician</label>
-                  <select value={wizardData.designation} onChange={e => updateData({ designation: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500">
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Designation of Examining Physician</label>
+                  <select value={wizardData.designation} onChange={e => updateData({ designation: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500">
                     <option value="">- Select Designation -</option>
                     <option value="Registered Medical Practitioners or Medical Specialist">Registered Medical Practitioners or Medical Specialist</option>
                     <option value="Medical Officer under OSHWC Code 2020">Medical Officer under OSHWC Code 2020</option>
@@ -625,17 +664,17 @@ export default function Home() {
                 </div>
                 
                 <div>
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Radiology Facility</label>
-                  <input type="text" value={wizardData.facility} onChange={e => updateData({ facility: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Radiology Facility</label>
+                  <input type="text" value={wizardData.facility} onChange={e => updateData({ facility: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500" />
                 </div>
                 <div>
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Ordering Physician</label>
-                  <input type="text" value={wizardData.orderingPhysician} onChange={e => updateData({ orderingPhysician: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Ordering Physician</label>
+                  <input type="text" value={wizardData.orderingPhysician} onChange={e => updateData({ orderingPhysician: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500" />
                 </div>
 
                 <div className="col-span-2">
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Classification Purpose</label>
-                  <select value={wizardData.classificationPurpose} onChange={e => updateData({ classificationPurpose: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500">
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Classification Purpose</label>
+                  <select value={wizardData.classificationPurpose} onChange={e => updateData({ classificationPurpose: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500">
                     <option value="">- Select Purpose -</option>
                     <option value="Screening and Surveillance for Pneumoconesis under OSHWC Code 2020">Screening and Surveillance for Pneumoconesis under OSHWC Code 2020</option>
                     <option value="Epidemiological Studies">Epidemiological Studies</option>
@@ -643,21 +682,21 @@ export default function Home() {
                   </select>
                   {wizardData.classificationPurpose === 'Other' && (
                     <div className="mt-2 animate-in fade-in duration-300">
-                      <textarea maxLength={1500} value={wizardData.classificationPurposeOtherText} onChange={e => updateData({ classificationPurposeOtherText: e.target.value })} placeholder="Please specify (max 250 words)..." className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
+                      <textarea maxLength={1500} value={wizardData.classificationPurposeOtherText} onChange={e => updateData({ classificationPurposeOtherText: e.target.value })} placeholder="Please specify (max 250 words)..." className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
                     </div>
                   )}
                 </div>
 
-                <div className="col-span-2 border-t border-cyan-700 pt-4 mt-2">
-                  <label className="block text-gray-400 text-xs uppercase mb-2">Trained in ILO Radiography?</label>
+                <div className="col-span-2 border-t border-slate-300 dark:border-cyan-700 pt-4 mt-2">
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-2">Trained in ILO Radiography?</label>
                   <div className="flex space-x-4">
                     <label className="flex items-center space-x-2 cursor-pointer">
                       <input type="radio" name="isTrained" checked={wizardData.isTrained === 'Yes'} onChange={() => updateData({ isTrained: 'Yes' })} className="accent-emerald-500 w-4 h-4" />
-                      <span className="text-white">Yes</span>
+                      <span className="text-slate-900 dark:text-white">Yes</span>
                     </label>
                     <label className="flex items-center space-x-2 cursor-pointer">
                       <input type="radio" name="isTrained" checked={wizardData.isTrained === 'No'} onChange={() => updateData({ isTrained: 'No' })} className="accent-emerald-500 w-4 h-4" />
-                      <span className="text-white">No</span>
+                      <span className="text-slate-900 dark:text-white">No</span>
                     </label>
                   </div>
                 </div>
@@ -665,12 +704,12 @@ export default function Home() {
                 {wizardData.isTrained === 'Yes' && (
                   <>
                     <div className="col-span-2 md:col-span-1 animate-in fade-in duration-300">
-                      <label className="block text-gray-400 text-xs uppercase mb-1">Trained from Which Institute *</label>
-                      <input type="text" value={wizardData.trainingInstitute} onChange={e => updateData({ trainingInstitute: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
+                      <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Trained from Which Institute *</label>
+                      <input type="text" value={wizardData.trainingInstitute} onChange={e => updateData({ trainingInstitute: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500" placeholder="Required" />
                     </div>
                     <div className="col-span-2 md:col-span-1 animate-in fade-in duration-300">
-                      <label className="block text-gray-400 text-xs uppercase mb-1">Date of Training/Refresher *</label>
-                      <input type="date" value={wizardData.trainingDate} onChange={e => updateData({ trainingDate: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
+                      <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Date of Training/Refresher *</label>
+                      <input type="date" value={wizardData.trainingDate} onChange={e => updateData({ trainingDate: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500" />
                     </div>
                   </>
                 )}
@@ -679,38 +718,38 @@ export default function Home() {
 
             {/* Patient Form */}
             <div className="space-y-6 mb-8">
-              <h2 className="text-xl font-bold border-b border-cyan-700 pb-2 text-white flex justify-between items-center">
+              <h2 className="text-xl font-bold border-b border-slate-300 dark:border-cyan-700 pb-2 text-slate-900 dark:text-white flex justify-between items-center">
                 <span>Patient/Worker/Employee Details</span>
-                <button onClick={openHistoryModal} className="flex items-center space-x-2 text-xs bg-[#334155] hover:bg-emerald-600 px-3 py-1.5 rounded transition-colors text-white font-bold">
+                <button onClick={openHistoryModal} className="flex items-center space-x-2 text-xs bg-slate-200 dark:bg-[#334155] hover:bg-emerald-600 px-3 py-1.5 rounded transition-colors text-slate-900 dark:text-white font-bold">
                   <Search size={14} />
                   <span>Search Patient History</span>
                 </button>
               </h2>
-              <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg grid grid-cols-2 gap-4">
+              <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Patient/Worker/Employee's Name *</label>
-                  <input type="text" value={wizardData.patientName} onChange={e => updateData({ patientName: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Patient/Worker/Employee's Name *</label>
+                  <input type="text" value={wizardData.patientName} onChange={e => updateData({ patientName: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500" placeholder="Required" />
                 </div>
                 <div>
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Patient/Worker/Employee ID *</label>
-                  <input type="text" value={wizardData.patientId} onChange={e => updateData({ patientId: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" placeholder="Required" />
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Patient/Worker/Employee ID *</label>
+                  <input type="text" value={wizardData.patientId} onChange={e => updateData({ patientId: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500" placeholder="Required" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Patient Address (including PIN)</label>
-                  <textarea value={wizardData.patientAddress} onChange={e => updateData({ patientAddress: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[60px]" placeholder="Address details"></textarea>
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Patient Address (including PIN)</label>
+                  <textarea value={wizardData.patientAddress} onChange={e => updateData({ patientAddress: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500 min-h-[60px]" placeholder="Address details"></textarea>
                 </div>
                 <div>
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Birth Date</label>
-                  <input type="date" value={wizardData.dob} onChange={e => updateData({ dob: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Birth Date</label>
+                  <input type="date" value={wizardData.dob} onChange={e => updateData({ dob: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Radiograph Date</label>
-                  <input type="date" value={wizardData.radiographDate} onChange={e => updateData({ radiographDate: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Radiograph Date</label>
+                  <input type="date" value={wizardData.radiographDate} onChange={e => updateData({ radiographDate: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500" />
                 </div>
 
-                <div className="col-span-2 border-t border-cyan-700 pt-4 mt-2">
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Working Place</label>
-                  <select value={wizardData.workingPlace} onChange={e => updateData({ workingPlace: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500">
+                <div className="col-span-2 border-t border-slate-300 dark:border-cyan-700 pt-4 mt-2">
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Working Place</label>
+                  <select value={wizardData.workingPlace} onChange={e => updateData({ workingPlace: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500">
                     <option value="">- Select Working Place -</option>
                     <option value="Factory">Factory</option>
                     <option value="Mines">Mines</option>
@@ -721,24 +760,24 @@ export default function Home() {
                   </select>
                   {wizardData.workingPlace === 'Any Other Establishment' && (
                     <div className="mt-2 animate-in fade-in duration-300">
-                      <textarea maxLength={1500} value={wizardData.workingPlaceOtherText} onChange={e => updateData({ workingPlaceOtherText: e.target.value })} placeholder="Please specify working place (max 250 words)..." className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
+                      <textarea maxLength={1500} value={wizardData.workingPlaceOtherText} onChange={e => updateData({ workingPlaceOtherText: e.target.value })} placeholder="Please specify working place (max 250 words)..." className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
                     </div>
                   )}
                 </div>
 
                 <div className="col-span-2">
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Name of The Establishment</label>
-                  <input type="text" value={wizardData.establishmentName} onChange={e => updateData({ establishmentName: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Name of The Establishment</label>
+                  <input type="text" value={wizardData.establishmentName} onChange={e => updateData({ establishmentName: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500" />
                 </div>
 
                 <div className="col-span-2">
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Address</label>
-                  <input type="text" value={wizardData.establishmentAddress} onChange={e => updateData({ establishmentAddress: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500" />
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Address</label>
+                  <input type="text" value={wizardData.establishmentAddress} onChange={e => updateData({ establishmentAddress: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500" />
                 </div>
 
-                <div className="col-span-2 border-t border-cyan-700 pt-4 mt-2">
-                  <label className="block text-gray-400 text-xs uppercase mb-1">Type of Examination</label>
-                  <select value={wizardData.examinationType} onChange={e => updateData({ examinationType: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500">
+                <div className="col-span-2 border-t border-slate-300 dark:border-cyan-700 pt-4 mt-2">
+                  <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-1">Type of Examination</label>
+                  <select value={wizardData.examinationType} onChange={e => updateData({ examinationType: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500">
                     <option value="">- Select Type of Examination -</option>
                     <option value="Initial Medical Examination in Mines">Initial Medical Examination in Mines</option>
                     <option value="Pre Employment Medical Examination">Pre Employment Medical Examination</option>
@@ -748,7 +787,7 @@ export default function Home() {
                   </select>
                   {wizardData.examinationType === 'Other Purpose' && (
                     <div className="mt-2 animate-in fade-in duration-300">
-                      <textarea maxLength={1500} value={wizardData.examinationTypeOtherText} onChange={e => updateData({ examinationTypeOtherText: e.target.value })} placeholder="Please specify type of examination (max 250 words)..." className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
+                      <textarea maxLength={1500} value={wizardData.examinationTypeOtherText} onChange={e => updateData({ examinationTypeOtherText: e.target.value })} placeholder="Please specify type of examination (max 250 words)..." className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
                     </div>
                   )}
                 </div>
@@ -756,30 +795,30 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg mb-8">
-              <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">Classification Mode *</p>
+            <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg mb-8">
+              <p className="mb-4 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs">Classification Mode *</p>
               <div className="flex space-x-4">
                 <label className="flex-1 cursor-pointer">
                   <input type="radio" name="classificationMode" checked={wizardData.classificationMode === 'Full'} onChange={() => updateData({ classificationMode: 'Full' })} className="peer hidden" />
-                  <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">
+                  <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">
                     Full Classification
                   </div>
                 </label>
                 <label className="flex-1 cursor-pointer">
                   <input type="radio" name="classificationMode" checked={wizardData.classificationMode === 'Abbreviated'} onChange={() => updateData({ classificationMode: 'Abbreviated' })} className="peer hidden" />
-                  <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">
+                  <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">
                     Abbreviated Classification
                   </div>
                 </label>
               </div>
             </div>
 
-            <div className="flex justify-end mt-8 border-t border-cyan-700 pt-6 pb-8">
+            <div className="flex justify-end mt-8 border-t border-slate-300 dark:border-cyan-700 pt-6 pb-8">
               <button 
                 suppressHydrationWarning
                 onClick={() => updateData({ stage: 2, currentInterpStep: 0 })}
                 disabled={!canStartInterpretation()}
-                className={`flex items-center space-x-2 px-8 py-3 rounded font-bold transition-colors shadow-lg ${!canStartInterpretation() ? 'bg-emerald-900/50 text-emerald-700 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900'}`}
+                className={`flex items-center space-x-2 px-8 py-3 rounded font-bold transition-colors shadow-lg ${!canStartInterpretation() ? 'bg-emerald-900/50 text-emerald-700 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-slate-900 dark:text-white shadow-emerald-900'}`}
               >
                 <span>Start Classification</span>
                 <ChevronRight size={18} />
@@ -792,10 +831,10 @@ export default function Home() {
         {wizardData.stage === 2 && (
           <div className="flex-1 flex flex-col relative animate-in slide-in-from-right duration-300">
             {/* Wizard Navigation */}
-            <div className="flex bg-[#1e293b] p-1 border-b border-cyan-700 text-xs">
+            <div className="flex bg-white dark:bg-[#1e293b] p-1 border-b border-slate-300 dark:border-cyan-700 text-xs">
               <button
                 onClick={() => updateData({ stage: 1 })}
-                className="px-4 py-3 font-bold text-gray-400 hover:bg-[#0f172a] border-r border-cyan-700 flex items-center space-x-1"
+                className="px-4 py-3 font-bold text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-[#0f172a] border-r border-slate-300 dark:border-cyan-700 flex items-center space-x-1"
               >
                 <ChevronLeft size={14} /> <span>Metadata</span>
               </button>
@@ -808,8 +847,8 @@ export default function Home() {
                     onClick={() => isAccessible && updateData({ currentInterpStep: idx })}
                     disabled={!isAccessible}
                     className={`px-2 py-3 font-bold flex-1 text-center transition-colors rounded-sm 
-                      ${isActive ? 'bg-[#334155] text-emerald-400 border-b-2 border-emerald-500' : ''}
-                      ${!isActive && isAccessible ? 'text-gray-400 hover:bg-[#0f172a] cursor-pointer' : ''}
+                      ${isActive ? 'bg-[#334155] text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-500' : ''}
+                      ${!isActive && isAccessible ? 'text-gray-400 hover:bg-slate-100 dark:hover:bg-[#0f172a] cursor-pointer' : ''}
                       ${!isAccessible ? 'text-gray-600 cursor-not-allowed opacity-50' : ''}
                     `}
                   >
@@ -821,10 +860,10 @@ export default function Home() {
                 <div className="flex-1 p-8 max-w-4xl mx-auto w-full text-sm overflow-y-auto">
               {visibleSteps[wizardData.currentInterpStep]?.id === '1_quality' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
-                  <h2 className="text-xl font-bold border-b border-cyan-700 pb-2 text-white">1. IMAGE QUALITY</h2>
-                  <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg flex flex-col justify-between">
+                  <h2 className="text-xl font-bold border-b border-slate-300 dark:border-cyan-700 pb-2 text-slate-900 dark:text-white">1. IMAGE QUALITY</h2>
+                  <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg flex flex-col justify-between">
                     <div>
-                      <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">TECHNICAL QUALITY *</p>
+                      <p className="mb-4 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs">TECHNICAL QUALITY *</p>
                       <div className="grid grid-cols-4 gap-4">
                         {['1', '2', '3', '4'].map(grade => (
                           <label key={grade} className="flex-1 cursor-pointer">
@@ -835,7 +874,7 @@ export default function Home() {
                                 updateData({ qualityGrade: grade });
                               }
                             }} className="peer hidden" />
-                            <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors shadow-sm">
+                            <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors shadow-sm">
                               Grade {grade}
                             </div>
                           </label>
@@ -844,25 +883,25 @@ export default function Home() {
 
                       {wizardData.classificationMode === 'Abbreviated' && wizardData.qualityGrade && wizardData.qualityGrade !== '1' && (
                         <div className="mt-6 animate-in fade-in duration-300">
-                          <p className="mb-2 text-emerald-400 font-bold uppercase tracking-widest text-xs">Comment on technical quality *</p>
-                          <textarea maxLength={1500} value={wizardData.abbrevQualityComment} onChange={e => updateData({ abbrevQualityComment: e.target.value })} placeholder="Comments required here..." className="w-full bg-[#0f172a] border border-cyan-500 rounded p-3 text-white outline-none focus:border-emerald-500 min-h-[100px]"></textarea>
+                          <p className="mb-2 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs">Comment on technical quality *</p>
+                          <textarea maxLength={1500} value={wizardData.abbrevQualityComment} onChange={e => updateData({ abbrevQualityComment: e.target.value })} placeholder="Comments required here..." className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-3 text-slate-900 dark:text-white outline-none focus:border-emerald-500 min-h-[100px]"></textarea>
                         </div>
                       )}
 
                       {wizardData.classificationMode === 'Full' && wizardData.qualityGrade && wizardData.qualityGrade !== '1' && (
                         <div className="mt-6 animate-in fade-in duration-300">
-                          <p className="mb-2 text-emerald-400 font-bold uppercase tracking-widest text-xs">SELECT ALL DEFECTS THAT APPLY</p>
+                          <p className="mb-2 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs">SELECT ALL DEFECTS THAT APPLY</p>
                           <div className="grid grid-cols-3 gap-2">
                             {QUALITY_DEFECTS.map(defect => (
-                              <label key={defect} className="flex items-center space-x-2 cursor-pointer bg-[#0f172a] p-3 rounded border border-cyan-500 hover:border-emerald-500 transition-colors">
+                              <label key={defect} className="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-[#0f172a] p-3 rounded border border-slate-400 dark:border-cyan-500 hover:border-emerald-500 transition-colors">
                                 <input type="checkbox" checked={wizardData.qualityDefects.includes(defect)} onChange={() => toggleArrayItem('qualityDefects', defect)} className="accent-emerald-500 w-4 h-4" />
-                                <span className="text-gray-300 text-xs">{defect}</span>
+                                <span className="text-slate-800 dark:text-gray-300 text-xs">{defect}</span>
                               </label>
                             ))}
                           </div>
                           {wizardData.qualityDefects.includes('Other') && (
                             <div className="mt-4 animate-in fade-in duration-300">
-                              <textarea maxLength={1500} value={wizardData.qualityDefectsOtherText} onChange={e => updateData({ qualityDefectsOtherText: e.target.value })} placeholder="Please specify other defects (max 250 words)..." className="w-full bg-[#0f172a] border border-cyan-500 rounded p-2 text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
+                              <textarea maxLength={1500} value={wizardData.qualityDefectsOtherText} onChange={e => updateData({ qualityDefectsOtherText: e.target.value })} placeholder="Please specify other defects (max 250 words)..." className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-2 text-slate-900 dark:text-white outline-none focus:border-emerald-500 min-h-[80px]"></textarea>
                             </div>
                           )}
                         </div>
@@ -872,18 +911,18 @@ export default function Home() {
 
                   {/* ESSENTIALLY NORMAL OVERRIDE */}
                   {wizardData.qualityGrade && wizardData.qualityGrade !== '4' && (
-                    <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg mt-6 animate-in fade-in duration-300">
-                      <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">OVERALL ASSESSMENT</p>
-                      <p className="mb-4 text-sm text-gray-300">Based on history, signs, symptoms, and your best clinical judgment, is this essentially a normal X-ray? (No parenchymal, pleural, or other abnormalities)</p>
+                    <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg mt-6 animate-in fade-in duration-300">
+                      <p className="mb-4 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs">OVERALL ASSESSMENT</p>
+                      <p className="mb-4 text-sm text-slate-800 dark:text-gray-300">Based on history, signs, symptoms, and your best clinical judgment, is this essentially a normal X-ray? (No parenchymal, pleural, or other abnormalities)</p>
                       <div className="flex space-x-4">
                         <label className="flex-1 cursor-pointer">
-                          <div className={`border rounded-lg p-4 flex items-center space-x-3 transition-colors ${wizardData.isEssentiallyNormal === 'Yes' ? 'border-emerald-500 bg-emerald-900/20' : 'border-cyan-500 bg-[#0f172a] hover:border-gray-400'}`}>
+                          <div className={`border rounded-lg p-4 flex items-center space-x-3 transition-colors ${wizardData.isEssentiallyNormal === 'Yes' ? 'border-emerald-500 bg-emerald-900/20' : 'border-cyan-500 bg-slate-50 dark:bg-[#0f172a] hover:border-gray-400'}`}>
                             <input type="radio" name="isEssentiallyNormal" checked={wizardData.isEssentiallyNormal === 'Yes'} onChange={() => updateData({ isEssentiallyNormal: 'Yes', anyParenchymal: 'No', anyPleural: 'No', anyOther: 'No' })} className="accent-emerald-500 w-5 h-5" />
                             <span className={`font-bold ${wizardData.isEssentiallyNormal === 'Yes' ? 'text-emerald-400' : 'text-gray-300'}`}>Yes</span>
                           </div>
                         </label>
                         <label className="flex-1 cursor-pointer">
-                          <div className={`border rounded-lg p-4 flex items-center space-x-3 transition-colors ${wizardData.isEssentiallyNormal === 'No' ? 'border-emerald-500 bg-emerald-900/20' : 'border-cyan-500 bg-[#0f172a] hover:border-gray-400'}`}>
+                          <div className={`border rounded-lg p-4 flex items-center space-x-3 transition-colors ${wizardData.isEssentiallyNormal === 'No' ? 'border-emerald-500 bg-emerald-900/20' : 'border-cyan-500 bg-slate-50 dark:bg-[#0f172a] hover:border-gray-400'}`}>
                             <input type="radio" name="isEssentiallyNormal" checked={wizardData.isEssentiallyNormal === 'No'} onChange={() => updateData({ isEssentiallyNormal: 'No' })} className="accent-emerald-500 w-5 h-5" />
                             <span className={`font-bold ${wizardData.isEssentiallyNormal === 'No' ? 'text-emerald-400' : 'text-gray-300'}`}>No</span>
                           </div>
@@ -897,20 +936,20 @@ export default function Home() {
 
               {visibleSteps[wizardData.currentInterpStep]?.id === '2_parenchymal' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
-                  <h2 className="text-xl font-bold border-b border-cyan-700 pb-2 text-white">2. PARENCHYMAL ABNORMALITIES</h2>
+                  <h2 className="text-xl font-bold border-b border-slate-300 dark:border-cyan-700 pb-2 text-slate-900 dark:text-white">2. PARENCHYMAL ABNORMALITIES</h2>
                   
                   {/* 2A (Full Mode Only) */}
                   {wizardData.classificationMode === 'Full' && (
-                    <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg">
-                      <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">2A. ANY CLASSIFIABLE PARENCHYMAL ABNORMALITIES? *</p>
+                    <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg">
+                      <p className="mb-4 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs">2A. ANY CLASSIFIABLE PARENCHYMAL ABNORMALITIES? *</p>
                       <div className="flex space-x-4">
                         <label className="flex-1 cursor-pointer">
                           <input type="radio" name="anyParenchymal" checked={wizardData.anyParenchymal === 'Yes'} onChange={() => updateData({ anyParenchymal: 'Yes' })} className="peer hidden" />
-                          <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">Yes (Proceed to 2B & 2C)</div>
+                          <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">Yes (Proceed to 2B & 2C)</div>
                         </label>
                         <label className="flex-1 cursor-pointer">
                           <input type="radio" name="anyParenchymal" checked={wizardData.anyParenchymal === 'No'} onChange={() => updateData({ anyParenchymal: 'No' })} className="peer hidden" />
-                          <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">No (Skip to Section 3A)</div>
+                          <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">No (Skip to Section 3A)</div>
                         </label>
                       </div>
                     </div>
@@ -919,21 +958,21 @@ export default function Home() {
                   {(wizardData.classificationMode === 'Abbreviated' || wizardData.anyParenchymal === 'Yes') && (
                     <div className="grid grid-cols-2 gap-6 animate-in slide-in-from-top-4 duration-300">
                       {/* 2B */}
-                      <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg">
-                        <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">{wizardData.classificationMode === 'Abbreviated' ? 'SMALL OPACITIES' : '2B. SMALL OPACITIES'}</p>
+                      <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg">
+                        <p className="mb-4 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs">{wizardData.classificationMode === 'Abbreviated' ? 'SMALL OPACITIES' : '2B. SMALL OPACITIES'}</p>
                         
                         {wizardData.classificationMode === 'Abbreviated' ? (
                           <div className="space-y-4">
                             <div>
-                              <span className="block text-gray-400 mb-1 text-xs">PROFUSION CATEGORY (4-point scale) *</span>
-                              <select value={wizardData.abbrevProfusion} onChange={e => updateData({ abbrevProfusion: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 text-white p-2 rounded outline-none focus:border-emerald-500">
+                              <span className="block text-slate-600 dark:text-gray-400 mb-1 text-xs">PROFUSION CATEGORY (4-point scale) *</span>
+                              <select value={wizardData.abbrevProfusion} onChange={e => { const val = e.target.value; updateData({ abbrevProfusion: val, ...(val === '0' ? { abbrevShape: '-' } : {}) }); }} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 text-slate-900 dark:text-white p-2 rounded outline-none focus:border-emerald-500">
                                 <option value="-">- Select -</option>
                                 <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>
                               </select>
                             </div>
                             <div>
-                              <span className="block text-gray-400 mb-1 text-xs">PREDOMINANT SHAPE AND SIZE *</span>
-                              <select disabled={wizardData.abbrevProfusion === '0'} value={wizardData.abbrevShape} onChange={e => updateData({ abbrevShape: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 text-white p-2 rounded outline-none focus:border-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                              <span className="block text-slate-600 dark:text-gray-400 mb-1 text-xs">PREDOMINANT SHAPE AND SIZE *</span>
+                              <select disabled={wizardData.abbrevProfusion === '0'} value={wizardData.abbrevShape} onChange={e => updateData({ abbrevShape: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 text-slate-900 dark:text-white p-2 rounded outline-none focus:border-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
                                 <option value="-">- Select -</option>
                                 <option value="p">p</option><option value="q">q</option><option value="r">r</option>
                                 <option value="s">s</option><option value="t">t</option><option value="u">u</option>
@@ -944,60 +983,53 @@ export default function Home() {
                           <div className="space-y-4">
 
                             <div>
-                              <span className="block text-gray-400 mb-1 text-xs">a. SHAPE/SIZE *</span>
-                              <div className="flex space-x-2">
-                                <div className="flex-1">
-                                  <label className="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Primary</label>
-                                  <select disabled={wizardData.profusion === '0/-' || wizardData.profusion === '0/0'} value={wizardData.primaryShape} onChange={e => updateData({ primaryShape: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 text-white p-2 rounded outline-none focus:border-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <option value="-">- Select -</option><option value="p">p</option><option value="q">q</option><option value="r">r</option><option value="s">s</option><option value="t">t</option><option value="u">u</option>
-                                  </select>
-                                </div>
-                                <div className="flex-1">
-                                  <label className="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Secondary</label>
-                                  <select disabled={wizardData.profusion === '0/-' || wizardData.profusion === '0/0'} value={wizardData.secondaryShape} onChange={e => updateData({ secondaryShape: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 text-white p-2 rounded outline-none focus:border-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <option value="-">- Select -</option><option value="p">p</option><option value="q">q</option><option value="r">r</option><option value="s">s</option><option value="t">t</option><option value="u">u</option>
-                                  </select>
-                                </div>
-                              </div>
+                              <span className="block text-slate-600 dark:text-gray-400 mb-1 text-xs">c. PROFUSION (12-point scale) *</span>
+                              <select value={wizardData.profusion} onChange={e => { const val = e.target.value; updateData({ profusion: val, ...(val === '0/-' || val === '0/0' ? { zones: [], primaryShape: '-', secondaryShape: '-' } : {}) }); }} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 text-slate-900 dark:text-white p-2 rounded outline-none focus:border-emerald-500">
+                                <option value="-">- Select -</option>
+                                <option value="0/-">0/-</option><option value="0/0">0/0</option><option value="0/1">0/1</option>
+                                <option value="1/0">1/0</option><option value="1/1">1/1</option><option value="1/2">1/2</option>
+                                <option value="2/1">2/1</option><option value="2/2">2/2</option><option value="2/3">2/3</option>
+                                <option value="3/2">3/2</option><option value="3/3">3/3</option><option value="3/+">3/+</option>
+                              </select>
                             </div>
                             
                             <div>
                               <div className="flex justify-between items-end mb-2">
-                                <span className="block text-gray-400 text-xs">b. ZONES (Area of Involvement) {wizardData.profusion !== '0/-' && wizardData.profusion !== '0/0' ? '*' : ''}</span>
-                                <button onClick={() => updateData({ zones: ['RU', 'RM', 'RL', 'LU', 'LM', 'LL'] })} className="text-[10px] bg-[#334155] hover:bg-emerald-600 px-2 py-1 rounded text-white transition-colors font-bold">Select All Zones</button>
+                                <span className="block text-slate-600 dark:text-gray-400 text-xs">b. ZONES (Area of Involvement) {wizardData.profusion !== '0/-' && wizardData.profusion !== '0/0' ? '*' : ''}</span>
+                                <button onClick={() => updateData({ zones: ['RU', 'RM', 'RL', 'LU', 'LM', 'LL'] })} disabled={wizardData.profusion === '0/-' || wizardData.profusion === '0/0'} className="text-[10px] bg-slate-200 dark:bg-[#334155] hover:bg-emerald-600 px-2 py-1 rounded text-slate-900 dark:text-white transition-colors font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-slate-200 dark:disabled:hover:bg-[#334155]">Select All Zones</button>
                               </div>
-                              <div className="flex space-x-6 text-gray-300">
+                              <div className="flex space-x-6 text-slate-800 dark:text-gray-300">
                                 {/* Right Lung */}
-                                <div className="space-y-2 flex-1 bg-[#0f172a] p-2 rounded border border-cyan-500">
-                                  <div className="text-[10px] text-gray-500 uppercase tracking-widest text-center border-b border-cyan-700 pb-1 mb-2">Right Lung</div>
+                                <div className="space-y-2 flex-1 bg-slate-50 dark:bg-[#0f172a] p-2 rounded border border-slate-400 dark:border-cyan-500">
+                                  <div className="text-[10px] text-slate-500 dark:text-gray-500 uppercase tracking-widest text-center border-b border-slate-300 dark:border-cyan-700 pb-1 mb-2">Right Lung</div>
                                   <div className="flex flex-col items-center space-y-2">
-                                    <label className="flex items-center space-x-3 cursor-pointer hover:bg-[#1e293b] p-1.5 rounded w-24">
+                                    <label className="flex items-center space-x-3 cursor-pointer hover:bg-white dark:hover:bg-[#1e293b] p-1.5 rounded w-24">
                                       <input type="checkbox" checked={wizardData.zones.includes('RU')} onChange={() => toggleArrayItem('zones', 'RU')} disabled={wizardData.profusion === '0/-' || wizardData.profusion === '0/0'} className="accent-emerald-500 w-4 h-4 disabled:opacity-50 disabled:cursor-not-allowed" />
                                       <span className="text-xs font-bold">Upper</span>
                                     </label>
-                                    <label className="flex items-center space-x-3 cursor-pointer hover:bg-[#1e293b] p-1.5 rounded w-24">
+                                    <label className="flex items-center space-x-3 cursor-pointer hover:bg-white dark:hover:bg-[#1e293b] p-1.5 rounded w-24">
                                       <input type="checkbox" checked={wizardData.zones.includes('RM')} onChange={() => toggleArrayItem('zones', 'RM')} disabled={wizardData.profusion === '0/-' || wizardData.profusion === '0/0'} className="accent-emerald-500 w-4 h-4 disabled:opacity-50 disabled:cursor-not-allowed" />
                                       <span className="text-xs font-bold">Middle</span>
                                     </label>
-                                    <label className="flex items-center space-x-3 cursor-pointer hover:bg-[#1e293b] p-1.5 rounded w-24">
+                                    <label className="flex items-center space-x-3 cursor-pointer hover:bg-white dark:hover:bg-[#1e293b] p-1.5 rounded w-24">
                                       <input type="checkbox" checked={wizardData.zones.includes('RL')} onChange={() => toggleArrayItem('zones', 'RL')} disabled={wizardData.profusion === '0/-' || wizardData.profusion === '0/0'} className="accent-emerald-500 w-4 h-4 disabled:opacity-50 disabled:cursor-not-allowed" />
                                       <span className="text-xs font-bold">Lower</span>
                                     </label>
                                   </div>
                                 </div>
                                 {/* Left Lung */}
-                                <div className="space-y-2 flex-1 bg-[#0f172a] p-2 rounded border border-cyan-500">
-                                  <div className="text-[10px] text-gray-500 uppercase tracking-widest text-center border-b border-cyan-700 pb-1 mb-2">Left Lung</div>
+                                <div className="space-y-2 flex-1 bg-slate-50 dark:bg-[#0f172a] p-2 rounded border border-slate-400 dark:border-cyan-500">
+                                  <div className="text-[10px] text-slate-500 dark:text-gray-500 uppercase tracking-widest text-center border-b border-slate-300 dark:border-cyan-700 pb-1 mb-2">Left Lung</div>
                                   <div className="flex flex-col items-center space-y-2">
-                                    <label className="flex items-center space-x-3 cursor-pointer hover:bg-[#1e293b] p-1.5 rounded w-24">
+                                    <label className="flex items-center space-x-3 cursor-pointer hover:bg-white dark:hover:bg-[#1e293b] p-1.5 rounded w-24">
                                       <input type="checkbox" checked={wizardData.zones.includes('LU')} onChange={() => toggleArrayItem('zones', 'LU')} disabled={wizardData.profusion === '0/-' || wizardData.profusion === '0/0'} className="accent-emerald-500 w-4 h-4 disabled:opacity-50 disabled:cursor-not-allowed" />
                                       <span className="text-xs font-bold">Upper</span>
                                     </label>
-                                    <label className="flex items-center space-x-3 cursor-pointer hover:bg-[#1e293b] p-1.5 rounded w-24">
+                                    <label className="flex items-center space-x-3 cursor-pointer hover:bg-white dark:hover:bg-[#1e293b] p-1.5 rounded w-24">
                                       <input type="checkbox" checked={wizardData.zones.includes('LM')} onChange={() => toggleArrayItem('zones', 'LM')} disabled={wizardData.profusion === '0/-' || wizardData.profusion === '0/0'} className="accent-emerald-500 w-4 h-4 disabled:opacity-50 disabled:cursor-not-allowed" />
                                       <span className="text-xs font-bold">Middle</span>
                                     </label>
-                                    <label className="flex items-center space-x-3 cursor-pointer hover:bg-[#1e293b] p-1.5 rounded w-24">
+                                    <label className="flex items-center space-x-3 cursor-pointer hover:bg-white dark:hover:bg-[#1e293b] p-1.5 rounded w-24">
                                       <input type="checkbox" checked={wizardData.zones.includes('LL')} onChange={() => toggleArrayItem('zones', 'LL')} disabled={wizardData.profusion === '0/-' || wizardData.profusion === '0/0'} className="accent-emerald-500 w-4 h-4 disabled:opacity-50 disabled:cursor-not-allowed" />
                                       <span className="text-xs font-bold">Lower</span>
                                     </label>
@@ -1007,26 +1039,35 @@ export default function Home() {
                             </div>
                             
                             <div>
-                              <span className="block text-gray-400 mb-1 text-xs">c. PROFUSION (12-point scale) *</span>
-                              <select value={wizardData.profusion} onChange={e => updateData({ profusion: e.target.value })} className="w-full bg-[#0f172a] border border-cyan-500 text-white p-2 rounded outline-none focus:border-emerald-500">
-                                <option value="-">- Select -</option>
-                                <option value="0/-">0/-</option><option value="0/0">0/0</option><option value="0/1">0/1</option>
-                                <option value="1/0">1/0</option><option value="1/1">1/1</option><option value="1/2">1/2</option>
-                                <option value="2/1">2/1</option><option value="2/2">2/2</option><option value="2/3">2/3</option>
-                                <option value="3/2">3/2</option><option value="3/3">3/3</option><option value="3/+">3/+</option>
-                              </select>
+                              <span className="block text-slate-600 dark:text-gray-400 mb-1 text-xs">a. SHAPE/SIZE *</span>
+                              <div className="flex space-x-2">
+                                <div className="flex-1">
+                                  <label className="text-[10px] text-slate-500 dark:text-gray-500 uppercase tracking-widest block mb-1">Primary</label>
+                                  <select disabled={wizardData.profusion === '0/-' || wizardData.profusion === '0/0'} value={wizardData.primaryShape} onChange={e => updateData({ primaryShape: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 text-slate-900 dark:text-white p-2 rounded outline-none focus:border-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <option value="-">- Select -</option><option value="p">p</option><option value="q">q</option><option value="r">r</option><option value="s">s</option><option value="t">t</option><option value="u">u</option>
+                                  </select>
+                                </div>
+                                <div className="flex-1">
+                                  <label className="text-[10px] text-slate-500 dark:text-gray-500 uppercase tracking-widest block mb-1">Secondary</label>
+                                  <select disabled={wizardData.profusion === '0/-' || wizardData.profusion === '0/0'} value={wizardData.secondaryShape} onChange={e => updateData({ secondaryShape: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 text-slate-900 dark:text-white p-2 rounded outline-none focus:border-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <option value="-">- Select -</option><option value="p">p</option><option value="q">q</option><option value="r">r</option><option value="s">s</option><option value="t">t</option><option value="u">u</option>
+                                  </select>
+                                </div>
+                              </div>
                             </div>
+                            
+
                           </div>
                         )}
                       </div>
                       {/* 2C */}
-                      <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg flex flex-col">
-                        <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs">{wizardData.classificationMode === 'Abbreviated' ? 'LARGE OPACITIES' : '2C. LARGE OPACITIES'}</p>
+                      <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg flex flex-col">
+                        <p className="mb-4 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs">{wizardData.classificationMode === 'Abbreviated' ? 'LARGE OPACITIES' : '2C. LARGE OPACITIES'}</p>
                         <div className="grid grid-cols-2 gap-2 flex-1">
                           {['0', 'A', 'B', 'C'].map(size => (
                             <label key={size} className="flex-1 cursor-pointer">
                               <input type="radio" name="large_opacity" checked={wizardData.largeOpacity === size} onChange={() => updateData({ largeOpacity: size })} className="peer hidden" />
-                              <div className="h-full flex items-center justify-center p-2 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">
+                              <div className="h-full flex items-center justify-center p-2 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">
                                 Size {size}
                               </div>
                             </label>
@@ -1040,47 +1081,58 @@ export default function Home() {
 
               {visibleSteps[wizardData.currentInterpStep]?.id === '3_pleural' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
-                  <h2 className="text-xl font-bold border-b border-cyan-700 pb-2 text-white">3. PLEURAL ABNORMALITIES</h2>
+                  <h2 className="text-xl font-bold border-b border-slate-300 dark:border-cyan-700 pb-2 text-slate-900 dark:text-white">3. PLEURAL ABNORMALITIES</h2>
                   
                   {/* 3A */}
                   {/* 3A */}
-                  <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg">
+                  <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg">
                     <p className="mb-4 text-purple-400 font-bold uppercase tracking-widest text-xs">{wizardData.classificationMode === 'Abbreviated' ? 'PLEURAL ABNORMALITIES *' : '3A. ANY CLASSIFIABLE PLEURAL ABNORMALITIES? *'}</p>
                     <div className="flex space-x-4">
                       <label className="flex-1 cursor-pointer">
                         <input type="radio" name="anyPleural" checked={wizardData.anyPleural === 'Yes'} onChange={() => updateData({ anyPleural: 'Yes' })} className="peer hidden" />
-                        <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">{wizardData.classificationMode === 'Abbreviated' ? 'Yes' : 'Yes (Proceed to 3B, 3C, 3D)'}</div>
+                        <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">{wizardData.classificationMode === 'Abbreviated' ? 'Yes' : 'Yes (Proceed to 3B, 3C, 3D)'}</div>
                       </label>
                       <label className="flex-1 cursor-pointer">
                         <input type="radio" name="anyPleural" checked={wizardData.anyPleural === 'No'} onChange={() => updateData({ anyPleural: 'No' })} className="peer hidden" />
-                        <div className={`p-4 border border-cyan-500 text-center rounded peer-checked:text-white font-bold hover:bg-[#334155] transition-colors peer-checked:bg-emerald-600 peer-checked:border-emerald-500`}>{wizardData.classificationMode === 'Abbreviated' ? 'No' : 'No (Skip to Section 4A)'}</div>
+                        <div className={`p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:text-slate-900 dark:peer-checked:text-white font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors peer-checked:bg-emerald-600 peer-checked:border-emerald-500`}>{wizardData.classificationMode === 'Abbreviated' ? 'No' : 'No (Skip to Section 4A)'}</div>
                       </label>
                     </div>
                   </div>
 
                   {wizardData.anyPleural === 'Yes' && (
-                    <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
+                    <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
                       
                       {wizardData.classificationMode === 'Abbreviated' ? (
                         <div className="space-y-6">
                           <div>
-                            <p className="mb-3 text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-cyan-700 pb-2">PLEURAL THICKENING - PT</p>
+                            <p className="mb-3 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">PLEURAL THICKENING - PT</p>
                             <div className="flex space-x-4">
-                              {['0', 'R', 'L'].map(opt => (
-                                <label key={`pt-${opt}`} className="flex items-center space-x-2 cursor-pointer bg-[#0f172a] px-4 py-2 rounded border border-cyan-500 hover:border-purple-500 transition-colors">
+                              {['R', 'L'].map(opt => (
+                                <label key={`pt-${opt}`} className="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-[#0f172a] px-4 py-2 rounded border border-slate-400 dark:border-cyan-500 hover:border-purple-500 transition-colors">
                                   <input type="checkbox" checked={wizardData.abbrevThickening.includes(opt)} onChange={() => toggleArrayItem('abbrevThickening', opt)} className="accent-emerald-500 w-4 h-4" />
-                                  <span className="text-gray-300 font-bold">{opt === '0' ? '0=None' : opt === 'R' ? 'R=Right' : 'L=Left'}</span>
+                                  <span className="text-slate-800 dark:text-gray-300 font-bold">{opt === '0' ? '0=None' : opt === '0' ? '0=None' : opt === 'R' ? 'R=Right' : 'L=Left'}</span>
                                 </label>
                               ))}
                             </div>
                           </div>
                           <div>
-                            <p className="mb-3 text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-cyan-700 pb-2">PLEURAL CALCIFICATION - PC</p>
+                            <p className="mb-3 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">PLEURAL CALCIFICATION - PC</p>
                             <div className="flex space-x-4">
                               {['0', 'R', 'L'].map(opt => (
-                                <label key={`pc-${opt}`} className="flex items-center space-x-2 cursor-pointer bg-[#0f172a] px-4 py-2 rounded border border-cyan-500 hover:border-purple-500 transition-colors">
+                                <label key={`pc-${opt}`} className="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-[#0f172a] px-4 py-2 rounded border border-slate-400 dark:border-cyan-500 hover:border-purple-500 transition-colors">
                                   <input type="checkbox" checked={wizardData.abbrevCalcification.includes(opt)} onChange={() => toggleArrayItem('abbrevCalcification', opt)} className="accent-emerald-500 w-4 h-4" />
-                                  <span className="text-gray-300 font-bold">{opt === '0' ? '0=None' : opt === 'R' ? 'R=Right' : 'L=Left'}</span>
+                                  <span className="text-slate-800 dark:text-gray-300 font-bold">{opt === '0' ? '0=None' : opt === '0' ? '0=None' : opt === 'R' ? 'R=Right' : 'L=Left'}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="mb-3 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">CP ANGLE OBLITERATION (OPTIONAL) <span className="text-[10px] normal-case font-normal text-slate-500 dark:text-slate-400 block mt-1">If nothing is selected or None is selected, it will not be printed as not required by ILO Abbreviated Version.</span></p>
+                            <div className="flex space-x-4">
+                              {['0', 'R', 'L'].map(opt => (
+                                <label key={`cp-${opt}`} className="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-[#0f172a] px-4 py-2 rounded border border-slate-400 dark:border-cyan-500 hover:border-purple-500 transition-colors">
+                                  <input type="checkbox" checked={wizardData.abbrevCPAngle.includes(opt)} onChange={() => toggleArrayItem('abbrevCPAngle', opt)} className="accent-emerald-500 w-4 h-4" />
+                                  <span className="text-slate-800 dark:text-gray-300 font-bold">{opt === '0' ? '0=None' : opt === 'R' ? 'R=Right' : 'L=Left'}</span>
                                 </label>
                               ))}
                             </div>
@@ -1089,21 +1141,21 @@ export default function Home() {
                       ) : (
                         <div className="space-y-6">
                           {/* 3B. PLEURAL PLAQUES */}
-                          <div className="bg-[#0f172a] p-4 rounded border border-cyan-500">
-                            <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-cyan-700 pb-2">3B. PLEURAL PLAQUES</p>
+                          <div className="bg-slate-50 dark:bg-[#0f172a] p-4 rounded border border-slate-400 dark:border-cyan-500">
+                            <p className="mb-4 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">3B. PLEURAL PLAQUES</p>
                             
                             <div className="grid grid-cols-4 gap-6">
                               {/* SITE */}
                               <div>
-                                <span className="block text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Site</span>
+                                <span className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Site</span>
                                 <div className="space-y-2">
                                   {[{l:'In profile', k:'plaqueSiteProfile'}, {l:'Face on', k:'plaqueSiteFaceOn'}, {l:'Diaphragm', k:'plaqueSiteDiaphragm'}, {l:'Other', k:'plaqueSiteOther'}].map(row => (
-                                    <div key={`site-${row.k}`} className="flex items-center justify-between bg-[#1e293b] p-1.5 rounded">
-                                      <span className="text-[10px] text-gray-400 w-16">{row.l}</span>
+                                    <div key={`site-${row.k}`} className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-1.5 rounded">
+                                      <span className="text-[10px] text-slate-600 dark:text-gray-400 w-16">{row.l}</span>
                                       <div className="flex space-x-1">
-                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
                                       </div>
                                     </div>
                                   ))}
@@ -1112,19 +1164,19 @@ export default function Home() {
                               
                               {/* CALCIFICATION */}
                               <div>
-                                <span className="block text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Calcification</span>
+                                <span className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Calcification</span>
                                 <div className="space-y-2">
                                   {[{l:'In profile', k:'plaqueCalcProfile'}, {l:'Face on', k:'plaqueCalcFaceOn'}, {l:'Diaphragm', k:'plaqueCalcDiaphragm'}, {l:'Other', k:'plaqueCalcOther'}].map(row => {
                                       const siteKey = row.k.replace('Calc', 'Site') as keyof typeof wizardData;
                                       const siteArr = wizardData[siteKey] as string[];
                                       const calcArr = wizardData[row.k as keyof typeof wizardData] as string[];
                                       return (
-                                      <div key={`calc-${row.k}`} className="flex items-center justify-between bg-[#1e293b] p-1.5 rounded">
-                                        <span className="text-[10px] text-gray-400 w-16">{row.l}</span>
+                                      <div key={`calc-${row.k}`} className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-1.5 rounded">
+                                        <span className="text-[10px] text-slate-600 dark:text-gray-400 w-16">{row.l}</span>
                                         <div className="flex space-x-1">
-                                          <button disabled={siteArr.length === 0} onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${siteArr.length === 0 ? 'opacity-30 cursor-not-allowed pointer-events-none ' : ''} ${calcArr.length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                          <button disabled={!siteArr.includes('R')} onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('R') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                          <button disabled={!siteArr.includes('L')} onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('L') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                          <button disabled={siteArr.length === 0} onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${siteArr.length === 0 ? 'opacity-30 cursor-not-allowed pointer-events-none ' : ''} ${calcArr.length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                          <button disabled={!siteArr.includes('R')} onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('R') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                          <button disabled={!siteArr.includes('L')} onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('L') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
                                         </div>
                                       </div>
                                       );
@@ -1134,10 +1186,10 @@ export default function Home() {
                               
                               {/* EXTENT */}
                               <div>
-                                <span title="Extent (chest wall; combined for in profile and face on)" className="block text-gray-400 font-bold text-[10px] mb-2 text-center uppercase"><span className="normal-case">EXTENT (1,2,3)</span></span>
-                                <div className="flex justify-around bg-[#1e293b] p-2 rounded h-full">
+                                <span title="Extent (chest wall; combined for in profile and face on)" className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 text-center uppercase"><span className="normal-case">EXTENT (1,2,3)</span></span>
+                                <div className="flex justify-around bg-white dark:bg-[#1e293b] p-2 rounded h-full">
                                   <div className="space-y-3">
-                                    <div className="text-[10px] text-gray-500 font-bold text-center">R</div>
+                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">R</div>
                                     {['0', '1', '2', '3'].map(val => {
   const hasR = wizardData.plaqueSiteProfile.includes('R') || wizardData.plaqueSiteFaceOn.includes('R');
   const disabled = !hasR && val !== '0';
@@ -1145,7 +1197,7 @@ export default function Home() {
   return (
   <label key={`extR-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
     <input type="radio" disabled={disabled} checked={wizardData.plaqueExtentRight === val} onChange={() => updateData({ plaqueExtentRight: val })} className="hidden" />
-    <div className={`w-6 h-6 rounded-full border border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueExtentRight === val ? 'bg-emerald-600 text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
+    <div className={`w-6 h-6 rounded-full border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueExtentRight === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
       {val === '0' ? 'O' : val}
     </div>
   </label>
@@ -1153,7 +1205,7 @@ export default function Home() {
 })}
                                   </div>
                                   <div className="space-y-3">
-                                    <div className="text-[10px] text-gray-500 font-bold text-center">L</div>
+                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">L</div>
                                     {['0', '1', '2', '3'].map(val => {
   const hasL = wizardData.plaqueSiteProfile.includes('L') || wizardData.plaqueSiteFaceOn.includes('L');
   const disabled = !hasL && val !== '0';
@@ -1161,7 +1213,7 @@ export default function Home() {
   return (
   <label key={`extL-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
     <input type="radio" disabled={disabled} checked={wizardData.plaqueExtentLeft === val} onChange={() => updateData({ plaqueExtentLeft: val })} className="hidden" />
-    <div className={`w-6 h-6 rounded-full border border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueExtentLeft === val ? 'bg-emerald-600 text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
+    <div className={`w-6 h-6 rounded-full border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueExtentLeft === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
       {val === '0' ? 'O' : val}
     </div>
   </label>
@@ -1173,10 +1225,10 @@ export default function Home() {
 
                               {/* WIDTH */}
                               <div>
-                                <span title="Width (in profile only) (3mm minimum width required)" className="block text-gray-400 font-bold text-[10px] mb-2 text-center uppercase">WIDTH <span className="normal-case">(a,b,c)</span></span>
-                                <div className="flex justify-around bg-[#1e293b] p-2 rounded h-full">
+                                <span title="Width (in profile only) (3mm minimum width required)" className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 text-center uppercase">WIDTH <span className="normal-case">(a,b,c)</span></span>
+                                <div className="flex justify-around bg-white dark:bg-[#1e293b] p-2 rounded h-full">
                                   <div className="space-y-3">
-                                    <div className="text-[10px] text-gray-500 font-bold text-center">R</div>
+                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">R</div>
                                     {['0', 'a', 'b', 'c'].map(val => {
   const hasR = wizardData.plaqueSiteProfile.includes('R');
   const disabled = !hasR && val !== '0';
@@ -1184,7 +1236,7 @@ export default function Home() {
   return (
   <label key={`widR-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
     <input type="radio" disabled={disabled} checked={wizardData.plaqueWidthRight === val} onChange={() => updateData({ plaqueWidthRight: val })} className="hidden" />
-    <div className={`w-6 h-6 rounded border border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueWidthRight === val ? 'bg-emerald-600 text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
+    <div className={`w-6 h-6 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueWidthRight === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
       {val === '0' ? 'O' : val}
     </div>
   </label>
@@ -1192,7 +1244,7 @@ export default function Home() {
 })}
                                   </div>
                                   <div className="space-y-3">
-                                    <div className="text-[10px] text-gray-500 font-bold text-center">L</div>
+                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">L</div>
                                     {['0', 'a', 'b', 'c'].map(val => {
   const hasL = wizardData.plaqueSiteProfile.includes('L');
   const disabled = !hasL && val !== '0';
@@ -1200,7 +1252,7 @@ export default function Home() {
   return (
   <label key={`widL-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
     <input type="radio" disabled={disabled} checked={wizardData.plaqueWidthLeft === val} onChange={() => updateData({ plaqueWidthLeft: val })} className="hidden" />
-    <div className={`w-6 h-6 rounded border border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueWidthLeft === val ? 'bg-emerald-600 text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
+    <div className={`w-6 h-6 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueWidthLeft === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
       {val === '0' ? 'O' : val}
     </div>
   </label>
@@ -1213,37 +1265,37 @@ export default function Home() {
                           </div>
 
                           {/* 3C. COSTOPHRENIC */}
-                          <div className="bg-[#0f172a] p-4 rounded border border-cyan-500 flex items-center justify-between">
-                            <p className="text-emerald-400 font-bold uppercase tracking-widest text-xs">3C. COSTOPHRENIC ANGLE OBLITERATION</p>
+                          <div className="bg-slate-50 dark:bg-[#0f172a] p-4 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-between">
+                            <p className="text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs">3C. COSTOPHRENIC ANGLE OBLITERATION</p>
                             <div className="flex space-x-6">
                               <label className="flex items-center space-x-2 cursor-pointer">
                                 <input type="checkbox" checked={wizardData.costophrenicRight} onChange={e => updateData({ costophrenicRight: e.target.checked })} className="w-5 h-5 accent-emerald-500" />
-                                <span className="text-gray-300 font-bold">Right (R)</span>
+                                <span className="text-slate-800 dark:text-gray-300 font-bold">Right (R)</span>
                               </label>
                               <label className="flex items-center space-x-2 cursor-pointer">
                                 <input type="checkbox" checked={wizardData.costophrenicLeft} onChange={e => updateData({ costophrenicLeft: e.target.checked })} className="w-5 h-5 accent-emerald-500" />
-                                <span className="text-gray-300 font-bold">Left (L)</span>
+                                <span className="text-slate-800 dark:text-gray-300 font-bold">Left (L)</span>
                               </label>
                             </div>
                           </div>
 
                           {/* 3D. DIFFUSE */}
                           {(wizardData.costophrenicRight || wizardData.costophrenicLeft) && (
-                            <div className="bg-[#0f172a] p-4 rounded border border-cyan-500">
-                            <p className="mb-4 text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-cyan-700 pb-2">3D. DIFFUSE PLEURAL THICKENING</p>
+                            <div className="bg-slate-50 dark:bg-[#0f172a] p-4 rounded border border-slate-400 dark:border-cyan-500">
+                            <p className="mb-4 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">3D. DIFFUSE PLEURAL THICKENING</p>
                             
                             <div className="grid grid-cols-4 gap-6">
                               {/* SITE */}
                               <div>
-                                <span className="block text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Site</span>
+                                <span className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Site</span>
                                 <div className="space-y-2">
                                   {[{l:'In profile', k:'diffuseSiteProfile'}, {l:'Face on', k:'diffuseSiteFaceOn'}].map(row => (
-                                    <div key={`dsite-${row.k}`} className="flex items-center justify-between bg-[#1e293b] p-1.5 rounded">
-                                      <span className="text-[10px] text-gray-400 w-16">{row.l}</span>
+                                    <div key={`dsite-${row.k}`} className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-1.5 rounded">
+                                      <span className="text-[10px] text-slate-600 dark:text-gray-400 w-16">{row.l}</span>
                                       <div className="flex space-x-1">
-                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
                                       </div>
                                     </div>
                                   ))}
@@ -1252,19 +1304,19 @@ export default function Home() {
                               
                               {/* CALCIFICATION */}
                               <div>
-                                <span className="block text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Calcification</span>
+                                <span className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Calcification</span>
                                 <div className="space-y-2">
                                   {[{l:'In profile', k:'diffuseCalcProfile'}, {l:'Face on', k:'diffuseCalcFaceOn'}].map(row => {
                                       const siteKey = row.k.replace('Calc', 'Site') as keyof typeof wizardData;
                                       const siteArr = wizardData[siteKey] as string[];
                                       const calcArr = wizardData[row.k as keyof typeof wizardData] as string[];
                                       return (
-                                      <div key={`dcalc-${row.k}`} className="flex items-center justify-between bg-[#1e293b] p-1.5 rounded">
-                                        <span className="text-[10px] text-gray-400 w-16">{row.l}</span>
+                                      <div key={`dcalc-${row.k}`} className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-1.5 rounded">
+                                        <span className="text-[10px] text-slate-600 dark:text-gray-400 w-16">{row.l}</span>
                                         <div className="flex space-x-1">
-                                          <button disabled={siteArr.length === 0} onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${siteArr.length === 0 ? 'opacity-30 cursor-not-allowed pointer-events-none ' : ''} ${calcArr.length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                          <button disabled={!siteArr.includes('R')} onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('R') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                          <button disabled={!siteArr.includes('L')} onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('L') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                          <button disabled={siteArr.length === 0} onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${siteArr.length === 0 ? 'opacity-30 cursor-not-allowed pointer-events-none ' : ''} ${calcArr.length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                          <button disabled={!siteArr.includes('R')} onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('R') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                          <button disabled={!siteArr.includes('L')} onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('L') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
                                         </div>
                                       </div>
                                       );
@@ -1274,10 +1326,10 @@ export default function Home() {
                               
                               {/* EXTENT */}
                               <div>
-                                <span title="Extent (chest wall; combined for in profile and face on)" className="block text-gray-400 font-bold text-[10px] mb-2 text-center uppercase"><span className="normal-case">EXTENT (1,2,3)</span></span>
-                                <div className="flex justify-around bg-[#1e293b] p-2 rounded h-full">
+                                <span title="Extent (chest wall; combined for in profile and face on)" className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 text-center uppercase"><span className="normal-case">EXTENT (1,2,3)</span></span>
+                                <div className="flex justify-around bg-white dark:bg-[#1e293b] p-2 rounded h-full">
                                   <div className="space-y-3">
-                                    <div className="text-[10px] text-gray-500 font-bold text-center">R</div>
+                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">R</div>
                                     {['0', '1', '2', '3'].map(val => {
                                         const hasR = wizardData.diffuseSiteProfile.includes('R') || wizardData.diffuseSiteFaceOn.includes('R');
                                         const disabled = !hasR && val !== '0';
@@ -1285,7 +1337,7 @@ export default function Home() {
                                         return (
                                         <label key={`dextR-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
                                           <input type="radio" disabled={disabled} checked={wizardData.diffuseExtentRight === val} onChange={() => updateData({ diffuseExtentRight: val })} className="hidden" />
-                                          <div className={`w-6 h-6 rounded-full border border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseExtentRight === val ? 'bg-emerald-600 text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
+                                          <div className={`w-6 h-6 rounded-full border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseExtentRight === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
                                             {val === '0' ? 'O' : val}
                                           </div>
                                         </label>
@@ -1293,7 +1345,7 @@ export default function Home() {
                                       })}
                                   </div>
                                   <div className="space-y-3">
-                                    <div className="text-[10px] text-gray-500 font-bold text-center">L</div>
+                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">L</div>
                                     {['0', '1', '2', '3'].map(val => {
                                         const hasL = wizardData.diffuseSiteProfile.includes('L') || wizardData.diffuseSiteFaceOn.includes('L');
                                         const disabled = !hasL && val !== '0';
@@ -1301,7 +1353,7 @@ export default function Home() {
                                         return (
                                         <label key={`dextL-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
                                           <input type="radio" disabled={disabled} checked={wizardData.diffuseExtentLeft === val} onChange={() => updateData({ diffuseExtentLeft: val })} className="hidden" />
-                                          <div className={`w-6 h-6 rounded-full border border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseExtentLeft === val ? 'bg-emerald-600 text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
+                                          <div className={`w-6 h-6 rounded-full border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseExtentLeft === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
                                             {val === '0' ? 'O' : val}
                                           </div>
                                         </label>
@@ -1313,10 +1365,10 @@ export default function Home() {
 
                               {/* WIDTH */}
                               <div>
-                                <span title="Width (in profile only) (3mm minimum width required)" className="block text-gray-400 font-bold text-[10px] mb-2 text-center uppercase">WIDTH <span className="normal-case">(a,b,c)</span></span>
-                                <div className="flex justify-around bg-[#1e293b] p-2 rounded h-full">
+                                <span title="Width (in profile only) (3mm minimum width required)" className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 text-center uppercase">WIDTH <span className="normal-case">(a,b,c)</span></span>
+                                <div className="flex justify-around bg-white dark:bg-[#1e293b] p-2 rounded h-full">
                                   <div className="space-y-3">
-                                    <div className="text-[10px] text-gray-500 font-bold text-center">R</div>
+                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">R</div>
                                     {['0', 'a', 'b', 'c'].map(val => {
                                         const hasR = wizardData.diffuseSiteProfile.includes('R');
                                         const disabled = !hasR && val !== '0';
@@ -1324,7 +1376,7 @@ export default function Home() {
                                         return (
                                         <label key={`dwidR-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
                                           <input type="radio" disabled={disabled} checked={wizardData.diffuseWidthRight === val} onChange={() => updateData({ diffuseWidthRight: val })} className="hidden" />
-                                          <div className={`w-6 h-6 rounded border border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseWidthRight === val ? 'bg-emerald-600 text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
+                                          <div className={`w-6 h-6 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseWidthRight === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
                                             {val === '0' ? 'O' : val}
                                           </div>
                                         </label>
@@ -1332,7 +1384,7 @@ export default function Home() {
                                       })}
                                   </div>
                                   <div className="space-y-3">
-                                    <div className="text-[10px] text-gray-500 font-bold text-center">L</div>
+                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">L</div>
                                     {['0', 'a', 'b', 'c'].map(val => {
                                         const hasL = wizardData.diffuseSiteProfile.includes('L');
                                         const disabled = !hasL && val !== '0';
@@ -1340,7 +1392,7 @@ export default function Home() {
                                         return (
                                         <label key={`dwidL-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
                                           <input type="radio" disabled={disabled} checked={wizardData.diffuseWidthLeft === val} onChange={() => updateData({ diffuseWidthLeft: val })} className="hidden" />
-                                          <div className={`w-6 h-6 rounded border border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseWidthLeft === val ? 'bg-emerald-600 text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
+                                          <div className={`w-6 h-6 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseWidthLeft === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
                                             {val === '0' ? 'O' : val}
                                           </div>
                                         </label>
@@ -1361,45 +1413,45 @@ export default function Home() {
 
               {visibleSteps[wizardData.currentInterpStep]?.id === '4_other' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
-                  <h2 className="text-xl font-bold border-b border-cyan-700 pb-2 text-white">4. OTHER ABNORMALITIES</h2>
+                  <h2 className="text-xl font-bold border-b border-slate-300 dark:border-cyan-700 pb-2 text-slate-900 dark:text-white">4. OTHER ABNORMALITIES</h2>
                   
                   {/* 4A (Full Mode Only) */}
                   {wizardData.classificationMode === 'Full' && (
-                    <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg">
-                      <p className="mb-4 text-blue-400 font-bold uppercase tracking-widest text-xs">4A. ANY OTHER ABNORMALITIES? *</p>
+                    <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg">
+                      <p className="mb-4 text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest text-xs">4A. ANY OTHER ABNORMALITIES? *</p>
                       <div className="flex space-x-4">
                         <label className="flex-1 cursor-pointer">
                           <input type="radio" name="anyOther" checked={wizardData.anyOther === 'Yes'} onChange={() => updateData({ anyOther: 'Yes' })} className="peer hidden" />
-                          <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">Yes (Proceed to 4B, 4C)</div>
+                          <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">Yes (Proceed to 4B, 4C)</div>
                         </label>
                         <label className="flex-1 cursor-pointer">
                           <input type="radio" name="anyOther" checked={wizardData.anyOther === 'No'} onChange={() => updateData({ anyOther: 'No' })} className="peer hidden" />
-                          <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">No (Complete Classification)</div>
+                          <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">No (Complete Classification)</div>
                         </label>
                       </div>
                     </div>
                   )}
 
                   {wizardData.classificationMode === 'Abbreviated' && (
-                    <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300 mb-6">
-                      <p className="mb-4 text-blue-400 font-bold uppercase tracking-widest text-xs border-b border-cyan-700 pb-2">SYMBOLS *</p>
+                    <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300 mb-6">
+                      <p className="mb-4 text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">SYMBOLS *</p>
                       <div className="flex space-x-4 mb-6">
                         <label className="flex-1 cursor-pointer">
                           <input type="radio" name="abbrevSymbolsPresent" checked={wizardData.abbrevSymbolsPresent === 'Yes'} onChange={() => updateData({ abbrevSymbolsPresent: 'Yes' })} className="peer hidden" />
-                          <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">Yes</div>
+                          <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">Yes</div>
                         </label>
                         <label className="flex-1 cursor-pointer">
                           <input type="radio" name="abbrevSymbolsPresent" checked={wizardData.abbrevSymbolsPresent === 'No'} onChange={() => { updateData({ abbrevSymbolsPresent: 'No', symbols: [] }); }} className="peer hidden" />
-                          <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">No</div>
+                          <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">No</div>
                         </label>
                       </div>
                       
                       {wizardData.abbrevSymbolsPresent === 'Yes' && (
                         <div className="grid grid-cols-8 gap-2 animate-in fade-in duration-300">
                           {OBLIGATORY_SYMBOLS.map(sym => (
-                            <label key={sym} title={OBLIGATORY_SYMBOLS_FULL[sym]} className="flex items-center justify-center border border-cyan-500 p-2 rounded hover:bg-[#334155] cursor-pointer transition-colors group">
+                            <label key={sym} title={OBLIGATORY_SYMBOLS_FULL[sym]} className="flex items-center justify-center border border-slate-400 dark:border-cyan-500 p-2 rounded hover:bg-slate-300 dark:hover:bg-[#334155] cursor-pointer transition-colors group">
                               <input type="checkbox" checked={wizardData.symbols.includes(sym)} onChange={() => toggleArrayItem('symbols', sym)} className="hidden peer" />
-                              <span className="font-mono font-bold uppercase text-gray-400 peer-checked:text-emerald-400">{sym}</span>
+                              <span className="font-mono font-bold uppercase text-slate-600 dark:text-gray-400 peer-checked:text-emerald-400">{sym}</span>
                             </label>
                           ))}
                         </div>
@@ -1410,13 +1462,13 @@ export default function Home() {
                   {(wizardData.classificationMode === 'Full' && wizardData.anyOther === 'Yes') && (
                     <>
                       {/* 4B */}
-                      <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
-                        <p className="mb-4 text-blue-400 font-bold uppercase tracking-widest text-xs border-b border-cyan-700 pb-2">4B. OTHER SYMBOLS (OBLIGATORY)</p>
+                      <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
+                        <p className="mb-4 text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">4B. OTHER SYMBOLS (OBLIGATORY)</p>
                         <div className="grid grid-cols-8 gap-2">
                           {OBLIGATORY_SYMBOLS.map(sym => (
-                            <label key={sym} title={OBLIGATORY_SYMBOLS_FULL[sym]} className="flex items-center justify-center border border-cyan-500 p-2 rounded hover:bg-[#334155] cursor-pointer transition-colors">
+                            <label key={sym} title={OBLIGATORY_SYMBOLS_FULL[sym]} className="flex items-center justify-center border border-slate-400 dark:border-cyan-500 p-2 rounded hover:bg-slate-300 dark:hover:bg-[#334155] cursor-pointer transition-colors">
                               <input type="checkbox" checked={wizardData.symbols.includes(sym)} onChange={() => toggleArrayItem('symbols', sym)} className="hidden peer" />
-                              <span className="font-mono font-bold uppercase text-gray-400 peer-checked:text-emerald-400">{sym}</span>
+                              <span className="font-mono font-bold uppercase text-slate-600 dark:text-gray-400 peer-checked:text-emerald-400">{sym}</span>
                             </label>
                           ))}
                         </div>
@@ -1424,39 +1476,48 @@ export default function Home() {
 
                       {/* 4C */}
                       {wizardData.classificationMode === 'Full' && (
-                        <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
-                          <p className="mb-4 text-gray-400 font-bold uppercase tracking-widest text-xs">4C. Should Patient/Worker/Employee see personal physician because of findings in section 4? *</p>
+                        <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
+                          <p className="mb-4 text-slate-600 dark:text-gray-400 font-bold uppercase tracking-widest text-xs">4C. Should Patient/Worker/Employee see personal physician because of findings in section 4? *</p>
                           <div className="flex space-x-4">
                             <label className="flex items-center space-x-2 cursor-pointer">
                               <input type="radio" name="seePhys" checked={wizardData.seePhysician === 'Yes'} onChange={() => updateData({ seePhysician: 'Yes' })} className="accent-emerald-500 w-5 h-5" />
-                              <span className="text-white font-bold">Yes</span>
+                              <span className="text-slate-900 dark:text-white font-bold">Yes</span>
                             </label>
                             <label className="flex items-center space-x-2 cursor-pointer">
                               <input type="radio" name="seePhys" checked={wizardData.seePhysician === 'No'} onChange={() => updateData({ seePhysician: 'No' })} className="accent-emerald-500 w-5 h-5" />
-                              <span className="text-white font-bold">No</span>
+                              <span className="text-slate-900 dark:text-white font-bold">No</span>
                             </label>
                           </div>
+                            <div className="mt-4">
+                              <label className="block text-slate-600 dark:text-gray-400 text-xs uppercase mb-2">Date Physician or Worker Notified?</label>
+                              <input type="date" value={wizardData.notifiedDate || ''} onChange={e => updateData({ notifiedDate: e.target.value })} className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 text-slate-900 dark:text-white p-2 rounded outline-none focus:border-emerald-500 transition-colors" />
+                            </div>
+    
                         </div>
                       )}
                     </>
                   )}
 
                   {/* COMMENTS (Always visible at bottom of Step 4) */}
-                  <div className="bg-[#1e293b] p-6 border border-cyan-700 shadow-sm rounded-lg">
-                    <p className="mb-4 text-blue-400 font-bold uppercase tracking-widest text-xs">COMMENTS</p>
+                  <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg">
+                    <p className="mb-4 text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest text-xs">COMMENTS</p>
                     <div className="flex space-x-4 mb-4">
                       <label className="flex-1 cursor-pointer">
                         <input type="radio" name="hasComments" checked={wizardData.hasComments === 'Yes'} onChange={() => updateData({ hasComments: 'Yes' })} className="peer hidden" />
-                        <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">Yes</div>
+                        <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">Yes</div>
                       </label>
                       <label className="flex-1 cursor-pointer">
                         <input type="radio" name="hasComments" checked={wizardData.hasComments === 'No'} onChange={() => updateData({ hasComments: 'No' })} className="peer hidden" />
-                        <div className="p-4 border border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-[#334155] transition-colors">No</div>
+                        <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">No</div>
                       </label>
                     </div>
                     {wizardData.hasComments === 'Yes' && (
                       <div className="animate-in fade-in duration-300">
-                        <textarea maxLength={1500} value={wizardData.commentsText} onChange={e => updateData({ commentsText: e.target.value })} placeholder="Enter comments here (max 250 words)..." className="w-full bg-[#0f172a] border border-cyan-500 rounded p-3 text-white outline-none focus:border-emerald-500 min-h-[120px]"></textarea>
+                        <textarea maxLength={1500} value={wizardData.commentsText} onChange={e => updateData({ commentsText: e.target.value })} placeholder="Enter comments here (max 250 words)..." className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-3 text-slate-900 dark:text-white outline-none focus:border-emerald-500 min-h-[120px]"></textarea>
+                      {wizardData.symbols.includes('od') && (!wizardData.commentsText || !wizardData.commentsText.trim()) && (
+                        <p className="text-red-500 text-xs mt-2 font-bold">Please enter the findings in the comments section because Other Diseases (OD) has been selected.</p>
+                      )}
+    
                       </div>
                     )}
                   </div>
@@ -1465,10 +1526,10 @@ export default function Home() {
             </div>
 
             {/* Wizard Controls */}
-            <div className="p-8 border-t border-cyan-700 flex justify-between bg-[#0f172a]">
+            <div className="p-8 border-t border-slate-300 dark:border-cyan-700 flex justify-between bg-slate-50 dark:bg-[#0f172a]">
               <button 
                 onClick={prevStep}
-                className="flex items-center space-x-2 px-6 py-2 rounded-xl font-bold transition-colors bg-[#334155] hover:bg-[#475569] text-white"
+                className="flex items-center space-x-2 px-6 py-2 rounded-xl font-bold transition-colors bg-slate-200 dark:bg-[#334155] hover:bg-slate-400 dark:hover:bg-[#475569] text-slate-900 dark:text-white"
               >
                 <ChevronLeft size={16} />
                 <span>Previous</span>
@@ -1487,7 +1548,7 @@ export default function Home() {
                 <div className="flex space-x-4">
                     <button 
                       onClick={() => window.location.reload()}
-                      className="flex items-center space-x-2 px-6 py-2 rounded-xl font-bold transition-colors bg-gray-700 hover:bg-gray-600 text-white shadow-lg"
+                      className="flex items-center space-x-2 px-6 py-2 rounded-xl font-bold transition-colors bg-slate-300 dark:bg-gray-700 hover:bg-slate-400 dark:hover:bg-gray-600 text-slate-900 dark:text-white shadow-lg"
                       title="Clear the form and start a new patient classification"
                     >
                       <RefreshCw size={16} />
@@ -1495,7 +1556,7 @@ export default function Home() {
                     </button>
                     <button 
                       disabled={!canProceedInterp(wizardData.currentInterpStep)}
-                      className={`flex items-center space-x-2 px-6 py-2 rounded font-bold transition-colors ${!canProceedInterp(wizardData.currentInterpStep) ? 'bg-blue-900/50 text-blue-700 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/50'}`}
+                      className={`flex items-center space-x-2 px-6 py-2 rounded font-bold transition-colors ${!canProceedInterp(wizardData.currentInterpStep) ? 'bg-blue-900/50 text-blue-700 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white shadow-lg shadow-blue-900/50'}`}
                       onClick={async () => {
                         await generatePDF();
                       }}
@@ -1510,54 +1571,54 @@ export default function Home() {
         )}
 
         {/* Developer & Documentation Footer Box (Compact) */}
-          <div className="bg-[#1e293b] border-t border-cyan-700 p-2 mt-2 print:hidden relative z-[50]">
+          <div className="bg-white dark:bg-[#1e293b] border-t border-slate-300 dark:border-cyan-700 p-2 mt-2 print:hidden relative z-[50]">
             <div className="max-w-7xl mx-auto flex flex-row justify-between items-center gap-4 w-full">
               
               {/* Left Side: Developer Info */}
               <div className="flex flex-col w-[50%]">
                 <div className="flex items-baseline space-x-2">
-                  <p className="font-bold text-blue-300 text-[11px]">Designed and Developed by <span className="text-orange-400">Dr. Arkaprabha Sau</span></p>
-                  <span className="font-bold text-blue-400 text-[10px] animate-pulse bg-blue-900/30 px-1.5 py-0.5 rounded border border-blue-500/50">v1.0.2</span>
+                  <p className="font-bold text-blue-700 dark:text-blue-300 text-[11px]">Designed and Developed by <span className="text-orange-700 dark:text-orange-400">Dr. Arkaprabha Sau</span></p>
+                  <span className="font-bold text-blue-600 dark:text-blue-400 text-[10px] animate-pulse bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded border border-blue-500/50">v1.0.2</span>
                 </div>
-                <p className="font-medium text-gray-300 text-[9px] leading-tight mt-1 whitespace-nowrap">
+                <p className="font-medium text-slate-800 dark:text-gray-300 text-[9px] leading-tight mt-1 whitespace-nowrap">
                   MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM
                 </p>
-                <p className="font-medium text-gray-300 text-[9px] leading-tight mt-0.5 whitespace-nowrap">
+                <p className="font-medium text-slate-800 dark:text-gray-300 text-[9px] leading-tight mt-0.5 whitespace-nowrap">
                   Ph.D. (Computer Science and Engineering: AI & ML in Healthcare)
                 </p>
-                <p className="font-medium text-blue-200 mt-1 text-[9px] whitespace-nowrap">
+                <p className="font-medium text-blue-800 dark:text-blue-200 mt-1 text-[9px] whitespace-nowrap">
                   Contact / Bug Report: <a href="mailto:arka.doctor@gmail.com" className="underline hover:text-blue-100">arka.doctor@gmail.com</a>
                 </p>
               </div>
               
               {/* Right Side: Buttons Grid */}
               <div className="grid grid-cols-3 gap-1.5 w-[50%]">
-                <a href="/ILO-2022.pdf" target="_blank" rel="noreferrer" className="bg-[#0f172a] hover:bg-blue-600 border border-cyan-700 hover:border-blue-500 text-gray-300 hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
+                <a href="/ILO-2022.pdf" target="_blank" rel="noreferrer" className="bg-slate-50 dark:bg-[#0f172a] hover:bg-blue-600 border border-slate-300 dark:border-cyan-700 hover:border-blue-500 text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
                   <ExternalLink size={14} className="shrink-0" />
                   <span className="leading-tight">ILO 2022</span>
                 </a>
                 
-                <a href="/ILO_2022-28-29.pdf" target="_blank" rel="noreferrer" className="bg-[#0f172a] hover:bg-blue-600 border border-cyan-700 hover:border-blue-500 text-gray-300 hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
+                <a href="/ILO_2022-28-29.pdf" target="_blank" rel="noreferrer" className="bg-slate-50 dark:bg-[#0f172a] hover:bg-blue-600 border border-slate-300 dark:border-cyan-700 hover:border-blue-500 text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
                   <ExternalLink size={14} className="shrink-0" />
                   <span className="leading-tight">ILO 2022 (ENTRY FORM)</span>
                 </a>
                 
-                <a href="https://arka1985.github.io/ILO_RAD/" target="_blank" rel="noreferrer" className="bg-[#0f172a] hover:bg-gray-700 border border-cyan-700 hover:border-gray-500 text-gray-300 hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center" title="Check GitHub for Updates">
+                <a href="https://arka1985.github.io/ILO_RAD/" target="_blank" rel="noreferrer" className="bg-slate-50 dark:bg-[#0f172a] hover:bg-slate-400 dark:hover:bg-gray-700 border border-slate-300 dark:border-cyan-700 hover:border-gray-500 text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center" title="Check GitHub for Updates">
                   <RefreshCw size={14} className="shrink-0" />
                   <span className="leading-tight">Updates</span>
                 </a>
 
-                <button onClick={() => setShowHelpModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white border border-cyan-700 p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
+                <button onClick={() => setShowHelpModal(true)} className="bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white border border-slate-300 dark:border-cyan-700 p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
                   <Info size={14} className="shrink-0" />
                   <span className="leading-tight">Help & Instructions</span>
                 </button>
                 
-                <button onClick={() => setShowLicenseModal(true)} className="bg-[#0f172a] hover:bg-emerald-600 border border-cyan-700 hover:border-emerald-500 text-gray-300 hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1 shadow-md h-full text-center leading-tight">
+                <button onClick={() => setShowLicenseModal(true)} className="bg-slate-50 dark:bg-[#0f172a] hover:bg-emerald-600 border border-slate-300 dark:border-cyan-700 hover:border-emerald-500 text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1 shadow-md h-full text-center leading-tight">
                   <ClipboardList size={14} className="shrink-0" />
                   <span>LICENSE & ACKNOWLEDGMENTS</span>
                 </button>
                 
-                <button onClick={() => setShowReferencesModal(true)} className="bg-[#0f172a] hover:bg-purple-600 border border-cyan-700 hover:border-purple-500 text-gray-300 hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
+                <button onClick={() => setShowReferencesModal(true)} className="bg-slate-50 dark:bg-[#0f172a] hover:bg-purple-600 border border-slate-300 dark:border-cyan-700 hover:border-purple-500 text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
                   <ExternalLink size={14} className="shrink-0" />
                   <span className="leading-tight">REFERENCES</span>
                 </button>
@@ -1567,14 +1628,14 @@ export default function Home() {
 
           {/* Modals */}
           {showHelpModal && (
-              <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4" onClick={() => setShowHelpModal(false)}>
-                <div className="bg-[#0f172a] border border-cyan-700 rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
-                  <div className="flex justify-between items-center p-4 border-b border-cyan-700 bg-[#1e293b]">
-                    <h2 className="text-xl font-bold text-white flex items-center space-x-2"><Info className="text-blue-400" /><span>Help & Instructions</span></h2>
-                    <button onClick={() => setShowHelpModal(false)} className="text-gray-400 hover:text-white transition-colors"><X size={24} /></button>
+              <div className="fixed inset-0 bg-slate-200/80 dark:bg-black/80 flex items-center justify-center z-[100] p-4" onClick={() => setShowHelpModal(false)}>
+                <div className="bg-slate-50 dark:bg-[#0f172a] border border-slate-300 dark:border-cyan-700 rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+                  <div className="flex justify-between items-center p-4 border-b border-slate-300 dark:border-cyan-700 bg-white dark:bg-[#1e293b]">
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center space-x-2"><Info className="text-blue-600 dark:text-blue-400" /><span>Help & Instructions</span></h2>
+                    <button onClick={() => setShowHelpModal(false)} className="text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white transition-colors"><X size={24} /></button>
                   </div>
-                  <div className="p-6 overflow-y-auto text-gray-300 space-y-4 text-sm">
-                    <h3 className="text-lg font-bold text-white">How to Use the App</h3>
+                  <div className="p-6 overflow-y-auto text-slate-800 dark:text-gray-300 space-y-4 text-sm">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">How to Use the App</h3>
                     <ol className="list-decimal pl-5 space-y-2">
                       <li>Fill out the <strong>Doctor Details</strong> and click "Save Doctor Info As Default".</li>
                       <li>Fill out the <strong>Patient Details</strong> for your current classification.</li>
@@ -1584,90 +1645,90 @@ export default function Home() {
                       <li>To begin the next patient, simply click <strong>Start New Patient</strong>.</li>
                     </ol>
       
-                    <h3 className="text-lg font-bold text-white mt-6 border-t border-cyan-700 pt-4">Data Backup & Migration</h3>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-6 border-t border-slate-300 dark:border-cyan-700 pt-4">Data Backup & Migration</h3>
                     <p>Your patient reports are permanently and securely saved to a database file on your computer. It is located at:</p>
-                    <code className="block bg-[#1e293b] text-emerald-400 p-2 rounded-xl border border-cyan-700 mt-2 mb-2 font-mono">Documents/ILO_RAD_Database/reports.db</code>
+                    <code className="block bg-white dark:bg-[#1e293b] text-emerald-700 dark:text-emerald-400 p-2 rounded-xl border border-slate-300 dark:border-cyan-700 mt-2 mb-2 font-mono">Documents/ILO_RAD_Database/reports.db</code>
                     <ul className="list-disc pl-5 space-y-2">
-                      <li><strong>To Backup:</strong> Copy the <code className="text-emerald-400">reports.db</code> file to a secure USB drive or cloud backup.</li>
-                      <li><strong>To Move Computers:</strong> Install the app on the new computer, then copy your old <code className="text-emerald-400">reports.db</code> file into the new computer's <code className="text-emerald-400">Documents/ILO_RAD_Database</code> folder.</li>
+                      <li><strong>To Backup:</strong> Copy the <code className="text-emerald-700 dark:text-emerald-400">reports.db</code> file to a secure USB drive or cloud backup.</li>
+                      <li><strong>To Move Computers:</strong> Install the app on the new computer, then copy your old <code className="text-emerald-700 dark:text-emerald-400">reports.db</code> file into the new computer's <code className="text-emerald-700 dark:text-emerald-400">Documents/ILO_RAD_Database</code> folder.</li>
                       <li><strong>App Updates:</strong> Because this database is stored in your Documents folder (outside the app folder), you can safely delete the old app folder when an update comes out without losing any patient records!</li>
                     </ul>
                   </div>
-                  <div className="p-4 border-t border-cyan-700 bg-[#1e293b] flex justify-end">
-                    <button onClick={() => setShowHelpModal(false)} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-bold transition-colors">Close Help</button>
+                  <div className="p-4 border-t border-slate-300 dark:border-cyan-700 bg-white dark:bg-[#1e293b] flex justify-end">
+                    <button onClick={() => setShowHelpModal(false)} className="bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white px-6 py-2 rounded-xl font-bold transition-colors">Close Help</button>
                   </div>
                 </div>
               </div>
           )}
           
           {showLicenseModal && (
-            <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[200] p-4" onClick={() => !isFirstLaunch && setShowLicenseModal(false)}>
-              <div className="bg-[#0f172a] border border-cyan-700 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
-                <div className="flex justify-between items-center p-5 border-b border-cyan-700 bg-[#1e293b]">
-                  <h2 className="text-xl font-black text-white flex items-center space-x-2">
-                    <ClipboardList className="text-emerald-400" />
+            <div className="fixed inset-0 bg-slate-300/90 dark:bg-black/90 flex items-center justify-center z-[200] p-4" onClick={() => !isFirstLaunch && setShowLicenseModal(false)}>
+              <div className="bg-slate-50 dark:bg-[#0f172a] border border-slate-300 dark:border-cyan-700 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center p-5 border-b border-slate-300 dark:border-cyan-700 bg-white dark:bg-[#1e293b]">
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center space-x-2">
+                    <ClipboardList className="text-emerald-700 dark:text-emerald-400" />
                     <span>PULMOVIEW LICENSE & ACKNOWLEDGMENTS</span>
                   </h2>
-                  {!isFirstLaunch && <button onClick={() => setShowLicenseModal(false)} className="text-gray-400 hover:text-white transition-colors"><X size={24} /></button>}
+                  {!isFirstLaunch && <button onClick={() => setShowLicenseModal(false)} className="text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white transition-colors"><X size={24} /></button>}
                 </div>
                 
-                <div className="p-8 overflow-y-auto text-gray-300 space-y-6 text-sm leading-relaxed">
+                <div className="p-8 overflow-y-auto text-slate-800 dark:text-gray-300 space-y-6 text-sm leading-relaxed">
                   
                   {isFirstLaunch && (
-                    <div className="bg-orange-900/20 border-l-4 border-orange-500 p-4 rounded-r">
-                      <p className="font-bold text-orange-400 mb-1 uppercase">Welcome to PulmoView!</p>
-                      <p className="text-orange-200">Please read and accept these terms before using the application.</p>
+                    <div className="bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-500 p-4 rounded-r">
+                      <p className="font-bold text-orange-700 dark:text-orange-400 mb-1 uppercase">Welcome to PulmoView!</p>
+                      <p className="text-orange-800 dark:text-orange-200">Please read and accept these terms before using the application.</p>
                     </div>
                   )}
 
-                  <div className="bg-orange-900/30 border-l-4 border-orange-500 p-4 rounded-r shadow-lg">
-                    <p className="text-orange-400 font-black uppercase text-base text-center">
+                  <div className="bg-orange-100 dark:bg-orange-900/30 border-l-4 border-orange-500 p-4 rounded-r shadow-lg">
+                    <p className="text-orange-700 dark:text-orange-400 font-black uppercase text-base text-center">
                       IT IS ABSOLUTELY FREE OF COST TO USE, NO PAID OR SUBSCRIPTION IS NEEDED.
                     </p>
                   </div>
 
-                  <div className="bg-[#1e293b] p-4 rounded-lg border border-cyan-700">
-                    <h3 className="font-bold text-white text-base mb-2">Designed and Developed by:</h3>
-                    <p className="font-bold text-orange-400 text-lg">Dr. Arkaprabha Sau</p>
-                    <p className="text-gray-300 mt-1">MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM</p>
-                    <p className="text-gray-300">Ph.D. (Computer Science and Engineering: AI & ML in Healthcare)</p>
+                  <div className="bg-white dark:bg-[#1e293b] p-4 rounded-lg border border-slate-300 dark:border-cyan-700">
+                    <h3 className="font-bold text-slate-900 dark:text-white text-base mb-2">Designed and Developed by:</h3>
+                    <p className="font-bold text-orange-700 dark:text-orange-400 text-lg">Dr. Arkaprabha Sau</p>
+                    <p className="text-slate-800 dark:text-gray-300 mt-1">MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM</p>
+                    <p className="text-slate-800 dark:text-gray-300">Ph.D. (Computer Science and Engineering: AI & ML in Healthcare)</p>
                   </div>
 
                   <div className="space-y-4">
-                    <h3 className="text-lg font-bold text-white border-b border-cyan-700 pb-2">Software Purpose & Important Acknowledgments</h3>
-                    <div className="bg-[#1e293b] p-4 rounded-xl border border-cyan-700">
-                      <p className="text-orange-400 font-black uppercase text-sm mb-1">THIS IS NOT AN AI-BASED TOOL.</p>
-                      <p className="text-gray-300">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-300 dark:border-cyan-700 pb-2">Software Purpose & Important Acknowledgments</h3>
+                    <div className="bg-white dark:bg-[#1e293b] p-4 rounded-xl border border-slate-300 dark:border-cyan-700">
+                      <p className="text-orange-700 dark:text-orange-400 font-black uppercase text-sm mb-1">THIS IS NOT AN AI-BASED TOOL.</p>
+                      <p className="text-slate-800 dark:text-gray-300">
                         This software is strictly a digital interface tool designed solely to facilitate the classification and filling of forms according to the latest ILO International Classification of Radiographs of Pneumoconioses. It acts as a digital worksheet to assist medical professionals in organizing their findings.
                       </p>
                     </div>
 
-                    <ul className="list-disc pl-5 space-y-2 text-gray-300">
+                    <ul className="list-disc pl-5 space-y-2 text-slate-800 dark:text-gray-300">
                       <li>The entire methodology is based solely on the official <strong>ILO International Classification of Radiographs of Pneumoconioses (2022 Guidelines)</strong>.</li>
                       <li><strong>Interpretation and classification MUST be solely performed by a Medical Officer / Qualified Medical Practitioner</strong> who is appropriately trained at a recognized institute.</li>
                     </ul>
                   </div>
 
                   <div className="space-y-4">
-                    <h3 className="text-lg font-bold text-white border-b border-cyan-700 pb-2">Privacy and Confidentiality Disclaimer & Terms of Use</h3>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-300 dark:border-cyan-700 pb-2">Privacy and Confidentiality Disclaimer & Terms of Use</h3>
                     <p>PulmoView operates <strong>100% locally</strong> on your machine. No patient data is collected, transmitted, or stored on external servers by this application.</p>
                     <p>However, <strong>YOU are solely responsible</strong> for ensuring that the computer on which this software is installed complies with all applicable local, regional, and national healthcare data privacy laws and regulations (e.g., DPDP Act, HIPAA, GDPR, or equivalent).</p>
                     <p>You must ensure that the local database and generated PDF reports are stored securely and protected against unauthorized access.</p>
-                    <p className="uppercase text-xs text-gray-400 mt-2">
+                    <p className="uppercase text-xs text-slate-600 dark:text-gray-400 mt-2">
                       THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY.
                     </p>
                   </div>
 
                   <div className="space-y-3 text-justify">
-                    <h3 className="text-lg font-bold text-white border-b border-cyan-700 pb-2">PULMOVIEW — Free Use and Attribution License</h3>
-                    <p className="font-bold text-gray-200">Copyright © 2026 Dr. Arkaprabha Sau.</p>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-300 dark:border-cyan-700 pb-2">PULMOVIEW — Free Use and Attribution License</h3>
+                    <p className="font-bold text-slate-800 dark:text-gray-200">Copyright © 2026 Dr. Arkaprabha Sau.</p>
                     <p>
                       PULMOVIEW is provided free of charge for academic, educational, research, institutional, professional, and other lawful purposes. Users are permitted to use, copy, distribute, modify, and adapt the software, provided that the original copyright notice and this license are retained and appropriate acknowledgement is given to the developer.
                     </p>
-                    <p className="font-bold text-emerald-400">
+                    <p className="font-bold text-emerald-700 dark:text-emerald-400">
                       Any publication, research article, thesis, dissertation, presentation, report, website, software, or other work that uses or incorporates PULMOVIEW or a substantial portion of its code, algorithms, functionality, or outputs must acknowledge:
                       <br/><br/>
-                      <span className="text-white">Dr. Arkaprabha Sau, MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM, Ph.D. (Computer Science and Engineering: AI & ML in Healthcare).</span>
+                      <span className="text-slate-900 dark:text-white">Dr. Arkaprabha Sau, MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM, Ph.D. (Computer Science and Engineering: AI & ML in Healthcare).</span>
                     </p>
                     <p>
                       Modification and redistribution are permitted, provided that modified versions clearly indicate that changes have been made and do not falsely represent the modified software as the original PULMOVIEW. Commercial use is permitted without a software license fee, subject to these attribution and copyright conditions.
@@ -1675,17 +1736,17 @@ export default function Home() {
                     <p>
                       Ownership and copyright of the original PULMOVIEW remain with Dr. Arkaprabha Sau, and no rights of ownership are transferred to any user or organization. Use of PULMOVIEW does not imply endorsement by the developer or any associated institution.
                     </p>
-                    <p className="uppercase text-xs text-gray-400 mt-2 font-bold">
+                    <p className="uppercase text-xs text-slate-600 dark:text-gray-400 mt-2 font-bold">
                       PULMOVIEW is provided "AS IS", without warranties of any kind, and users are responsible for independently evaluating its accuracy, suitability, reliability, and limitations, particularly when used for medical, occupational-health, clinical, research, or professional purposes. By downloading, installing, copying, modifying, distributing, or using PULMOVIEW, the user agrees to these terms.
                     </p>
                     <p className="mt-2">
-                      This work incorporates elements governed by the <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline font-bold">Creative Commons Attribution 4.0 International License (CC BY 4.0)</a>.
+                      This work incorporates elements governed by the <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline font-bold">Creative Commons Attribution 4.0 International License (CC BY 4.0)</a>.
                     </p>
                   </div>
                   
                 </div>
                 
-                <div className="p-5 border-t border-cyan-700 bg-[#1e293b] flex justify-end">
+                <div className="p-5 border-t border-slate-300 dark:border-cyan-700 bg-white dark:bg-[#1e293b] flex justify-end">
                   {isFirstLaunch ? (
                     <button 
                       onClick={() => {
@@ -1693,14 +1754,14 @@ export default function Home() {
                         setIsFirstLaunch(false);
                         setShowLicenseModal(false);
                       }} 
-                      className="bg-red-600 hover:bg-red-500 active:bg-green-500 focus:bg-green-500 text-white px-8 py-3 rounded-xl font-black transition-all shadow-lg uppercase tracking-wide"
+                      className="bg-red-600 hover:bg-red-500 active:bg-green-500 focus:bg-green-500 text-slate-900 dark:text-white px-8 py-3 rounded-xl font-black transition-all shadow-lg uppercase tracking-wide"
                     >
                       I Have Read and Accept These Terms
                     </button>
                   ) : (
                     <button 
                       onClick={() => setShowLicenseModal(false)} 
-                      className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-bold transition-colors shadow-lg"
+                      className="bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white px-6 py-2 rounded-xl font-bold transition-colors shadow-lg"
                     >
                       Close
                     </button>
@@ -1711,55 +1772,55 @@ export default function Home() {
           )}
 
           {showReferencesModal && (
-            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4" onClick={() => setShowReferencesModal(false)}>
-              <div className="bg-[#0f172a] border border-cyan-700 rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
-                <div className="flex justify-between items-center p-4 border-b border-cyan-700 bg-[#1e293b]">
-                  <h2 className="text-xl font-bold text-white flex items-center space-x-2"><span>References</span></h2>
-                  <button onClick={() => setShowReferencesModal(false)} className="text-gray-400 hover:text-white transition-colors"><X size={24} /></button>
+            <div className="fixed inset-0 bg-slate-200/80 dark:bg-black/80 flex items-center justify-center z-[100] p-4" onClick={() => setShowReferencesModal(false)}>
+              <div className="bg-slate-50 dark:bg-[#0f172a] border border-slate-300 dark:border-cyan-700 rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center p-4 border-b border-slate-300 dark:border-cyan-700 bg-white dark:bg-[#1e293b]">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center space-x-2"><span>References</span></h2>
+                  <button onClick={() => setShowReferencesModal(false)} className="text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white transition-colors"><X size={24} /></button>
                 </div>
-                <div className="p-6 overflow-y-auto text-gray-300 space-y-6 text-sm">
+                <div className="p-6 overflow-y-auto text-slate-800 dark:text-gray-300 space-y-6 text-sm">
                   <div>
-                    <h3 className="font-bold text-white mb-2 border-b border-cyan-700 pb-1">1. ILO 2022 Guidelines</h3>
+                    <h3 className="font-bold text-slate-900 dark:text-white mb-2 border-b border-slate-300 dark:border-cyan-700 pb-1">1. ILO 2022 Guidelines</h3>
                     <p>International Labour Office. <em>Guidelines for the use of the ILO International Classification of Radiographs of Pneumoconioses</em>. Revised edition 2022. Geneva: ILO; 2022.</p>
-                    <a href="https://www.ilo.org/resource/other/ilo-international-classification-radiographs-pneumoconioses" target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-300 underline mt-1 inline-block break-all">
+                    <a href="https://www.ilo.org/resource/other/ilo-international-classification-radiographs-pneumoconioses" target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-300 underline mt-1 inline-block break-all">
                       https://www.ilo.org/resource/other/ilo-international-classification-radiographs-pneumoconioses
                     </a>
                   </div>
                   <div>
-                    <h3 className="font-bold text-white mb-2 border-b border-cyan-700 pb-1">2. OSHWC Code 2020</h3>
+                    <h3 className="font-bold text-slate-900 dark:text-white mb-2 border-b border-slate-300 dark:border-cyan-700 pb-1">2. OSHWC Code 2020</h3>
                     <p>Ministry of Labour and Employment, Government of India. <em>The Occupational Safety, Health and Working Conditions Code, 2020</em>. No. 37 of 2020. New Delhi: The Gazette of India; 2020 Sept 29.</p>
                   </div>
                   <div>
-                    <h3 className="font-bold text-white mb-2 border-b border-cyan-700 pb-1">3. Central Rules 2026 (Form IX)</h3>
+                    <h3 className="font-bold text-slate-900 dark:text-white mb-2 border-b border-slate-300 dark:border-cyan-700 pb-1">3. Central Rules 2026 (Form IX)</h3>
                     <p>Ministry of Labour and Employment, Government of India. <em>The Occupational Safety, Health and Working Conditions (Central) Rules, 2026</em>. New Delhi: The Gazette of India; 2026. (Form IX: Report of Medical Examination).</p>
                   </div>
                 </div>
-                <div className="p-4 border-t border-cyan-700 bg-[#1e293b] flex justify-end">
-                  <button onClick={() => setShowReferencesModal(false)} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-bold transition-colors">Close</button>
+                <div className="p-4 border-t border-slate-300 dark:border-cyan-700 bg-white dark:bg-[#1e293b] flex justify-end">
+                  <button onClick={() => setShowReferencesModal(false)} className="bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white px-6 py-2 rounded-xl font-bold transition-colors">Close</button>
                 </div>
               </div>
             </div>
           )}
           
 {showHistoryModal && (
-            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4 print:hidden">
-            <div className="bg-[#0f172a] border border-cyan-700 rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-              <div className="p-4 border-b border-cyan-700 flex justify-between items-center bg-[#1e293b] rounded-t-lg">
-                <h3 className="text-white font-bold text-lg flex items-center space-x-2">
+            <div className="fixed inset-0 bg-slate-200/80 dark:bg-black/80 flex items-center justify-center z-[100] p-4 print:hidden">
+            <div className="bg-slate-50 dark:bg-[#0f172a] border border-slate-300 dark:border-cyan-700 rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+              <div className="p-4 border-b border-slate-300 dark:border-cyan-700 flex justify-between items-center bg-white dark:bg-[#1e293b] rounded-t-lg">
+                <h3 className="text-slate-900 dark:text-white font-bold text-lg flex items-center space-x-2">
                   <Search size={18} />
                   <span>Search Previous Patients</span>
                 </h3>
-                <button onClick={() => setShowHistoryModal(false)} className="text-gray-400 hover:text-white transition-colors">
+                <button onClick={() => setShowHistoryModal(false)} className="text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                   <X size={20} />
                 </button>
               </div>
-              <div className="p-4 border-b border-cyan-700">
+              <div className="p-4 border-b border-slate-300 dark:border-cyan-700">
                 <input 
                   type="text" 
                   placeholder="Search by Patient Name or ID..." 
                   value={historySearch} 
                   onChange={e => setHistorySearch(e.target.value)}
-                  className="w-full bg-[#1e293b] border border-cyan-500 text-white px-4 py-3 rounded-xl outline-none focus:border-emerald-500 transition-colors"
+                  className="w-full bg-white dark:bg-[#1e293b] border border-slate-400 dark:border-cyan-500 text-slate-900 dark:text-white px-4 py-3 rounded-xl outline-none focus:border-emerald-500 transition-colors"
                 />
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -1767,15 +1828,15 @@ export default function Home() {
                   (r.patientName || '').toLowerCase().includes(historySearch.toLowerCase()) || 
                   (r.patientId || '').toLowerCase().includes(historySearch.toLowerCase())
                 ).map((report, idx) => (
-                  <div key={idx} className="bg-[#1e293b] border border-cyan-700 p-4 rounded-xl hover:border-emerald-500 transition-colors flex justify-between items-center group">
+                  <div key={idx} className="bg-white dark:bg-[#1e293b] border border-slate-300 dark:border-cyan-700 p-4 rounded-xl hover:border-emerald-500 transition-colors flex justify-between items-center group">
                     <div>
-                      <p className="text-white font-bold text-lg">{report.patientName} <span className="text-gray-400 text-sm font-normal">({report.patientId})</span></p>
-                      <p className="text-gray-400 text-sm mt-1">Report Date: {report.historyDate || 'Unknown'} | Mode: {report.classificationMode}</p>
+                      <p className="text-slate-900 dark:text-white font-bold text-lg">{report.patientName} <span className="text-slate-600 dark:text-gray-400 text-sm font-normal">({report.patientId})</span></p>
+                      <p className="text-slate-600 dark:text-gray-400 text-sm mt-1">Report Date: {report.historyDate || 'Unknown'} | Mode: {report.classificationMode}</p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <button 
                         onClick={(e) => { e.stopPropagation(); deleteHistoricalPatient(report.historyId); }}
-                        className="bg-red-900/50 hover:bg-red-600 text-red-200 px-3 py-2 rounded-xl transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                        className="bg-red-100 dark:bg-red-900/50 hover:bg-red-600 text-red-800 dark:text-red-200 px-3 py-2 rounded-xl transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
                         title="Delete this record"
                       >
                         <Trash2 size={18} />
@@ -1784,15 +1845,23 @@ export default function Home() {
                           onClick={() => {
                             updateData(report);
                             setShowHistoryModal(false);
-                            setTimeout(() => window.print(), 2000);
+                            setTimeout(() => {
+                                const pName = report.patientName ? report.patientName.replace(/[^a-zA-Z0-9 -]/g, '').trim().replace(/\s+/g, '_') : 'Patient';
+                                const pId = report.patientId ? report.patientId.replace(/[^a-zA-Z0-9 -]/g, '').trim().replace(/\s+/g, '_') : 'NoID';
+                                const rDate = report.readingDate || 'NoDate';
+                                const origTitle = document.title;
+                                document.title = `ILO_Report_${pName}_${pId}_${rDate}`;
+                                window.print();
+                                setTimeout(() => { document.title = origTitle; }, 1000);
+                              }, 2000);
                           }}
-                          className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                          className="bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white px-4 py-2 rounded-xl font-bold transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
                         >
                           Print Report
                         </button>
                         <button
                           onClick={() => loadHistoricalPatient(report)}
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                          className="bg-emerald-600 hover:bg-emerald-500 text-slate-900 dark:text-white px-4 py-2 rounded-xl font-bold transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
                         >
                         Load Demographics
                         </button>
@@ -1800,7 +1869,7 @@ export default function Home() {
                   </div>
                 ))}
                 {historyData.length === 0 && (
-                  <div className="text-center text-gray-500 py-8">
+                  <div className="text-center text-slate-500 dark:text-gray-500 py-8">
                     No previous reports found on this device.
                   </div>
                 )}
@@ -1812,7 +1881,7 @@ export default function Home() {
     </div>
 
     {/* HIDDEN REPORT TEMPLATE FOR PDF */}
-    <div id="pdf-report-container" className="hidden print:block print:w-[210mm] print:mx-auto print:bg-white print:text-black">
+    <div id="pdf-report-container" className="hidden print:block print:w-full print:bg-white print:text-black">
       {wizardData.classificationMode === 'Abbreviated' 
         ? <ILOAbbreviatedReportTemplate data={wizardData} />
         : <ILOReportTemplate data={wizardData} />

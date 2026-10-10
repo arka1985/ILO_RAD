@@ -8,7 +8,7 @@ const LetterBox = ({ checked, label, className = "" }: { checked: boolean, label
   <span className={`relative inline-block w-[22px] h-[22px] border ${checked ? 'border-black text-black' : 'border-[#ef4444] text-[#ef4444]'} bg-white text-center text-[12px] align-middle overflow-hidden ${className}`} style={{ lineHeight: '20px' }}>
     <span className="relative z-10">{label}</span>
     {checked && (
-      <span className="absolute text-black font-normal" style={{ fontSize: '22px', left: 0, top: 0, width: '100%', height: '100%', lineHeight: '20px', textAlign: 'center', zIndex: 20 }}>
+      <span className="absolute text-black font-normal opacity-50" style={{ fontSize: '22px', left: 0, top: 0, width: '100%', height: '100%', lineHeight: '20px', textAlign: 'center', zIndex: 20 }}>
         X
       </span>
     )}
@@ -18,7 +18,7 @@ const LetterBox = ({ checked, label, className = "" }: { checked: boolean, label
 const Checkbox = ({ checked, label, className = "", boxClass = "w-4 h-4", style }: { checked: boolean, label?: string, className?: string, boxClass?: string, style?: React.CSSProperties }) => (
   <span className={`inline-block whitespace-nowrap align-middle ${className}`} style={{ lineHeight: '1', ...style }}>
     <span className={`inline-block ${boxClass} border ${checked ? 'border-black text-black font-extrabold' : 'border-[#ef4444] text-transparent'} text-center text-[12px] align-middle bg-white overflow-hidden`} style={{ lineHeight: boxClass.includes('22px') ? '20px' : '14px' }}>
-      {checked ? 'X' : '\u00A0'}
+      {checked ? <span className="opacity-60">X</span> : '\u00A0'}
     </span>
     {label && <span className="align-middle ml-1.5 text-black text-[11px] whitespace-normal">{label}</span>}
   </span>
@@ -92,7 +92,7 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
         </div>
         <div>
           <p><span className="font-bold">Reader Name:</span> {data.classifyingPhysician || 'N/A'}</p>
-          <p><span className="font-bold">Classification Mode:</span> {data.classificationMode} &nbsp; | &nbsp; <span className="font-bold">Purpose:</span> {data.classificationPurpose === 'Other' ? data.classificationPurposeOtherText : data.classificationPurpose}</p>
+          <p><span className="font-bold">Classification Mode:</span> {data.classificationMode} &nbsp; | &nbsp; <span className="font-bold">Purpose:</span> {data.classificationPurpose === 'Other' ? data.classificationPurposeOtherText : data.classificationPurpose} <br/> <span className="font-bold">Type of Examination:</span> {data.examinationType === 'Other Purpose' ? data.examinationTypeOtherText : data.examinationType}</p>
         </div>
       </div>
 
@@ -223,7 +223,7 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
             <h3 className="text-[13px] mb-6 text-black font-bold">2C. LARGE OPACITIES</h3>
             <div className="flex items-center space-x-2 pl-4">
               <span className="text-[10px] text-black">SIZE</span>
-              {['O', 'A', 'B', 'C'].map(o => (
+              {['0', 'A', 'B', 'C'].map(o => (
                 <LetterBox key={o} checked={pData.largeOpacity === o && showParenchymalDetails} label={o} />
               ))}
               <span className="text-[9px] ml-2 text-black leading-tight">Proceed to<br/>Section 3A</span>
@@ -528,10 +528,10 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
           
           <div className="flex justify-between items-center mt-2 border-t border-gray-300 pt-1">
             <div className="text-[10px] text-black">
-              If other diseases or significant abnormalities, <span className="font-bold">findings must be recorded on reverse.</span>
+              If other diseases or significant abnormalities, <span className="font-bold">findings must be recorded on reverse or Comment Section.</span>
             </div>
             <div className="text-[9px] text-black text-right leading-tight">
-              Date Physician or Worker<br/>notified? ______________
+              Date Physician or Worker<br/>notified?
             </div>
           </div>
 
@@ -541,7 +541,7 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
             <Checkbox checked={pData.seePhysician === 'Yes'} boxClass="w-4 h-4" />
             <span className="text-black">No</span>
             <Checkbox checked={pData.seePhysician === 'No'} boxClass="w-4 h-4" />
-            <div className="border border-[#1e1b4b] w-24 h-5 ml-4 bg-gray-50"></div>
+            <div className="border border-[#1e1b4b] w-24 h-5 ml-4 bg-gray-50 flex items-center justify-center text-[10px] text-black font-bold">{data.notifiedDate || ''}</div>
           </div>
         </div>
 
@@ -592,9 +592,15 @@ export const ILOReportTemplate: React.FC<ILOReportProps> = ({ data }) => {
                 <p className="text-gray-800">{data.orderingPhysician || '_______________________'}</p>
               </div>
             </div>
-            <div className="mt-4">
-              <p className="mb-1 text-base text-black">_______________________</p>
-              <p className="font-bold text-black text-[10px]">Date</p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <div>
+                <p className="font-bold text-black text-[10px] mb-1">Reading Date</p>
+                <p className="text-xs text-black">{data.readingDate || '_______________________'}</p>
+              </div>
+              <div>
+                <p className="font-bold text-black text-[10px] mb-1">Establishment Name</p>
+                <p className="text-xs text-black">{data.establishmentName || '_______________________'}</p>
+              </div>
             </div>
           </div>
         </div>

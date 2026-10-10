@@ -94,7 +94,7 @@ export function FormIXReportTemplate({ reportData }: { reportData: any }) {
   }
 
   return (
-    <div className="bg-white text-black p-8 max-w-4xl mx-auto font-sans break-inside-avoid">
+    <div id="form-ix-template" className="bg-white text-black p-8 max-w-4xl mx-auto font-sans break-inside-avoid">
       <div className="mb-6 border-b-2 border-black pb-4 text-center">
         <h2 className="text-xl font-bold uppercase">
           REPORT AS PER FORM IX OF OCCUPATIONAL SAFETY HEALTH AND WORKING CONDITION (CENTRAL) RULES 2026
@@ -108,10 +108,12 @@ export function FormIXReportTemplate({ reportData }: { reportData: any }) {
       <div className="mb-6 grid grid-cols-2 gap-4 text-sm font-bold border-b border-gray-300 pb-4">
         <div>Patient Name: <span className="font-normal">{reportData.patientName}</span></div>
         <div>Patient ID: <span className="font-normal">{reportData.patientId}</span></div>
-        <div>Date of Examination: <span className="font-normal">{reportData.radiographDate || reportData.readingDate}</span></div>
+        <div>Radiograph Date: <span className="font-normal">{reportData.radiographDate || reportData.readingDate}</span></div>
         <div>Classifying Physician: <span className="font-normal">{reportData.classifyingPhysician}</span></div>
         <div>Reading Date: <span className="font-normal">{reportData.readingDate}</span></div>
         <div>Establishment Name: <span className="font-normal">{reportData.establishmentName || 'Not Specified'}</span></div>
+          <div>Purpose: <span className="font-normal">{reportData.classificationPurpose === 'Other' ? reportData.classificationPurposeOtherText : reportData.classificationPurpose}</span></div>
+          <div>Type of Examination: <span className="font-normal">{reportData.examinationType === 'Other Purpose' ? reportData.examinationTypeOtherText : reportData.examinationType}</span></div>
       </div>
 
       <div className="mb-4">
@@ -148,10 +150,24 @@ export function FormIXReportTemplate({ reportData }: { reportData: any }) {
         </table>
       </div>
       
-      <div className="mt-16 flex justify-between">
-         <div className="text-center">
-            <div className="border-b border-black w-48 mb-2"></div>
+      <div className="mt-16 flex justify-between items-end">
+         <div>
+            <div className="border-b border-black w-48 mb-2 h-8 flex items-end justify-center text-lg"></div>
             <p className="font-bold text-sm">Signature of Classifying Physician</p>
+            {reportData.classifyingPhysician && (
+              <p className="text-xs mt-1 font-bold">{reportData.classifyingPhysician}</p>
+            )}
+            {reportData.physicianQualification && (
+              <p className="text-xs text-gray-700 max-w-[250px]">
+                {Array.isArray(reportData.physicianQualification) 
+                  ? [...reportData.physicianQualification.filter((q: string) => q !== 'Others'), ...(reportData.physicianQualification.includes('Others') && reportData.physicianQualificationOtherText ? [reportData.physicianQualificationOtherText] : [])].join(', ') 
+                  : reportData.physicianQualification}
+              </p>
+            )}
+         </div>
+         <div className="text-center">
+            <p className="font-bold text-sm mb-1">Reading Date</p>
+            <p className="text-sm text-black">{reportData.readingDate || '_______________________'}</p>
          </div>
       </div>
     </div>

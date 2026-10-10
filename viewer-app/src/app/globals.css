@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
 
 :root {
   --background: #ffffff;
@@ -34,10 +36,11 @@ body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  #ilo-report-template, #ilo-abbrev-report-template {
+  #ilo-report-template, #ilo-abbrev-report-template, #form-ix-template {
     width: 200mm !important;
-    transform: scale(0.85);
-    transform-origin: top left;
-    margin: 0 !important;
+    zoom: 0.82;
+    margin: 0 auto !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }
