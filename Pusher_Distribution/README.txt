@@ -41,7 +41,7 @@ Keep the black terminal window open while you are using the app. When you're don
 
 
 ## Updates and Versioning
-**Current Version:** 1.0.2
+**Current Version:** v2.0.0
 
 To check if a newer version of the software is available, visit the [Official Updates Page](https://arka1985.github.io/ILO_RAD/) (you can also click the "Updates" button in the Viewer App footer). 
 

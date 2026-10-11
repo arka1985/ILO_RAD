@@ -272,7 +272,7 @@
     <header>
         <h1>PulmoView: ILO Radiograph Suite</h1>
         <p class="subtitle">A comprehensive, fully local web application suite for PulmoView: ILO Radiography System for Pneumoconiosis Classification customised to Indian Context</p>
-        <p class="pulsatile" style="color: var(--primary-accent); font-size: 1.1rem; font-weight: 600; margin-top: 1rem;">Version: 1.0.2 | Updated: October 11, 2026</p>
+        <p class="pulsatile" style="color: var(--primary-accent); font-size: 1.1rem; font-weight: 600; margin-top: 1rem;">Version: v2.0.0 | Updated: October 11, 2026</p>
     </header>
 
     <div class="glass-panel">
@@ -511,11 +511,19 @@
             <h2>Updates and Versioning</h2>
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
                 <span style="font-size: 1.25rem;"><strong>Current Version:</strong></span>
-                <span style="background: rgba(167, 139, 250, 0.2); color: #a78bfa; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: bold;">1.0.2</span>
+                <span style="background: rgba(167, 139, 250, 0.2); color: #a78bfa; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: bold;">v2.0.0</span>
             </div>
             <p style="color: var(--text-muted);">You are currently on the official updates page! Compare this version with the one shown in your Viewer App's footer.</p>
             
-            <h3 style="color: #a78bfa;">How to Install an Update:</h3>
+            <h3 style="color: #38bdf8; margin-top: 1.5rem;">What's New in v2.0.0:</h3>
+            <ul style="color: var(--text-muted); font-size: 0.95rem;">
+                <li><strong>Dynamic Skip-Pattern Workflow:</strong> Marking "No" in Section 2A jumps to 3A; "No" in 3A (or 3C) jumps to 4A; "No" in 4A jumps directly to Section 5.</li>
+                <li><strong>Synchronized Abbreviated PDF Reporting:</strong> Pleural abnormality selection precisely matches between entry form and printed PDF; selecting "No" avoids redundant zero marks.</li>
+                <li><strong>Overall Assessment Validation:</strong> Requires explanatory clinical comments if an X-ray is deemed abnormal when individual sub-sections are negative.</li>
+                <li><strong>Optimized Action Navigation:</strong> Standardized ALL-CAPS footer buttons and refined report completion controls.</li>
+            </ul>
+            
+            <h3 style="color: #a78bfa; margin-top: 1.5rem;">How to Install an Update:</h3>
             <ol>
                 <li>Download the new <code>.zip</code> package and extract it to a <strong>new folder</strong>.</li>
                 <li><strong>Do not overwrite</strong> the old folder immediately.</li>

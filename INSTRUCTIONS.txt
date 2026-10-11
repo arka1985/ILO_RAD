@@ -7,8 +7,8 @@ This software can be distributed in three different ways, depending on who needs
 
 1. VIEWER DISTRIBUTION (Viewer_Distribution folder)
    Send this folder to the Interpreter/Physician. It only contains the Viewer App.
-   - Windows: Double-click `start_viewer_windows.bat`
-   - Mac/Linux: Run `./start_viewer_mac_linux.sh`
+   - Windows: Double-click `start_windows.bat`
+   - Mac/Linux: Run `./start_mac_linux.sh`
    It automatically installs dependencies and opens the Viewer in the browser at http://localhost:3000.
 
 2. PUSHER DISTRIBUTION (Pusher_Distribution folder)
@@ -80,7 +80,7 @@ If any bug or any issue please email to arka.doctor@gmail.com
 
 
 ## Updates and Versioning
-**Current Version:** 1.0.2
+**Current Version:** v2.0.0
 
 To check if a newer version of the software is available, visit the [Official Updates Page](https://arka1985.github.io/ILO_RAD/) (you can also click the "Updates" button in the Viewer App footer). 
 

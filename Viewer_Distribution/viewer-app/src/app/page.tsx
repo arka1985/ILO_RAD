@@ -307,6 +307,98 @@ export default function Home() {
     if ('diffuseSiteProfile' in updates || 'diffuseSiteFaceOn' in updates) {
         processPleural('diffuse', ['diffuseSiteProfile', 'diffuseSiteFaceOn']);
     }
+    if ('costophrenicRight' in updates || 'costophrenicLeft' in updates) {
+        if (!next.costophrenicRight && !next.costophrenicLeft) {
+            next.diffuseSiteProfile = [];
+            next.diffuseSiteFaceOn = [];
+            next.diffuseCalcProfile = [];
+            next.diffuseCalcFaceOn = [];
+            next.diffuseExtentRight = '0';
+            next.diffuseExtentLeft = '0';
+            next.diffuseWidthRight = '0';
+            next.diffuseWidthLeft = '0';
+        } else {
+            if (!next.costophrenicRight) {
+                next.diffuseSiteProfile = next.diffuseSiteProfile.filter(x => x !== 'R');
+                next.diffuseSiteFaceOn = next.diffuseSiteFaceOn.filter(x => x !== 'R');
+                next.diffuseCalcProfile = next.diffuseCalcProfile.filter(x => x !== 'R');
+                next.diffuseCalcFaceOn = next.diffuseCalcFaceOn.filter(x => x !== 'R');
+                next.diffuseExtentRight = '0';
+                next.diffuseWidthRight = '0';
+            }
+            if (!next.costophrenicLeft) {
+                next.diffuseSiteProfile = next.diffuseSiteProfile.filter(x => x !== 'L');
+                next.diffuseSiteFaceOn = next.diffuseSiteFaceOn.filter(x => x !== 'L');
+                next.diffuseCalcProfile = next.diffuseCalcProfile.filter(x => x !== 'L');
+                next.diffuseCalcFaceOn = next.diffuseCalcFaceOn.filter(x => x !== 'L');
+                next.diffuseExtentLeft = '0';
+                next.diffuseWidthLeft = '0';
+            }
+        }
+    }
+    if ('anyParenchymal' in updates && updates.anyParenchymal === 'No') {
+        next.profusion = '-';
+        next.primaryShape = '-';
+        next.secondaryShape = '-';
+        next.zones = [];
+        next.largeOpacity = '0';
+    }
+    if ('anyPleural' in updates && updates.anyPleural === 'No') {
+        next.plaqueSiteProfile = [];
+        next.plaqueSiteFaceOn = [];
+        next.plaqueSiteDiaphragm = [];
+        next.plaqueSiteOther = [];
+        next.plaqueCalcProfile = [];
+        next.plaqueCalcFaceOn = [];
+        next.plaqueCalcDiaphragm = [];
+        next.plaqueCalcOther = [];
+        next.plaqueExtentRight = '0';
+        next.plaqueExtentLeft = '0';
+        next.plaqueWidthRight = '0';
+        next.plaqueWidthLeft = '0';
+        next.costophrenicRight = false;
+        next.costophrenicLeft = false;
+        next.diffuseSiteProfile = [];
+        next.diffuseSiteFaceOn = [];
+        next.diffuseCalcProfile = [];
+        next.diffuseCalcFaceOn = [];
+        next.diffuseExtentRight = '0';
+        next.diffuseExtentLeft = '0';
+        next.diffuseWidthRight = '0';
+        next.diffuseWidthLeft = '0';
+        next.abbrevThickening = [];
+        next.abbrevCalcification = ['0'];
+        next.abbrevCPAngle = [];
+    }
+    if ('anyPleural' in updates && updates.anyPleural === 'Yes') {
+      if (!next.abbrevCalcification || next.abbrevCalcification.length === 0) {
+        next.abbrevCalcification = ['0'];
+      }
+    }
+    if ('abbrevThickening' in updates) {
+      const thick = next.abbrevThickening || [];
+      let calc = next.abbrevCalcification || [];
+      // Calcification is only applicable where thickening is present
+      calc = calc.filter(c => c === '0' || thick.includes(c));
+      if (calc.length === 0 || (calc.length === 1 && calc[0] === '0')) {
+        calc = ['0'];
+      }
+      next.abbrevCalcification = calc;
+    }
+    if ('anyOther' in updates && updates.anyOther === 'No') {
+        next.symbols = [];
+        next.seePhysician = '';
+        next.notifiedDate = '';
+    }
+    // Mandatory comment if Abbreviated Overall Assessment is No (abnormal) but no specific abnormalities recorded
+    if (next.classificationMode === 'Abbreviated' &&
+        next.isEssentiallyNormal === 'No' &&
+        next.abbrevProfusion === '0' &&
+        (next.largeOpacity === '0' || !next.largeOpacity) &&
+        next.anyPleural === 'No' &&
+        (next.abbrevSymbolsPresent === 'No' || (!next.symbols || next.symbols.length === 0))) {
+      next.hasComments = 'Yes';
+    }
     return next;
   };
 
@@ -314,7 +406,7 @@ export default function Home() {
     setWizardData(prev => applyCascades({ ...prev, ...updates }, updates));
   };
 
-  const toggleArrayItem = (key: 'physicianQualification' | 'qualityDefects' | 'symbols' | 'abbrevThickening' | 'abbrevCalcification' | 'zones' | 'plaqueSiteProfile' | 'plaqueSiteFaceOn' | 'plaqueSiteDiaphragm' | 'plaqueSiteOther' | 'plaqueCalcProfile' | 'plaqueCalcFaceOn' | 'plaqueCalcDiaphragm' | 'plaqueCalcOther' | 'diffuseSiteProfile' | 'diffuseSiteFaceOn' | 'diffuseCalcProfile' | 'diffuseCalcFaceOn', item: string) => {
+  const toggleArrayItem = (key: 'physicianQualification' | 'qualityDefects' | 'symbols' | 'abbrevThickening' | 'abbrevCalcification' | 'abbrevCPAngle' | 'zones' | 'plaqueSiteProfile' | 'plaqueSiteFaceOn' | 'plaqueSiteDiaphragm' | 'plaqueSiteOther' | 'plaqueCalcProfile' | 'plaqueCalcFaceOn' | 'plaqueCalcDiaphragm' | 'plaqueCalcOther' | 'diffuseSiteProfile' | 'diffuseSiteFaceOn' | 'diffuseCalcProfile' | 'diffuseCalcFaceOn', item: string) => {
     if (key === 'physicianQualification') {
       const arr = wizardData.physicianQualification;
       const isChecking = !arr.includes(item);
@@ -390,6 +482,84 @@ export default function Home() {
     ? INTERPRETATION_STEPS.filter(s => s.id === '1_quality') 
     : INTERPRETATION_STEPS;
 
+  // Pleural Plaque & Diffuse Extent/Width Validation
+  const isPlaqueExtentWidthValid = () => {
+    // In profile R requires Extent (1,2,3) & Width (a,b,c). Face on R requires Extent (1,2,3).
+    const profileR = wizardData.plaqueSiteProfile.includes('R');
+    const faceOnR = wizardData.plaqueSiteFaceOn.includes('R');
+    if (profileR) {
+      if (!['1', '2', '3'].includes(wizardData.plaqueExtentRight)) return false;
+      if (!['a', 'b', 'c'].includes(wizardData.plaqueWidthRight)) return false;
+    } else if (faceOnR) {
+      if (!['1', '2', '3'].includes(wizardData.plaqueExtentRight)) return false;
+    }
+
+    // In profile L requires Extent (1,2,3) & Width (a,b,c). Face on L requires Extent (1,2,3).
+    const profileL = wizardData.plaqueSiteProfile.includes('L');
+    const faceOnL = wizardData.plaqueSiteFaceOn.includes('L');
+    if (profileL) {
+      if (!['1', '2', '3'].includes(wizardData.plaqueExtentLeft)) return false;
+      if (!['a', 'b', 'c'].includes(wizardData.plaqueWidthLeft)) return false;
+    } else if (faceOnL) {
+      if (!['1', '2', '3'].includes(wizardData.plaqueExtentLeft)) return false;
+    }
+
+    return true;
+  };
+
+  const isDiffuseExtentWidthValid = () => {
+    if (!wizardData.costophrenicRight && !wizardData.costophrenicLeft) return true;
+
+    // In profile R requires Extent (1,2,3) & Width (a,b,c). Face on R requires Extent (1,2,3).
+    const profileR = wizardData.diffuseSiteProfile.includes('R');
+    const faceOnR = wizardData.diffuseSiteFaceOn.includes('R');
+    if (profileR) {
+      if (!['1', '2', '3'].includes(wizardData.diffuseExtentRight)) return false;
+      if (!['a', 'b', 'c'].includes(wizardData.diffuseWidthRight)) return false;
+    } else if (faceOnR) {
+      if (!['1', '2', '3'].includes(wizardData.diffuseExtentRight)) return false;
+    }
+
+    // In profile L requires Extent (1,2,3) & Width (a,b,c). Face on L requires Extent (1,2,3).
+    const profileL = wizardData.diffuseSiteProfile.includes('L');
+    const faceOnL = wizardData.diffuseSiteFaceOn.includes('L');
+    if (profileL) {
+      if (!['1', '2', '3'].includes(wizardData.diffuseExtentLeft)) return false;
+      if (!['a', 'b', 'c'].includes(wizardData.diffuseWidthLeft)) return false;
+    } else if (faceOnL) {
+      if (!['1', '2', '3'].includes(wizardData.diffuseExtentLeft)) return false;
+    }
+
+    return true;
+  };
+
+  const getPlaqueWarningText = () => {
+    if (isPlaqueExtentWidthValid()) return null;
+    const hasProfile = wizardData.plaqueSiteProfile.includes('R') || wizardData.plaqueSiteProfile.includes('L');
+    if (hasProfile) {
+      return 'Please select Extent (1, 2, 3) and Width (a, b, c) to proceed.';
+    }
+    return 'Please select Extent (1, 2, 3) to proceed.';
+  };
+
+  const getDiffuseWarningText = () => {
+    if (isDiffuseExtentWidthValid()) return null;
+    const hasProfile = wizardData.diffuseSiteProfile.includes('R') || wizardData.diffuseSiteProfile.includes('L');
+    if (hasProfile) {
+      return 'Please select Extent (1, 2, 3) and Width (a, b, c) to proceed.';
+    }
+    return 'Please select Extent (1, 2, 3) to proceed.';
+  };
+
+  const isAbbrevAbnormalCommentMandatory = (data = wizardData) => {
+    if (data.classificationMode !== 'Abbreviated') return false;
+    if (data.isEssentiallyNormal !== 'No') return false;
+    const parenchymalNormal = data.abbrevProfusion === '0' && (data.largeOpacity === '0' || !data.largeOpacity);
+    const pleuralNormal = data.anyPleural === 'No';
+    const symbolsNormal = data.abbrevSymbolsPresent === 'No' || (!data.symbols || data.symbols.length === 0);
+    return parenchymalNormal && pleuralNormal && symbolsNormal;
+  };
+
   // Stage 2 Validation
   const canProceedInterp = (stepIndex: number) => {
     const stepId = visibleSteps[stepIndex].id;
@@ -424,14 +594,25 @@ export default function Home() {
         if (wizardData.abbrevThickening.length === 0) return false;
         if (wizardData.abbrevCalcification.length === 0) return false;
       }
-      return true; // detailed checkboxes are optional if Yes in Full mode
+      if (wizardData.classificationMode !== 'Abbreviated' && wizardData.anyPleural === 'Yes') {
+        if (!isPlaqueExtentWidthValid()) return false;
+        if (!isDiffuseExtentWidthValid()) return false;
+      }
+      return true;
     }
     if (stepId === '4_other') {
       const hasOD = wizardData.symbols.includes('OD') || wizardData.symbols.includes('od');
       if (hasOD && (!wizardData.commentsText || !wizardData.commentsText.trim())) return false;
       if (wizardData.classificationMode === 'Abbreviated') {
         if (!wizardData.abbrevSymbolsPresent) return false;
+        if (wizardData.abbrevSymbolsPresent === 'Yes' && wizardData.symbols.length === 0) return false;
+        if (isAbbrevAbnormalCommentMandatory()) {
+          if (wizardData.hasComments !== 'Yes') return false;
+          if (!wizardData.commentsText || !wizardData.commentsText.trim()) return false;
+          return true;
+        }
         if (!wizardData.hasComments) return false;
+        if (wizardData.hasComments === 'Yes' && (!wizardData.commentsText || !wizardData.commentsText.trim())) return false;
         return true;
       } else {
         if (!wizardData.anyOther) return false;
@@ -948,7 +1129,7 @@ export default function Home() {
                           <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">Yes (Proceed to 2B & 2C)</div>
                         </label>
                         <label className="flex-1 cursor-pointer">
-                          <input type="radio" name="anyParenchymal" checked={wizardData.anyParenchymal === 'No'} onChange={() => updateData({ anyParenchymal: 'No' })} className="peer hidden" />
+                          <input type="radio" name="anyParenchymal" checked={wizardData.anyParenchymal === 'No'} onChange={() => updateData({ anyParenchymal: 'No', currentInterpStep: 2 })} className="peer hidden" />
                           <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">No (Skip to Section 3A)</div>
                         </label>
                       </div>
@@ -1090,11 +1271,11 @@ export default function Home() {
                     <div className="flex space-x-4">
                       <label className="flex-1 cursor-pointer">
                         <input type="radio" name="anyPleural" checked={wizardData.anyPleural === 'Yes'} onChange={() => updateData({ anyPleural: 'Yes' })} className="peer hidden" />
-                        <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">{wizardData.classificationMode === 'Abbreviated' ? 'Yes' : 'Yes (Proceed to 3B, 3C, 3D)'}</div>
+                        <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">{wizardData.classificationMode === 'Abbreviated' ? 'Yes (Proceed to Thickening & Calcification)' : 'Yes (Proceed to 3B, 3C, 3D)'}</div>
                       </label>
-                      <label className="flex-1 cursor-pointer">
-                        <input type="radio" name="anyPleural" checked={wizardData.anyPleural === 'No'} onChange={() => updateData({ anyPleural: 'No' })} className="peer hidden" />
-                        <div className={`p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:text-slate-900 dark:peer-checked:text-white font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors peer-checked:bg-emerald-600 peer-checked:border-emerald-500`}>{wizardData.classificationMode === 'Abbreviated' ? 'No' : 'No (Skip to Section 4A)'}</div>
+                      <label className="flex-1 cursor-pointer" onClick={() => updateData({ anyPleural: 'No', currentInterpStep: 3 })}>
+                        <input type="radio" name="anyPleural" checked={wizardData.anyPleural === 'No'} onChange={() => updateData({ anyPleural: 'No', currentInterpStep: 3 })} className="peer hidden" />
+                        <div className={`p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:text-slate-900 dark:peer-checked:text-white font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors peer-checked:bg-emerald-600 peer-checked:border-emerald-500`}>{wizardData.classificationMode === 'Abbreviated' ? 'No (Proceed to Symbols)' : 'No (Skip to Section 4A)'}</div>
                       </label>
                     </div>
                   </div>
@@ -1105,26 +1286,94 @@ export default function Home() {
                       {wizardData.classificationMode === 'Abbreviated' ? (
                         <div className="space-y-6">
                           <div>
-                            <p className="mb-3 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">PLEURAL THICKENING - PT</p>
+                            <p className="mb-3 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">PLEURAL THICKENING - PT *</p>
                             <div className="flex space-x-4">
                               {['R', 'L'].map(opt => (
                                 <label key={`pt-${opt}`} className="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-[#0f172a] px-4 py-2 rounded border border-slate-400 dark:border-cyan-500 hover:border-purple-500 transition-colors">
                                   <input type="checkbox" checked={wizardData.abbrevThickening.includes(opt)} onChange={() => toggleArrayItem('abbrevThickening', opt)} className="accent-emerald-500 w-4 h-4" />
-                                  <span className="text-slate-800 dark:text-gray-300 font-bold">{opt === '0' ? '0=None' : opt === '0' ? '0=None' : opt === 'R' ? 'R=Right' : 'L=Left'}</span>
+                                  <span className="text-slate-800 dark:text-gray-300 font-bold">{opt === 'R' ? 'R = Right' : 'L = Left'}</span>
                                 </label>
                               ))}
                             </div>
                           </div>
                           <div>
-                            <p className="mb-3 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">PLEURAL CALCIFICATION - PC</p>
-                            <div className="flex space-x-4">
-                              {['0', 'R', 'L'].map(opt => (
-                                <label key={`pc-${opt}`} className="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-[#0f172a] px-4 py-2 rounded border border-slate-400 dark:border-cyan-500 hover:border-purple-500 transition-colors">
-                                  <input type="checkbox" checked={wizardData.abbrevCalcification.includes(opt)} onChange={() => toggleArrayItem('abbrevCalcification', opt)} className="accent-emerald-500 w-4 h-4" />
-                                  <span className="text-slate-800 dark:text-gray-300 font-bold">{opt === '0' ? '0=None' : opt === '0' ? '0=None' : opt === 'R' ? 'R=Right' : 'L=Left'}</span>
-                                </label>
-                              ))}
+                            <div className="flex items-center justify-between border-b border-slate-300 dark:border-cyan-700 pb-2 mb-3">
+                              <p className="text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs">PLEURAL CALCIFICATION - PC</p>
+                              <span className="text-[11px] text-slate-500 dark:text-gray-400 italic">Without thickening, calcification is not applicable</span>
                             </div>
+                            <div className="flex space-x-4">
+                              {/* Option 0 = None */}
+                              <label className="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-[#0f172a] px-4 py-2 rounded border border-slate-400 dark:border-cyan-500 hover:border-purple-500 transition-colors">
+                                <input
+                                  type="checkbox"
+                                  checked={wizardData.abbrevCalcification.includes('0') || wizardData.abbrevCalcification.length === 0}
+                                  onChange={() => updateData({ abbrevCalcification: ['0'] })}
+                                  className="accent-emerald-500 w-4 h-4"
+                                />
+                                <span className="text-slate-800 dark:text-gray-300 font-bold">0 = None</span>
+                              </label>
+
+                              {/* Option R = Right */}
+                              {(() => {
+                                const canR = wizardData.abbrevThickening.includes('R');
+                                return (
+                                  <label
+                                    title={canR ? 'Right Pleural Calcification' : 'Only applicable if Right Pleural Thickening is selected'}
+                                    className={`flex items-center space-x-2 px-4 py-2 rounded border border-slate-400 dark:border-cyan-500 transition-colors ${canR ? 'cursor-pointer bg-slate-50 dark:bg-[#0f172a] hover:border-purple-500' : 'opacity-30 cursor-not-allowed pointer-events-none bg-slate-200 dark:bg-slate-800'}`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      disabled={!canR}
+                                      checked={canR && wizardData.abbrevCalcification.includes('R')}
+                                      onChange={() => {
+                                        let current = wizardData.abbrevCalcification.filter(x => x !== '0');
+                                        if (current.includes('R')) {
+                                          current = current.filter(x => x !== 'R');
+                                        } else {
+                                          current.push('R');
+                                        }
+                                        updateData({ abbrevCalcification: current.length > 0 ? current : ['0'] });
+                                      }}
+                                      className="accent-emerald-500 w-4 h-4 disabled:cursor-not-allowed"
+                                    />
+                                    <span className="text-slate-800 dark:text-gray-300 font-bold">R = Right</span>
+                                  </label>
+                                );
+                              })()}
+
+                              {/* Option L = Left */}
+                              {(() => {
+                                const canL = wizardData.abbrevThickening.includes('L');
+                                return (
+                                  <label
+                                    title={canL ? 'Left Pleural Calcification' : 'Only applicable if Left Pleural Thickening is selected'}
+                                    className={`flex items-center space-x-2 px-4 py-2 rounded border border-slate-400 dark:border-cyan-500 transition-colors ${canL ? 'cursor-pointer bg-slate-50 dark:bg-[#0f172a] hover:border-purple-500' : 'opacity-30 cursor-not-allowed pointer-events-none bg-slate-200 dark:bg-slate-800'}`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      disabled={!canL}
+                                      checked={canL && wizardData.abbrevCalcification.includes('L')}
+                                      onChange={() => {
+                                        let current = wizardData.abbrevCalcification.filter(x => x !== '0');
+                                        if (current.includes('L')) {
+                                          current = current.filter(x => x !== 'L');
+                                        } else {
+                                          current.push('L');
+                                        }
+                                        updateData({ abbrevCalcification: current.length > 0 ? current : ['0'] });
+                                      }}
+                                      className="accent-emerald-500 w-4 h-4 disabled:cursor-not-allowed"
+                                    />
+                                    <span className="text-slate-800 dark:text-gray-300 font-bold">L = Left</span>
+                                  </label>
+                                );
+                              })()}
+                            </div>
+                            {wizardData.abbrevThickening.length === 0 && (
+                              <p className="text-xs text-amber-500 dark:text-amber-400 mt-2 font-medium">
+                                ℹ Please select Pleural Thickening (R and/or L) above before selecting Pleural Calcification.
+                              </p>
+                            )}
                           </div>
                           <div>
                             <p className="mb-3 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">CP ANGLE OBLITERATION (OPTIONAL) <span className="text-[10px] normal-case font-normal text-slate-500 dark:text-slate-400 block mt-1">If nothing is selected or None is selected, it will not be printed as not required by ILO Abbreviated Version.</span></p>
@@ -1132,7 +1381,7 @@ export default function Home() {
                               {['0', 'R', 'L'].map(opt => (
                                 <label key={`cp-${opt}`} className="flex items-center space-x-2 cursor-pointer bg-slate-50 dark:bg-[#0f172a] px-4 py-2 rounded border border-slate-400 dark:border-cyan-500 hover:border-purple-500 transition-colors">
                                   <input type="checkbox" checked={wizardData.abbrevCPAngle.includes(opt)} onChange={() => toggleArrayItem('abbrevCPAngle', opt)} className="accent-emerald-500 w-4 h-4" />
-                                  <span className="text-slate-800 dark:text-gray-300 font-bold">{opt === '0' ? '0=None' : opt === 'R' ? 'R=Right' : 'L=Left'}</span>
+                                  <span className="text-slate-800 dark:text-gray-300 font-bold">{opt === '0' ? '0 = None' : opt === 'R' ? 'R = Right' : 'L = Left'}</span>
                                 </label>
                               ))}
                             </div>
@@ -1145,81 +1394,102 @@ export default function Home() {
                             <p className="mb-4 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">3B. PLEURAL PLAQUES</p>
                             
                             <div className="grid grid-cols-4 gap-6">
-                              {/* SITE */}
-                              <div>
-                                <span className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Site</span>
-                                <div className="space-y-2">
-                                  {[{l:'In profile', k:'plaqueSiteProfile'}, {l:'Face on', k:'plaqueSiteFaceOn'}, {l:'Diaphragm', k:'plaqueSiteDiaphragm'}, {l:'Other', k:'plaqueSiteOther'}].map(row => (
-                                    <div key={`site-${row.k}`} className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-1.5 rounded">
-                                      <span className="text-[10px] text-slate-600 dark:text-gray-400 w-16">{row.l}</span>
-                                      <div className="flex space-x-1">
-                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                              
-                              {/* CALCIFICATION */}
-                              <div>
-                                <span className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Calcification</span>
-                                <div className="space-y-2">
-                                  {[{l:'In profile', k:'plaqueCalcProfile'}, {l:'Face on', k:'plaqueCalcFaceOn'}, {l:'Diaphragm', k:'plaqueCalcDiaphragm'}, {l:'Other', k:'plaqueCalcOther'}].map(row => {
-                                      const siteKey = row.k.replace('Calc', 'Site') as keyof typeof wizardData;
-                                      const siteArr = wizardData[siteKey] as string[];
-                                      const calcArr = wizardData[row.k as keyof typeof wizardData] as string[];
-                                      return (
-                                      <div key={`calc-${row.k}`} className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-1.5 rounded">
-                                        <span className="text-[10px] text-slate-600 dark:text-gray-400 w-16">{row.l}</span>
-                                        <div className="flex space-x-1">
-                                          <button disabled={siteArr.length === 0} onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${siteArr.length === 0 ? 'opacity-30 cursor-not-allowed pointer-events-none ' : ''} ${calcArr.length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                          <button disabled={!siteArr.includes('R')} onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('R') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                          <button disabled={!siteArr.includes('L')} onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('L') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                              {/* SITE & CALCIFICATION (with warning below in blank space) */}
+                              <div className="col-span-2 flex flex-col justify-between">
+                                <div className="grid grid-cols-2 gap-6">
+                                  {/* SITE */}
+                                  <div>
+                                    <span className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Site</span>
+                                    <div className="space-y-2">
+                                      {[{l:'In profile', k:'plaqueSiteProfile'}, {l:'Face on', k:'plaqueSiteFaceOn'}, {l:'Diaphragm', k:'plaqueSiteDiaphragm'}, {l:'Other', k:'plaqueSiteOther'}].map(row => (
+                                        <div key={`site-${row.k}`} className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-1.5 rounded">
+                                          <span className="text-[10px] text-slate-600 dark:text-gray-400 w-16">{row.l}</span>
+                                          <div className="flex space-x-1">
+                                            <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                            <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                            <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                          </div>
                                         </div>
-                                      </div>
-                                      );
-                                    })}
+                                      ))}
+                                    </div>
+                                  </div>
+                                  
+                                  {/* CALCIFICATION */}
+                                  <div>
+                                    <span className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Calcification</span>
+                                    <div className="space-y-2">
+                                      {[{l:'In profile', k:'plaqueCalcProfile'}, {l:'Face on', k:'plaqueCalcFaceOn'}, {l:'Diaphragm', k:'plaqueCalcDiaphragm'}, {l:'Other', k:'plaqueCalcOther'}].map(row => {
+                                          const siteKey = row.k.replace('Calc', 'Site') as keyof typeof wizardData;
+                                          const siteArr = wizardData[siteKey] as string[];
+                                          const calcArr = wizardData[row.k as keyof typeof wizardData] as string[];
+                                          return (
+                                          <div key={`calc-${row.k}`} className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-1.5 rounded">
+                                            <span className="text-[10px] text-slate-600 dark:text-gray-400 w-16">{row.l}</span>
+                                            <div className="flex space-x-1">
+                                              <button disabled={siteArr.length === 0} onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${siteArr.length === 0 ? 'opacity-30 cursor-not-allowed pointer-events-none ' : ''} ${calcArr.length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                              <button disabled={!siteArr.includes('R')} onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('R') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                              <button disabled={!siteArr.includes('L')} onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('L') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                            </div>
+                                          </div>
+                                          );
+                                        })}
+                                    </div>
+                                  </div>
                                 </div>
+
+                                {/* Warning in blank space below Site and Calcification */}
+                                {getPlaqueWarningText() && (
+                                  <div className="mt-auto pt-2 animate-in fade-in duration-200">
+                                    <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-semibold whitespace-nowrap">
+                                      <span>⚠️</span>
+                                      <span>{getPlaqueWarningText()}</span>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                               
                               {/* EXTENT */}
                               <div>
                                 <span title="Extent (chest wall; combined for in profile and face on)" className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 text-center uppercase"><span className="normal-case">EXTENT (1,2,3)</span></span>
                                 <div className="flex justify-around bg-white dark:bg-[#1e293b] p-2 rounded h-full">
-                                  <div className="space-y-3">
-                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">R</div>
-                                    {['0', '1', '2', '3'].map(val => {
-  const hasR = wizardData.plaqueSiteProfile.includes('R') || wizardData.plaqueSiteFaceOn.includes('R');
-  const disabled = !hasR && val !== '0';
-  const title = val === '0' ? 'None' : (val === '1' ? 'Up to 1/4 of lateral chest wall' : (val === '2' ? '1/4 to 1/2 of lateral chest wall' : '> 1/2 of lateral chest wall'));
-  return (
-  <label key={`extR-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
-    <input type="radio" disabled={disabled} checked={wizardData.plaqueExtentRight === val} onChange={() => updateData({ plaqueExtentRight: val })} className="hidden" />
-    <div className={`w-6 h-6 rounded-full border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueExtentRight === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
-      {val === '0' ? 'O' : val}
-    </div>
-  </label>
-  );
-})}
-                                  </div>
-                                  <div className="space-y-3">
-                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">L</div>
-                                    {['0', '1', '2', '3'].map(val => {
-  const hasL = wizardData.plaqueSiteProfile.includes('L') || wizardData.plaqueSiteFaceOn.includes('L');
-  const disabled = !hasL && val !== '0';
-  const title = val === '0' ? 'None' : (val === '1' ? 'Up to 1/4 of lateral chest wall' : (val === '2' ? '1/4 to 1/2 of lateral chest wall' : '> 1/2 of lateral chest wall'));
-  return (
-  <label key={`extL-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
-    <input type="radio" disabled={disabled} checked={wizardData.plaqueExtentLeft === val} onChange={() => updateData({ plaqueExtentLeft: val })} className="hidden" />
-    <div className={`w-6 h-6 rounded-full border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueExtentLeft === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
-      {val === '0' ? 'O' : val}
-    </div>
-  </label>
-  );
-})}
-                                  </div>
+                                  {(() => {
+                                    const hasR = wizardData.plaqueSiteProfile.includes('R') || wizardData.plaqueSiteFaceOn.includes('R');
+                                    const hasL = wizardData.plaqueSiteProfile.includes('L') || wizardData.plaqueSiteFaceOn.includes('L');
+                                    return (
+                                      <>
+                                        <div className={`space-y-3 ${!hasR ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}`}>
+                                          <div className={`text-[10px] ${hasR ? 'text-slate-500 dark:text-gray-500' : 'text-slate-400 dark:text-gray-600'} font-bold text-center`}>R</div>
+                                          {['0', '1', '2', '3'].map(val => {
+                                            const disabled = !hasR;
+                                            const title = val === '0' ? 'None' : (val === '1' ? 'Up to 1/4 of lateral chest wall' : (val === '2' ? '1/4 to 1/2 of lateral chest wall' : '> 1/2 of lateral chest wall'));
+                                            return (
+                                              <label key={`extR-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
+                                                <input type="radio" disabled={disabled} checked={wizardData.plaqueExtentRight === val} onChange={() => updateData({ plaqueExtentRight: val })} className="hidden" />
+                                                <div className={`w-6 h-6 rounded-full border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueExtentRight === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
+                                                  {val === '0' ? 'O' : val}
+                                                </div>
+                                              </label>
+                                            );
+                                          })}
+                                        </div>
+                                        <div className={`space-y-3 ${!hasL ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}`}>
+                                          <div className={`text-[10px] ${hasL ? 'text-slate-500 dark:text-gray-500' : 'text-slate-400 dark:text-gray-600'} font-bold text-center`}>L</div>
+                                          {['0', '1', '2', '3'].map(val => {
+                                            const disabled = !hasL;
+                                            const title = val === '0' ? 'None' : (val === '1' ? 'Up to 1/4 of lateral chest wall' : (val === '2' ? '1/4 to 1/2 of lateral chest wall' : '> 1/2 of lateral chest wall'));
+                                            return (
+                                              <label key={`extL-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
+                                                <input type="radio" disabled={disabled} checked={wizardData.plaqueExtentLeft === val} onChange={() => updateData({ plaqueExtentLeft: val })} className="hidden" />
+                                                <div className={`w-6 h-6 rounded-full border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueExtentLeft === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
+                                                  {val === '0' ? 'O' : val}
+                                                </div>
+                                              </label>
+                                            );
+                                          })}
+                                        </div>
+                                      </>
+                                    );
+                                  })()}
                                 </div>
                               </div>
 
@@ -1227,38 +1497,44 @@ export default function Home() {
                               <div>
                                 <span title="Width (in profile only) (3mm minimum width required)" className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 text-center uppercase">WIDTH <span className="normal-case">(a,b,c)</span></span>
                                 <div className="flex justify-around bg-white dark:bg-[#1e293b] p-2 rounded h-full">
-                                  <div className="space-y-3">
-                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">R</div>
-                                    {['0', 'a', 'b', 'c'].map(val => {
-  const hasR = wizardData.plaqueSiteProfile.includes('R');
-  const disabled = !hasR && val !== '0';
-  const title = val === '0' ? 'None' : (val === 'a' ? '3 to 5 mm' : (val === 'b' ? '5 to 10 mm' : '> 10 mm'));
-  return (
-  <label key={`widR-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
-    <input type="radio" disabled={disabled} checked={wizardData.plaqueWidthRight === val} onChange={() => updateData({ plaqueWidthRight: val })} className="hidden" />
-    <div className={`w-6 h-6 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueWidthRight === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
-      {val === '0' ? 'O' : val}
-    </div>
-  </label>
-  );
-})}
-                                  </div>
-                                  <div className="space-y-3">
-                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">L</div>
-                                    {['0', 'a', 'b', 'c'].map(val => {
-  const hasL = wizardData.plaqueSiteProfile.includes('L');
-  const disabled = !hasL && val !== '0';
-  const title = val === '0' ? 'None' : (val === 'a' ? '3 to 5 mm' : (val === 'b' ? '5 to 10 mm' : '> 10 mm'));
-  return (
-  <label key={`widL-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
-    <input type="radio" disabled={disabled} checked={wizardData.plaqueWidthLeft === val} onChange={() => updateData({ plaqueWidthLeft: val })} className="hidden" />
-    <div className={`w-6 h-6 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueWidthLeft === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
-      {val === '0' ? 'O' : val}
-    </div>
-  </label>
-  );
-})}
-                                  </div>
+                                  {(() => {
+                                    const hasR = wizardData.plaqueSiteProfile.includes('R');
+                                    const hasL = wizardData.plaqueSiteProfile.includes('L');
+                                    return (
+                                      <>
+                                        <div className={`space-y-3 ${!hasR ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}`}>
+                                          <div className={`text-[10px] ${hasR ? 'text-slate-500 dark:text-gray-500' : 'text-slate-400 dark:text-gray-600'} font-bold text-center`}>R</div>
+                                          {['0', 'a', 'b', 'c'].map(val => {
+                                            const disabled = !hasR;
+                                            const title = val === '0' ? 'None' : (val === 'a' ? '3 to 5 mm' : (val === 'b' ? '5 to 10 mm' : '> 10 mm'));
+                                            return (
+                                              <label key={`widR-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
+                                                <input type="radio" disabled={disabled} checked={wizardData.plaqueWidthRight === val} onChange={() => updateData({ plaqueWidthRight: val })} className="hidden" />
+                                                <div className={`w-6 h-6 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueWidthRight === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
+                                                  {val === '0' ? 'O' : val}
+                                                </div>
+                                              </label>
+                                            );
+                                          })}
+                                        </div>
+                                        <div className={`space-y-3 ${!hasL ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}`}>
+                                          <div className={`text-[10px] ${hasL ? 'text-slate-500 dark:text-gray-500' : 'text-slate-400 dark:text-gray-600'} font-bold text-center`}>L</div>
+                                          {['0', 'a', 'b', 'c'].map(val => {
+                                            const disabled = !hasL;
+                                            const title = val === '0' ? 'None' : (val === 'a' ? '3 to 5 mm' : (val === 'b' ? '5 to 10 mm' : '> 10 mm'));
+                                            return (
+                                              <label key={`widL-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
+                                                <input type="radio" disabled={disabled} checked={wizardData.plaqueWidthLeft === val} onChange={() => updateData({ plaqueWidthLeft: val })} className="hidden" />
+                                                <div className={`w-6 h-6 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.plaqueWidthLeft === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
+                                                  {val === '0' ? 'O' : val}
+                                                </div>
+                                              </label>
+                                            );
+                                          })}
+                                        </div>
+                                      </>
+                                    );
+                                  })()}
                                 </div>
                               </div>
                             </div>
@@ -1267,7 +1543,25 @@ export default function Home() {
                           {/* 3C. COSTOPHRENIC */}
                           <div className="bg-slate-50 dark:bg-[#0f172a] p-4 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-between">
                             <p className="text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs">3C. COSTOPHRENIC ANGLE OBLITERATION</p>
-                            <div className="flex space-x-6">
+                            <div className="flex space-x-6 items-center">
+                              <label className="flex items-center space-x-2 cursor-pointer">
+                                <input 
+                                  type="checkbox" 
+                                  checked={!wizardData.costophrenicRight && !wizardData.costophrenicLeft} 
+                                  onChange={e => {
+                                    if (e.target.checked) {
+                                      const canAdvance = isPlaqueExtentWidthValid();
+                                      updateData({ 
+                                        costophrenicRight: false, 
+                                        costophrenicLeft: false,
+                                        ...(canAdvance ? { currentInterpStep: 3 } : {})
+                                      });
+                                    }
+                                  }} 
+                                  className="w-5 h-5 accent-emerald-500" 
+                                />
+                                <span className="text-slate-800 dark:text-gray-300 font-bold">No <span className="text-[11px] font-normal text-slate-500 dark:text-gray-400">(Proceed to Section 4A)</span></span>
+                              </label>
                               <label className="flex items-center space-x-2 cursor-pointer">
                                 <input type="checkbox" checked={wizardData.costophrenicRight} onChange={e => updateData({ costophrenicRight: e.target.checked })} className="w-5 h-5 accent-emerald-500" />
                                 <span className="text-slate-800 dark:text-gray-300 font-bold">Right (R)</span>
@@ -1285,81 +1579,102 @@ export default function Home() {
                             <p className="mb-4 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">3D. DIFFUSE PLEURAL THICKENING</p>
                             
                             <div className="grid grid-cols-4 gap-6">
-                              {/* SITE */}
-                              <div>
-                                <span className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Site</span>
-                                <div className="space-y-2">
-                                  {[{l:'In profile', k:'diffuseSiteProfile'}, {l:'Face on', k:'diffuseSiteFaceOn'}].map(row => (
-                                    <div key={`dsite-${row.k}`} className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-1.5 rounded">
-                                      <span className="text-[10px] text-slate-600 dark:text-gray-400 w-16">{row.l}</span>
-                                      <div className="flex space-x-1">
-                                        <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                        <button onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                              
-                              {/* CALCIFICATION */}
-                              <div>
-                                <span className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Calcification</span>
-                                <div className="space-y-2">
-                                  {[{l:'In profile', k:'diffuseCalcProfile'}, {l:'Face on', k:'diffuseCalcFaceOn'}].map(row => {
-                                      const siteKey = row.k.replace('Calc', 'Site') as keyof typeof wizardData;
-                                      const siteArr = wizardData[siteKey] as string[];
-                                      const calcArr = wizardData[row.k as keyof typeof wizardData] as string[];
-                                      return (
-                                      <div key={`dcalc-${row.k}`} className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-1.5 rounded">
-                                        <span className="text-[10px] text-slate-600 dark:text-gray-400 w-16">{row.l}</span>
-                                        <div className="flex space-x-1">
-                                          <button disabled={siteArr.length === 0} onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${siteArr.length === 0 ? 'opacity-30 cursor-not-allowed pointer-events-none ' : ''} ${calcArr.length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
-                                          <button disabled={!siteArr.includes('R')} onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('R') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
-                                          <button disabled={!siteArr.includes('L')} onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('L') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                              {/* SITE & CALCIFICATION (with warning below in blank space) */}
+                              <div className="col-span-2 flex flex-col justify-between">
+                                <div className="grid grid-cols-2 gap-6">
+                                  {/* SITE */}
+                                  <div>
+                                    <span className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Site</span>
+                                    <div className="space-y-2">
+                                      {[{l:'In profile', k:'diffuseSiteProfile'}, {l:'Face on', k:'diffuseSiteFaceOn'}].map(row => (
+                                        <div key={`dsite-${row.k}`} className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-1.5 rounded">
+                                          <span className="text-[10px] text-slate-600 dark:text-gray-400 w-16">{row.l}</span>
+                                          <div className="flex space-x-1">
+                                            <button onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${(wizardData[row.k as keyof typeof wizardData] as string[]).length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                            <button disabled={!wizardData.costophrenicRight} onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!wizardData.costophrenicRight ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                            <button disabled={!wizardData.costophrenicLeft} onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!wizardData.costophrenicLeft ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${(wizardData[row.k as keyof typeof wizardData] as string[]).includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                          </div>
                                         </div>
-                                      </div>
-                                      );
-                                    })}
+                                      ))}
+                                    </div>
+                                  </div>
+                                  
+                                  {/* CALCIFICATION */}
+                                  <div>
+                                    <span className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 uppercase text-center">Calcification</span>
+                                    <div className="space-y-2">
+                                      {[{l:'In profile', k:'diffuseCalcProfile'}, {l:'Face on', k:'diffuseCalcFaceOn'}].map(row => {
+                                          const siteKey = row.k.replace('Calc', 'Site') as keyof typeof wizardData;
+                                          const siteArr = wizardData[siteKey] as string[];
+                                          const calcArr = wizardData[row.k as keyof typeof wizardData] as string[];
+                                          return (
+                                          <div key={`dcalc-${row.k}`} className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-1.5 rounded">
+                                            <span className="text-[10px] text-slate-600 dark:text-gray-400 w-16">{row.l}</span>
+                                            <div className="flex space-x-1">
+                                              <button disabled={siteArr.length === 0} onClick={() => updateData({ [row.k]: [] })} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${siteArr.length === 0 ? 'opacity-30 cursor-not-allowed pointer-events-none ' : ''} ${calcArr.length === 0 ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>O</button>
+                                              <button disabled={!siteArr.includes('R')} onClick={() => toggleArrayItem(row.k as any, 'R')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('R') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('R') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>R</button>
+                                              <button disabled={!siteArr.includes('L')} onClick={() => toggleArrayItem(row.k as any, 'L')} className={`w-5 h-5 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-[10px] font-bold ${!siteArr.includes('L') ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''} ${calcArr.includes('L') ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-[#334155]'}`}>L</button>
+                                            </div>
+                                          </div>
+                                          );
+                                        })}
+                                    </div>
+                                  </div>
                                 </div>
+
+                                {/* Warning in blank space below Site and Calcification */}
+                                {getDiffuseWarningText() && (
+                                  <div className="mt-auto pt-2 animate-in fade-in duration-200">
+                                    <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-semibold whitespace-nowrap">
+                                      <span>⚠️</span>
+                                      <span>{getDiffuseWarningText()}</span>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                               
                               {/* EXTENT */}
                               <div>
                                 <span title="Extent (chest wall; combined for in profile and face on)" className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 text-center uppercase"><span className="normal-case">EXTENT (1,2,3)</span></span>
                                 <div className="flex justify-around bg-white dark:bg-[#1e293b] p-2 rounded h-full">
-                                  <div className="space-y-3">
-                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">R</div>
-                                    {['0', '1', '2', '3'].map(val => {
-                                        const hasR = wizardData.diffuseSiteProfile.includes('R') || wizardData.diffuseSiteFaceOn.includes('R');
-                                        const disabled = !hasR && val !== '0';
-                                        const title = val === '0' ? 'None' : (val === '1' ? 'Up to 1/4 of lateral chest wall' : (val === '2' ? '1/4 to 1/2 of lateral chest wall' : '> 1/2 of lateral chest wall'));
-                                        return (
-                                        <label key={`dextR-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
-                                          <input type="radio" disabled={disabled} checked={wizardData.diffuseExtentRight === val} onChange={() => updateData({ diffuseExtentRight: val })} className="hidden" />
-                                          <div className={`w-6 h-6 rounded-full border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseExtentRight === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
-                                            {val === '0' ? 'O' : val}
-                                          </div>
-                                        </label>
-                                        );
-                                      })}
-                                  </div>
-                                  <div className="space-y-3">
-                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">L</div>
-                                    {['0', '1', '2', '3'].map(val => {
-                                        const hasL = wizardData.diffuseSiteProfile.includes('L') || wizardData.diffuseSiteFaceOn.includes('L');
-                                        const disabled = !hasL && val !== '0';
-                                        const title = val === '0' ? 'None' : (val === '1' ? 'Up to 1/4 of lateral chest wall' : (val === '2' ? '1/4 to 1/2 of lateral chest wall' : '> 1/2 of lateral chest wall'));
-                                        return (
-                                        <label key={`dextL-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
-                                          <input type="radio" disabled={disabled} checked={wizardData.diffuseExtentLeft === val} onChange={() => updateData({ diffuseExtentLeft: val })} className="hidden" />
-                                          <div className={`w-6 h-6 rounded-full border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseExtentLeft === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
-                                            {val === '0' ? 'O' : val}
-                                          </div>
-                                        </label>
-                                        );
-                                      })}
-                                  </div>
+                                  {(() => {
+                                    const hasR = wizardData.diffuseSiteProfile.includes('R') || wizardData.diffuseSiteFaceOn.includes('R');
+                                    const hasL = wizardData.diffuseSiteProfile.includes('L') || wizardData.diffuseSiteFaceOn.includes('L');
+                                    return (
+                                      <>
+                                        <div className={`space-y-3 ${!hasR ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}`}>
+                                          <div className={`text-[10px] ${hasR ? 'text-slate-500 dark:text-gray-500' : 'text-slate-400 dark:text-gray-600'} font-bold text-center`}>R</div>
+                                          {['0', '1', '2', '3'].map(val => {
+                                            const disabled = !hasR;
+                                            const title = val === '0' ? 'None' : (val === '1' ? 'Up to 1/4 of lateral chest wall' : (val === '2' ? '1/4 to 1/2 of lateral chest wall' : '> 1/2 of lateral chest wall'));
+                                            return (
+                                              <label key={`dextR-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
+                                                <input type="radio" disabled={disabled} checked={wizardData.diffuseExtentRight === val} onChange={() => updateData({ diffuseExtentRight: val })} className="hidden" />
+                                                <div className={`w-6 h-6 rounded-full border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseExtentRight === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
+                                                  {val === '0' ? 'O' : val}
+                                                </div>
+                                              </label>
+                                            );
+                                          })}
+                                        </div>
+                                        <div className={`space-y-3 ${!hasL ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}`}>
+                                          <div className={`text-[10px] ${hasL ? 'text-slate-500 dark:text-gray-500' : 'text-slate-400 dark:text-gray-600'} font-bold text-center`}>L</div>
+                                          {['0', '1', '2', '3'].map(val => {
+                                            const disabled = !hasL;
+                                            const title = val === '0' ? 'None' : (val === '1' ? 'Up to 1/4 of lateral chest wall' : (val === '2' ? '1/4 to 1/2 of lateral chest wall' : '> 1/2 of lateral chest wall'));
+                                            return (
+                                              <label key={`dextL-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
+                                                <input type="radio" disabled={disabled} checked={wizardData.diffuseExtentLeft === val} onChange={() => updateData({ diffuseExtentLeft: val })} className="hidden" />
+                                                <div className={`w-6 h-6 rounded-full border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseExtentLeft === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-blue-500' : 'text-gray-500 group-hover:border-blue-400'}`}>
+                                                  {val === '0' ? 'O' : val}
+                                                </div>
+                                              </label>
+                                            );
+                                          })}
+                                        </div>
+                                      </>
+                                    );
+                                  })()}
                                 </div>
                               </div>
 
@@ -1367,38 +1682,44 @@ export default function Home() {
                               <div>
                                 <span title="Width (in profile only) (3mm minimum width required)" className="block text-slate-600 dark:text-gray-400 font-bold text-[10px] mb-2 text-center uppercase">WIDTH <span className="normal-case">(a,b,c)</span></span>
                                 <div className="flex justify-around bg-white dark:bg-[#1e293b] p-2 rounded h-full">
-                                  <div className="space-y-3">
-                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">R</div>
-                                    {['0', 'a', 'b', 'c'].map(val => {
-                                        const hasR = wizardData.diffuseSiteProfile.includes('R');
-                                        const disabled = !hasR && val !== '0';
-                                        const title = val === '0' ? 'None' : (val === 'a' ? '3 to 5 mm' : (val === 'b' ? '5 to 10 mm' : '> 10 mm'));
-                                        return (
-                                        <label key={`dwidR-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
-                                          <input type="radio" disabled={disabled} checked={wizardData.diffuseWidthRight === val} onChange={() => updateData({ diffuseWidthRight: val })} className="hidden" />
-                                          <div className={`w-6 h-6 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseWidthRight === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
-                                            {val === '0' ? 'O' : val}
-                                          </div>
-                                        </label>
-                                        );
-                                      })}
-                                  </div>
-                                  <div className="space-y-3">
-                                    <div className="text-[10px] text-slate-500 dark:text-gray-500 font-bold text-center">L</div>
-                                    {['0', 'a', 'b', 'c'].map(val => {
-                                        const hasL = wizardData.diffuseSiteProfile.includes('L');
-                                        const disabled = !hasL && val !== '0';
-                                        const title = val === '0' ? 'None' : (val === 'a' ? '3 to 5 mm' : (val === 'b' ? '5 to 10 mm' : '> 10 mm'));
-                                        return (
-                                        <label key={`dwidL-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
-                                          <input type="radio" disabled={disabled} checked={wizardData.diffuseWidthLeft === val} onChange={() => updateData({ diffuseWidthLeft: val })} className="hidden" />
-                                          <div className={`w-6 h-6 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseWidthLeft === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
-                                            {val === '0' ? 'O' : val}
-                                          </div>
-                                        </label>
-                                        );
-                                      })}
-                                  </div>
+                                  {(() => {
+                                    const hasR = wizardData.diffuseSiteProfile.includes('R');
+                                    const hasL = wizardData.diffuseSiteProfile.includes('L');
+                                    return (
+                                      <>
+                                        <div className={`space-y-3 ${!hasR ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}`}>
+                                          <div className={`text-[10px] ${hasR ? 'text-slate-500 dark:text-gray-500' : 'text-slate-400 dark:text-gray-600'} font-bold text-center`}>R</div>
+                                          {['0', 'a', 'b', 'c'].map(val => {
+                                            const disabled = !hasR;
+                                            const title = val === '0' ? 'None' : (val === 'a' ? '3 to 5 mm' : (val === 'b' ? '5 to 10 mm' : '> 10 mm'));
+                                            return (
+                                              <label key={`dwidR-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
+                                                <input type="radio" disabled={disabled} checked={wizardData.diffuseWidthRight === val} onChange={() => updateData({ diffuseWidthRight: val })} className="hidden" />
+                                                <div className={`w-6 h-6 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseWidthRight === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
+                                                  {val === '0' ? 'O' : val}
+                                                </div>
+                                              </label>
+                                            );
+                                          })}
+                                        </div>
+                                        <div className={`space-y-3 ${!hasL ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}`}>
+                                          <div className={`text-[10px] ${hasL ? 'text-slate-500 dark:text-gray-500' : 'text-slate-400 dark:text-gray-600'} font-bold text-center`}>L</div>
+                                          {['0', 'a', 'b', 'c'].map(val => {
+                                            const disabled = !hasL;
+                                            const title = val === '0' ? 'None' : (val === 'a' ? '3 to 5 mm' : (val === 'b' ? '5 to 10 mm' : '> 10 mm'));
+                                            return (
+                                              <label key={`dwidL-${val}`} title={title} className={`flex flex-col items-center group ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}>
+                                                <input type="radio" disabled={disabled} checked={wizardData.diffuseWidthLeft === val} onChange={() => updateData({ diffuseWidthLeft: val })} className="hidden" />
+                                                <div className={`w-6 h-6 rounded border border-slate-400 dark:border-cyan-500 flex items-center justify-center text-xs ${wizardData.diffuseWidthLeft === val ? 'bg-emerald-600 text-slate-900 dark:text-white border-emerald-500' : 'text-gray-500 group-hover:border-emerald-400'}`}>
+                                                  {val === '0' ? 'O' : val}
+                                                </div>
+                                              </label>
+                                            );
+                                          })}
+                                        </div>
+                                      </>
+                                    );
+                                  })()}
                                 </div>
                               </div>
                             </div>
@@ -1426,7 +1747,7 @@ export default function Home() {
                         </label>
                         <label className="flex-1 cursor-pointer">
                           <input type="radio" name="anyOther" checked={wizardData.anyOther === 'No'} onChange={() => updateData({ anyOther: 'No' })} className="peer hidden" />
-                          <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">No (Complete Classification)</div>
+                          <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">No (Proceed to Section 5)</div>
                         </label>
                       </div>
                     </div>
@@ -1500,27 +1821,75 @@ export default function Home() {
 
                   {/* COMMENTS (Always visible at bottom of Step 4) */}
                   <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg">
-                    <p className="mb-4 text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest text-xs">COMMENTS</p>
+                    <p className="mb-4 text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest text-xs">
+                      COMMENTS {isAbbrevAbnormalCommentMandatory() ? '*' : ''}
+                    </p>
+
+                    {isAbbrevAbnormalCommentMandatory() && (
+                      <div className="mb-4 p-3 rounded bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-semibold animate-in fade-in duration-300">
+                        ⚠️ Overall Assessment was marked as NOT essentially normal, but no parenchymal, pleural, or symbol abnormalities were recorded. You must mention in the comments why you consider this radiograph abnormal.
+                      </div>
+                    )}
                     <div className="flex space-x-4 mb-4">
                       <label className="flex-1 cursor-pointer">
                         <input type="radio" name="hasComments" checked={wizardData.hasComments === 'Yes'} onChange={() => updateData({ hasComments: 'Yes' })} className="peer hidden" />
                         <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">Yes</div>
                       </label>
-                      <label className="flex-1 cursor-pointer">
-                        <input type="radio" name="hasComments" checked={wizardData.hasComments === 'No'} onChange={() => updateData({ hasComments: 'No' })} className="peer hidden" />
-                        <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:bg-emerald-600 peer-checked:text-slate-900 dark:peer-checked:text-white peer-checked:border-emerald-500 font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">No</div>
+                      <label
+                        className={`flex-1 ${isAbbrevAbnormalCommentMandatory() ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}
+                        title={isAbbrevAbnormalCommentMandatory() ? 'Comment is mandatory because Overall Assessment is abnormal with no specific pneumoconiosis findings' : undefined}
+                      >
+                        <input
+                          type="radio"
+                          name="hasComments"
+                          disabled={isAbbrevAbnormalCommentMandatory()}
+                          checked={wizardData.hasComments === 'No'}
+                          onChange={() => updateData({ hasComments: 'No' })}
+                          className="peer hidden"
+                        />
+                        <div className="p-4 border border-slate-400 dark:border-cyan-500 text-center rounded peer-checked:text-slate-900 dark:peer-checked:text-white font-bold hover:bg-slate-300 dark:hover:bg-[#334155] transition-colors">No</div>
                       </label>
                     </div>
                     {wizardData.hasComments === 'Yes' && (
                       <div className="animate-in fade-in duration-300">
-                        <textarea maxLength={1500} value={wizardData.commentsText} onChange={e => updateData({ commentsText: e.target.value })} placeholder="Enter comments here (max 250 words)..." className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-3 text-slate-900 dark:text-white outline-none focus:border-emerald-500 min-h-[120px]"></textarea>
-                      {wizardData.symbols.includes('od') && (!wizardData.commentsText || !wizardData.commentsText.trim()) && (
-                        <p className="text-red-500 text-xs mt-2 font-bold">Please enter the findings in the comments section because Other Diseases (OD) has been selected.</p>
-                      )}
+                        <textarea
+                          maxLength={1500}
+                          value={wizardData.commentsText}
+                          onChange={e => updateData({ commentsText: e.target.value })}
+                          placeholder={isAbbrevAbnormalCommentMandatory() ? "Please explain why you consider this radiograph abnormal (Overall Assessment = No)..." : "Enter comments here (max 250 words)..."}
+                          className="w-full bg-slate-50 dark:bg-[#0f172a] border border-slate-400 dark:border-cyan-500 rounded p-3 text-slate-900 dark:text-white outline-none focus:border-emerald-500 min-h-[120px]"
+                        ></textarea>
+                        {wizardData.symbols.includes('od') && (!wizardData.commentsText || !wizardData.commentsText.trim()) && (
+                          <p className="text-red-500 text-xs mt-2 font-bold">Please enter the findings in the comments section because Other Diseases (OD) has been selected.</p>
+                        )}
+                        {isAbbrevAbnormalCommentMandatory() && (!wizardData.commentsText || !wizardData.commentsText.trim()) && (
+                          <p className="text-amber-500 text-xs mt-2 font-bold">* Explanation in comments is required to save/complete this classification.</p>
+                        )}
     
                       </div>
                     )}
                   </div>
+
+                  {/* 5. CLASSIFYING PHYSICIAN DETAILS */}
+                  {wizardData.classificationMode === 'Full' && wizardData.anyOther === 'No' && (
+                    <div className="bg-white dark:bg-[#1e293b] p-6 border border-slate-300 dark:border-cyan-700 shadow-sm rounded-lg animate-in slide-in-from-top-4 duration-300">
+                      <p className="mb-3 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-xs border-b border-slate-300 dark:border-cyan-700 pb-2">5. CLASSIFYING PHYSICIAN DETAILS</p>
+                      <div className="grid grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <p className="text-slate-500 dark:text-gray-400 font-semibold">Classifying Physician:</p>
+                          <p className="font-bold text-slate-900 dark:text-white text-sm">{wizardData.classifyingPhysician || 'Not Specified'}</p>
+                          <p className="text-slate-500 dark:text-gray-400 mt-2 font-semibold">Qualifications:</p>
+                          <p className="text-slate-800 dark:text-gray-200">{Array.isArray(wizardData.physicianQualification) ? wizardData.physicianQualification.join(', ') : wizardData.physicianQualification || 'None'}</p>
+                        </div>
+                        <div>
+                          <p className="text-slate-500 dark:text-gray-400 font-semibold">Reading Date:</p>
+                          <p className="font-bold text-slate-900 dark:text-white text-sm">{wizardData.readingDate || 'Not Specified'}</p>
+                          <p className="text-slate-500 dark:text-gray-400 mt-2 font-semibold">Radiology Facility:</p>
+                          <p className="text-slate-800 dark:text-gray-200">{wizardData.facility || 'Not Specified'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1539,9 +1908,16 @@ export default function Home() {
                 <button 
                   onClick={nextStep}
                   disabled={!canProceedInterp(wizardData.currentInterpStep)}
+                  title={!canProceedInterp(wizardData.currentInterpStep) ? "Please complete all required selections to proceed to the next step" : undefined}
                   className={`flex items-center space-x-2 px-6 py-2 rounded font-bold transition-colors ${!canProceedInterp(wizardData.currentInterpStep) ? 'bg-emerald-900/50 text-emerald-700 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}`}
                 >
-                  <span>Next Step</span>
+                  <span>
+                    {wizardData.currentInterpStep === 1 && wizardData.anyParenchymal === 'No'
+                      ? 'Proceed to Section 3A'
+                      : wizardData.currentInterpStep === 2 && (wizardData.anyPleural === 'No' || (!wizardData.costophrenicRight && !wizardData.costophrenicLeft))
+                      ? (wizardData.classificationMode === 'Abbreviated' ? 'Proceed to Symbols' : 'Proceed to Section 4A')
+                      : 'Next Step'}
+                  </span>
                   <ChevronRight size={16} />
                 </button>
               ) : (
@@ -1562,7 +1938,7 @@ export default function Home() {
                       }}
                     >
                       <Save size={16} />
-                      <span>Save & Generate PDF</span>
+                      <span>{wizardData.classificationMode === 'Full' && wizardData.anyOther === 'No' ? 'Complete and Save PDF' : 'Save & Generate PDF'}</span>
                     </button>
                   </div>
               )}
@@ -1578,7 +1954,7 @@ export default function Home() {
               <div className="flex flex-col w-[50%]">
                 <div className="flex items-baseline space-x-2">
                   <p className="font-bold text-blue-700 dark:text-blue-300 text-[11px]">Designed and Developed by <span className="text-orange-700 dark:text-orange-400">Dr. Arkaprabha Sau</span></p>
-                  <span className="font-bold text-blue-600 dark:text-blue-400 text-[10px] animate-pulse bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded border border-blue-500/50">v1.0.2</span>
+                  <span className="font-bold text-blue-600 dark:text-blue-400 text-[10px] animate-pulse bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded border border-blue-500/50">v2.0.0</span>
                 </div>
                 <p className="font-medium text-slate-800 dark:text-gray-300 text-[9px] leading-tight mt-1 whitespace-nowrap">
                   MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM
@@ -1593,32 +1969,32 @@ export default function Home() {
               
               {/* Right Side: Buttons Grid */}
               <div className="grid grid-cols-3 gap-1.5 w-[50%]">
-                <a href="/ILO-2022.pdf" target="_blank" rel="noreferrer" className="bg-slate-50 dark:bg-[#0f172a] hover:bg-blue-600 border border-slate-300 dark:border-cyan-700 hover:border-blue-500 text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
+                <a href="/ILO-2022.pdf" target="_blank" rel="noreferrer" className="bg-slate-50 dark:bg-[#0f172a] hover:bg-blue-600 active:bg-blue-700 border border-slate-300 dark:border-cyan-700 hover:border-blue-500 text-slate-800 dark:text-gray-300 hover:text-white active:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
                   <ExternalLink size={14} className="shrink-0" />
                   <span className="leading-tight">ILO 2022</span>
                 </a>
                 
-                <a href="/ILO_2022-28-29.pdf" target="_blank" rel="noreferrer" className="bg-slate-50 dark:bg-[#0f172a] hover:bg-blue-600 border border-slate-300 dark:border-cyan-700 hover:border-blue-500 text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
+                <a href="/ILO_2022-28-29.pdf" target="_blank" rel="noreferrer" className="bg-slate-50 dark:bg-[#0f172a] hover:bg-blue-600 active:bg-blue-700 border border-slate-300 dark:border-cyan-700 hover:border-blue-500 text-slate-800 dark:text-gray-300 hover:text-white active:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
                   <ExternalLink size={14} className="shrink-0" />
-                  <span className="leading-tight">ILO 2022 (ENTRY FORM)</span>
+                  <span className="leading-tight">ILO 2022<br /><span className="whitespace-nowrap">(ENTRY FORM)</span></span>
                 </a>
                 
-                <a href="https://arka1985.github.io/ILO_RAD/" target="_blank" rel="noreferrer" className="bg-slate-50 dark:bg-[#0f172a] hover:bg-slate-400 dark:hover:bg-gray-700 border border-slate-300 dark:border-cyan-700 hover:border-gray-500 text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center" title="Check GitHub for Updates">
-                  <RefreshCw size={14} className="shrink-0" />
-                  <span className="leading-tight">Updates</span>
+                <a href="https://arka1985.github.io/ILO_RAD/" target="_blank" rel="noreferrer" className="bg-slate-50 dark:bg-[#0f172a] hover:bg-orange-600 active:bg-orange-700 border border-slate-300 dark:border-cyan-700 hover:border-orange-500 text-slate-800 dark:text-gray-300 hover:text-white active:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center group" title="Check GitHub for Updates">
+                  <RefreshCw size={14} className="shrink-0 group-hover:rotate-180 group-active:rotate-180 transition-transform duration-500" />
+                  <span className="leading-tight">UPDATES</span>
                 </a>
 
-                <button onClick={() => setShowHelpModal(true)} className="bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white border border-slate-300 dark:border-cyan-700 p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
+                <button onClick={() => setShowHelpModal(true)} className="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white border border-slate-300 dark:border-cyan-700 p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
                   <Info size={14} className="shrink-0" />
-                  <span className="leading-tight">Help & Instructions</span>
+                  <span className="leading-tight">HELP & INSTRUCTIONS</span>
                 </button>
                 
-                <button onClick={() => setShowLicenseModal(true)} className="bg-slate-50 dark:bg-[#0f172a] hover:bg-emerald-600 border border-slate-300 dark:border-cyan-700 hover:border-emerald-500 text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1 shadow-md h-full text-center leading-tight">
+                <button onClick={() => setShowLicenseModal(true)} className="bg-slate-50 dark:bg-[#0f172a] hover:bg-emerald-600 active:bg-emerald-700 border border-slate-300 dark:border-cyan-700 hover:border-emerald-500 text-slate-800 dark:text-gray-300 hover:text-white active:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1 shadow-md h-full text-center leading-tight">
                   <ClipboardList size={14} className="shrink-0" />
                   <span>LICENSE & ACKNOWLEDGMENTS</span>
                 </button>
                 
-                <button onClick={() => setShowReferencesModal(true)} className="bg-slate-50 dark:bg-[#0f172a] hover:bg-purple-600 border border-slate-300 dark:border-cyan-700 hover:border-purple-500 text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
+                <button onClick={() => setShowReferencesModal(true)} className="bg-slate-50 dark:bg-[#0f172a] hover:bg-purple-600 active:bg-purple-700 border border-slate-300 dark:border-cyan-700 hover:border-purple-500 text-slate-800 dark:text-gray-300 hover:text-white active:text-white p-1 rounded-lg text-[9px] font-bold transition-colors flex items-center justify-center space-x-1.5 shadow-md h-full text-center">
                   <ExternalLink size={14} className="shrink-0" />
                   <span className="leading-tight">REFERENCES</span>
                 </button>

@@ -40,9 +40,22 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
   const profusion = isUnreadable || isEssentiallyNormal ? null : data.abbrevProfusion;
   const shape = (isUnreadable || isEssentiallyNormal || data.abbrevProfusion === '0') ? null : data.abbrevShape;
   const largeOpacity = isUnreadable || isEssentiallyNormal ? null : data.largeOpacity;
-  const thickening = isUnreadable || isEssentiallyNormal ? [] : (data.anyPleural === 'No' ? ['0'] : (data.abbrevThickening || []));
-  const calcification = isUnreadable || isEssentiallyNormal ? [] : (data.anyPleural === 'No' ? ['0'] : (data.abbrevCalcification || []));
-  const cpAngle = isUnreadable || isEssentiallyNormal || data.anyPleural === 'No' ? [] : (data.abbrevCPAngle || []);
+  // Pleural Thickening - PT:
+  // 0 = None, R = Right, L = Left
+  const thickening = (isUnreadable || isEssentiallyNormal || anyPleural === 'No')
+    ? []
+    : (data.abbrevThickening && data.abbrevThickening.length > 0 ? data.abbrevThickening : ['0']);
+
+  // Pleural Calcification - PC:
+  // Rule: Without thickening on a side, calcification is NOT applicable.
+  const validCalcSides = (data.abbrevCalcification || []).filter(
+    (side: string) => ['R', 'L'].includes(side) && thickening.includes(side)
+  );
+  const calcification = (isUnreadable || isEssentiallyNormal || anyPleural === 'No')
+    ? []
+    : (validCalcSides.length > 0 ? validCalcSides : ['0']);
+
+  const cpAngle = isUnreadable || isEssentiallyNormal || anyPleural === 'No' ? [] : (data.abbrevCPAngle || []);
   const symbols = isUnreadable || isEssentiallyNormal ? [] : (data.symbols || []);
 
   return (
@@ -135,7 +148,21 @@ export const ILOAbbreviatedReportTemplate: React.FC<ILOReportProps> = ({ data })
 
         {/* 3. PLEURAL ABNORMALITIES */}
         <div className="mb-6 border-b border-gray-300 pb-4">
-          <h3 className="font-bold mb-4 flex items-center">3. Pleural Abnormalities <span className="italic font-normal text-xs ml-4">(0 = None, R = Right, L = Left)</span></h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold flex items-center">
+              3. Pleural Abnormalities <span className="italic font-normal text-xs ml-4">(0 = None, R = Right, L = Left)</span>
+            </h3>
+            <div className="flex items-center space-x-6 mr-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-black font-bold text-sm">Yes</span>
+                <Checkbox checked={anyPleural === 'Yes'} boxClass="w-5 h-5" />
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-black font-bold text-sm">No</span>
+                <Checkbox checked={anyPleural === 'No'} boxClass="w-5 h-5" />
+              </div>
+            </div>
+          </div>
           <div className={`grid grid-cols-3 gap-4 ${isEssentiallyNormal || isUnreadable ? 'opacity-30' : ''}`}>
             <div>
               <p className="font-bold mb-2">PLEURAL THICKENING - PT</p>

@@ -280,7 +280,7 @@ export default function PusherPage() {
             {/* Standard Footer */}
             <div className="bg-[#1e293b] border-t border-orange-700 p-4 mt-6 relative z-[50]">
               <div className="flex flex-col items-center justify-center text-xs text-gray-500 font-bold border-t border-orange-700 pt-3 space-y-2 text-center">
-                <span>PulmoView (Version 1.0.2)</span>
+                <span>PulmoView (v2.0.0)</span>
                 <span className="text-center my-2 md:my-0 text-gray-400">
                   Designed and Developed by <span className="text-orange-400">Dr. Arkaprabha Sau</span><br/>
                   <span className="text-[10px] font-normal">MBBS, MD (Gold Medalist), DPH, Dip. Geriatric Medicine, CCEBDM</span><br/>
